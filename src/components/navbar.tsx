@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -7,10 +8,10 @@ export default function Navbar() {
         Syntory
       </Link>
       <div className="flex items-center gap-6">
-        <Link href="/login" className="hover:text-blue-500">
+        <Link href="/auth/login" className="hover:text-blue-500">
           Login
         </Link>
-        <Link href="/register" className="hover:text-blue-500">
+        <Link href="/auth/register" className="hover:text-blue-500">
           Sign Up
         </Link>
       </div>
