@@ -32,10 +32,16 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/dashboard" className="hover:text-blue-500">
+              <Link
+                href={`/account/${user.id}`}
+                className="hover:text-blue-500"
+              >
                 Account
               </Link>
-              <button onClick={handleLogout} className="hover:text-red-500 cursor-pointer">
+              <button
+                onClick={handleLogout}
+                className="hover:text-red-500 cursor-pointer"
+              >
                 Logout
               </button>
             </>
