@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { login } from "@/lib/api/auth";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -11,13 +12,23 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
 
-    if (email && password) {
-      router.push("/");
+  if (!email || !password) return;
+
+  try {
+    await login({ email, password });
+    router.push("/dashboard"); 
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      alert(err.message);
+    } else {
+      alert("Login failed");
     }
   }
+}
+
 
   return (
     <form
