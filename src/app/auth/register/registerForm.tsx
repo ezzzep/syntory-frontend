@@ -39,7 +39,7 @@ export default function RegisterForm() {
         password_confirmation: passwordConfirmation,
       });
       alert("Registration successful!");
-      router.push("/dashboard");
+      router.push("/");
     } catch (error: unknown) {
       if (error instanceof Error) alert(error.message);
       else alert("Registration failed");

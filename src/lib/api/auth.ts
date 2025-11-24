@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import { notifyAuthChanged } from "@/lib/authEvents";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -14,7 +15,7 @@ type LoginData = {
   password: string;
 };
 
-type User = {
+export type User = {
   id: number;
   name: string;
   email: string;
@@ -111,16 +112,24 @@ export async function getUser(): Promise<User> {
 }
 
 export async function logout() {
-  await fetchCsrfToken();
-  const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
-  const res = await fetch(`${API_URL}/logout`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
-    },
-  });
+  try {
+    await fetchCsrfToken();
 
-  if (!res.ok) throw new Error("Logout failed");
+    const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+    await fetch(`${API_URL}/api/logout`, {
+      method: "POST",
+      credentials: "include", 
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+      },
+    });
+
+  } catch (err) {
+    console.warn("Logout request failed (probably offline or 204)", err);
+  } finally {
+    Cookies.remove("XSRF-TOKEN");
+    notifyAuthChanged(); 
+  }
 }
