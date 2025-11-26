@@ -7,7 +7,7 @@ export default function HomePage() {
     <div className={homeStyles.mainWrapper}>
       <div className={homeStyles.bgDesktopWrapper}>
         <Image
-          src="/image/syntory-logo.png"
+          src="/image/syntory-homepage.png"
           alt="Background"
           fill
           className={homeStyles.bgDesktopImage}
