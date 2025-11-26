@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "@/lib/api/auth";
 import { notifyAuthChanged } from "@/lib/authEvents";
+import Link from "next/link";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     if (!email || !password) {
       setError("Please fill in both email and password");
       setLoading(false);
@@ -30,11 +32,8 @@ export default function LoginForm() {
       notifyAuthChanged();
       router.push("/dashboard");
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("Login failed");
-      }
+      if (err instanceof Error) alert(err.message);
+      else alert("Login failed");
     } finally {
       setLoading(false);
     }
@@ -43,20 +42,26 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-5 w-full max-w-sm"
+      className="
+        flex flex-col gap-8 w-full max-w-md 
+        bg-white rounded-3xl shadow-xl 
+        px-10 py-12
+        animate-fadeIn
+      "
     >
+      <h2 className="text-3xl font-bold text-center text-black">Login</h2>
+
       {error && (
-        <div className="bg-red-900/50 border border-red-600 text-red-200 px-4 py-3 rounded text-sm">
+        <div className="bg-red-200 text-red-800 px-4 py-3 rounded text-sm">
           {error}
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Email</label>
+      <div className="flex flex-col gap-3">
+        <label className="text-base font-medium text-black">Email</label>
         <Input
           type="email"
           placeholder="Enter your email"
-          className="bg-zinc-800 text-white border-zinc-700"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -64,12 +69,11 @@ export default function LoginForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Password</label>
+      <div className="flex flex-col gap-3">
+        <label className="text-base font-medium text-black">Password</label>
         <Input
           type="password"
           placeholder="Enter your password"
-          className="bg-zinc-800 text-white border-zinc-700"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -77,13 +81,18 @@ export default function LoginForm() {
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 cursor-pointer"
-      >
+      <Button type="submit" disabled={loading}>
         {loading ? "Logging in..." : "Login"}
       </Button>
+      <p className="text-center text-sm text-gray-600 mt-4">
+        Don’t have an account?{" "}
+        <Link
+          href="/auth/register"
+          className="text-black font-medium underline"
+        >
+          Register
+        </Link>
+      </p>
     </form>
   );
 }

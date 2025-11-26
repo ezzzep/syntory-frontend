@@ -5,13 +5,14 @@ export function Button({
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      className={cn(
-        "px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90",
-        className
-      )}
-      {...props}
-    />
-  );
+  const defaultClasses = `
+    bg-black text-white rounded-lg 
+    h-12 text-base font-semibold
+    transition-all duration-300
+    hover:scale-[1.02] hover:bg-black/90
+    active:scale-95
+    disabled:opacity-50 cursor-pointer
+  `;
+
+  return <button className={cn(defaultClasses, className)} {...props} />;
 }

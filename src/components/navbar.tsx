@@ -14,7 +14,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full bg-white shadow px-6 py-4 flex items-center justify-between fixed">
+    <nav className="w-full bg-white px-6 py-4 flex items-center justify-between fixed">
       <Link href="/" className="text-xl font-semibold">
         Syntory
       </Link>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/auth";
+import { notifyAuthChanged } from "@/lib/authEvents";
+import Link from "next/link";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -12,21 +14,23 @@ export default function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
 
-    if (!name || !email || !password || !passwordConfirmation) {
-      alert("All fields are required");
+    if (!name || !email || !password || !confirmPassword) {
+      setError("All fields are required");
       setLoading(false);
       return;
     }
 
-    if (password !== passwordConfirmation) {
-      alert("Passwords do not match");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
@@ -36,12 +40,13 @@ export default function RegisterForm() {
         name,
         email,
         password,
-        password_confirmation: passwordConfirmation,
+        password_confirmation: confirmPassword,
       });
-      alert("Registration successful!");
-      router.push("/");
-    } catch (error: unknown) {
-      if (error instanceof Error) alert(error.message);
+
+      notifyAuthChanged();
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error) alert(err.message);
       else alert("Registration failed");
     } finally {
       setLoading(false);
@@ -51,63 +56,78 @@ export default function RegisterForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-5 w-full max-w-sm"
+      className="
+        flex flex-col gap-5 w-full max-w-sm
+        bg-white rounded-2xl shadow-xl
+        px-8 py-10
+        animate-fadeIn
+      "
     >
+      <h2 className="text-2xl font-bold text-center text-black">Register</h2>
+
+      {error && (
+        <div className="bg-red-200 text-red-800 px-4 py-3 rounded text-sm">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Name</label>
+        <label className="text-sm font-medium text-black">Name</label>
         <Input
           type="text"
           placeholder="Enter your name"
-          className="bg-zinc-800 text-white border-zinc-700"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={loading}
           required
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Email</label>
+        <label className="text-sm font-medium text-black">Email</label>
         <Input
           type="email"
           placeholder="Enter your email"
-          className="bg-zinc-800 text-white border-zinc-700"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
           required
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Password</label>
+        <label className="text-sm font-medium text-black">Password</label>
         <Input
           type="password"
-          placeholder="Enter your password"
-          className="bg-zinc-800 text-white border-zinc-700"
+          placeholder="Create a password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          disabled={loading}
           required
         />
       </div>
-
       <div className="flex flex-col gap-2">
-        <label className="text-white text-sm">Confirm Password</label>
+        <label className="text-sm font-medium text-black">
+          Confirm Password
+        </label>
         <Input
           type="password"
           placeholder="Confirm your password"
-          className="bg-zinc-800 text-white border-zinc-700"
-          value={passwordConfirmation}
-          onChange={(e) => setPasswordConfirmation(e.target.value)}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          disabled={loading}
           required
         />
       </div>
-
-      <Button
-        type="submit"
-        disabled={loading}
-        className="bg-green-600 hover:bg-green-700 text-white"
-      >
+      <Button type="submit" disabled={loading}>
         {loading ? "Registering..." : "Register"}
       </Button>
+      <p className="text-center text-sm text-gray-600 mt-4">
+        Already have an account?{" "}
+        <Link href="/auth/login" className="text-black font-medium underline">
+          Login
+        </Link>
+      </p>
     </form>
   );
 }
