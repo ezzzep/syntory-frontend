@@ -58,12 +58,12 @@ export default function RegisterForm() {
       onSubmit={handleSubmit}
       className="
         flex flex-col gap-5 w-full max-w-sm
-        bg-white rounded-2xl shadow-xl
+        bg-black rounded-2xl shadow-xl
         px-8 py-10
         animate-fadeIn
       "
     >
-      <h2 className="text-2xl font-bold text-center text-black">Register</h2>
+      <h2 className="text-2xl font-bold text-center text-white">Register</h2>
 
       {error && (
         <div className="bg-red-200 text-red-800 px-4 py-3 rounded text-sm">
@@ -72,7 +72,7 @@ export default function RegisterForm() {
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-black">Name</label>
+        <label className="text-sm font-medium text-white">Name</label>
         <Input
           type="text"
           placeholder="Enter your name"
@@ -84,7 +84,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-black">Email</label>
+        <label className="text-sm font-medium text-white">Email</label>
         <Input
           type="email"
           placeholder="Enter your email"
@@ -96,7 +96,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-black">Password</label>
+        <label className="text-sm font-medium text-white">Password</label>
         <Input
           type="password"
           placeholder="Create a password"
@@ -107,7 +107,7 @@ export default function RegisterForm() {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-black">
+        <label className="text-sm font-medium text-white">
           Confirm Password
         </label>
         <Input
@@ -119,12 +119,12 @@ export default function RegisterForm() {
           required
         />
       </div>
-      <Button type="submit" disabled={loading}>
+      <Button type="submit" disabled={loading} className="bg-blue-950">
         {loading ? "Registering..." : "Register"}
       </Button>
-      <p className="text-center text-sm text-gray-600 mt-4">
+      <p className="text-center text-sm text-gray-200 mt-4">
         Already have an account?{" "}
-        <Link href="/auth/login" className="text-black font-medium underline">
+        <Link href="/auth/login" className="text-white font-medium underline">
           Login
         </Link>
       </p>
