@@ -10,9 +10,10 @@ import {
   BarChart3,
   Bell,
   Boxes,
+  Smile,
 } from "lucide-react";
 import { logout } from "@/lib/api/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
 interface NavigationItem {
@@ -32,9 +33,8 @@ export function Sidebar({ className = "" }: SidebarProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeItem, setActiveItem] = useState("dashboard");
-
   const overlayRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number | null>(null);
 
@@ -65,6 +65,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
     { id: "analytics", name: "Analytics", icon: BarChart3, href: "/analytics" },
     { id: "inventory", name: "Inventory", icon: Boxes, href: "/inventory" },
     {
+      id: "supplier",
+      name: "Supplier Status",
+      icon: Smile,
+      href: "/suppliers",
+    },
+    {
       id: "notifications",
       name: "Notifications",
       icon: Bell,
@@ -77,6 +83,13 @@ export function Sidebar({ className = "" }: SidebarProps) {
       onClick: () => router.push(`/account/${user?.id}`),
     },
   ];
+
+  const currentItem = navigationItems.find((item) => {
+    if (item.href) return item.href === pathname; 
+    if (item.id === "profile") return pathname.startsWith("/account");
+    return false;
+  });
+  const [activeItem, setActiveItem] = useState(currentItem?.id || "dashboard");
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startXRef.current = e.touches[0].clientX;
