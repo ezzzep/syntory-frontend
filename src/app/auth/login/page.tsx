@@ -5,7 +5,7 @@ import LoginForm from "./loginForm";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 pt-14">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4 pt-14">
       <div
         className="
       
@@ -21,7 +21,7 @@ export default function LoginPage() {
         </div>
         <div className="relative flex-1 hidden md:block">
           <Image
-            src="/image/syntory.jpg"
+            src="/image/syntory.png"
             alt="Login visual"
             fill
             className="object-cover"

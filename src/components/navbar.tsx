@@ -17,7 +17,7 @@ export default function Navbar() {
   const logoHref = user ? "/dashboard" : "/";
 
   return (
-    <nav className="w-full bg-black px-6 py-4 flex items-center justify-between fixed">
+    <nav className="w-full bg-gray-900 px-6 py-4 flex items-center justify-between fixed">
       <Link
         href={logoHref}
         className="flex items-center text-white text-3xl font-bold"

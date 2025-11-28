@@ -50,7 +50,7 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
       <section
         ref={ref}
         className={cn(
-          "relative z-0 flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black",
+          "relative z-0 flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-gray-900",
           className
         )}
         {...props}
@@ -94,8 +94,8 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
                 [--conic-position:from_70deg_at_center_top]
               "
             >
-              <div className="absolute w-full left-0 bg-black h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
-              <div className="absolute w-40 h-full left-0 bg-black bottom-0 z-20 mask-[linear-gradient(to_right,white,transparent)]" />
+              <div className="absolute w-full left-0 bg-gray-900 h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
+              <div className="absolute w-40 h-full left-0 bg-gray-900 bottom-0 z-20 mask-[linear-gradient(to_right,white,transparent)]" />
             </motion.div>
 
             <motion.div
@@ -114,8 +114,8 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               "
             >
               {" "}
-              <div className="absolute w-40 h-full right-0 bg-black bottom-0 z-20 mask-[linear-gradient(to_left,white,transparent)]" />
-              <div className="absolute w-full right-0 bg-black h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
+              <div className="absolute w-40 h-full right-0 bg-gray-900 bottom-0 z-20 mask-[linear-gradient(to_left,white,transparent)]" />
+              <div className="absolute w-full right-0 bg-gray-900 h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
             </motion.div>
           </div>
         )}
@@ -154,7 +154,7 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
                       variant={action.variant || "default"}
                       className={
                         isLogin
-                          ? "bg-black text-white border border-white hover:bg-gray-900"
+                          ? "bg-gray-900 text-white border border-white hover:bg-gray-900"
                           : "bg-white text-black border border-white hover:bg-gray-200"
                       }
                       asChild

@@ -1,6 +1,6 @@
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans bg-black">
+    <div className="flex min-h-screen items-center justify-center font-sans bg-gray-900">
       <h1 className="text-white">hoyhoy</h1>
     </div>
   );

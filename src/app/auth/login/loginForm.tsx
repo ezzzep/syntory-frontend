@@ -43,13 +43,14 @@ export default function LoginForm() {
     <form
       onSubmit={handleSubmit}
       className="
-        flex flex-col gap-8 w-full max-w-md 
-        shadow-xl 
-        px-10 py-12
-        
+        flex flex-col gap-8 w-full max-w-md
+        px-6 sm:px-10 sm:py-12
+        mx-auto
       "
     >
-      <h2 className="text-3xl font-bold text-center text-white">Login</h2>
+      <h2 className="text-3xl sm:text-4xl font-bold text-center text-white">
+        Login
+      </h2>
 
       {error && (
         <div className="bg-red-200 text-red-800 px-4 py-3 rounded text-sm">
@@ -58,7 +59,9 @@ export default function LoginForm() {
       )}
 
       <div className="flex flex-col gap-3">
-        <label className="text-base font-medium text-white">Email</label>
+        <label className="text-base sm:text-lg font-medium text-white">
+          Email
+        </label>
         <Input
           type="email"
           placeholder="Enter your email"
@@ -70,7 +73,9 @@ export default function LoginForm() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <label className="text-base font-medium text-white">Password</label>
+        <label className="text-base sm:text-lg font-medium text-white">
+          Password
+        </label>
         <Input
           type="password"
           placeholder="Enter your password"
@@ -84,11 +89,12 @@ export default function LoginForm() {
       <Button
         type="submit"
         disabled={loading}
-        className="bg-blue-950 cursor-pointer "
+        className="bg-blue-950 cursor-pointer w-full"
       >
         {loading ? "Logging in..." : "Login"}
       </Button>
-      <p className="text-center text-sm text-gray-200 mt-4">
+
+      <p className="text-center text-sm sm:text-base text-gray-200 mt-4">
         Don’t have an account?{" "}
         <Link
           href="/auth/register"

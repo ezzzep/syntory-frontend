@@ -1,16 +1,15 @@
 import "./globals.css";
-import Navbar from "@/components/navbar";
+import ClientLayout from "@/components/ClientLayout";
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

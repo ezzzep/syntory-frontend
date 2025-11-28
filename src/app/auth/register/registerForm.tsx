@@ -58,7 +58,7 @@ export default function RegisterForm() {
       onSubmit={handleSubmit}
       className="
         flex flex-col gap-5 w-full max-w-sm
-        bg-black rounded-2xl shadow-xl
+        bg-gray-900 rounded-2xl shadow-xl
         px-8 py-10
         animate-fadeIn
       "
