@@ -27,14 +27,20 @@ interface NavigationItem {
 
 interface SidebarProps {
   className?: string;
+  isCollapsed: boolean;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function Sidebar({ className = "" }: SidebarProps) {
+export function Sidebar({
+  className = "",
+  isCollapsed,
+  setIsCollapsed,
+}: SidebarProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const [isOpen, setIsOpen] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number | null>(null);
 
@@ -49,7 +55,6 @@ export function Sidebar({ className = "" }: SidebarProps) {
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   const handleItemClick = (item: NavigationItem) => {
-    setActiveItem(item.id);
     if (item.onClick) item.onClick();
     else if (item.href) router.push(item.href);
     if (window.innerWidth < 768) setIsOpen(false);
@@ -84,12 +89,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
     },
   ];
 
-  const currentItem = navigationItems.find((item) => {
-    if (item.href) return item.href === pathname; 
-    if (item.id === "profile") return pathname.startsWith("/account");
-    return false;
-  });
-  const [activeItem, setActiveItem] = useState(currentItem?.id || "dashboard");
+  const activeItem =
+    navigationItems.find((item) => {
+      if (item.href) return item.href === pathname;
+      if (item.id === "profile") return pathname.startsWith("/account");
+      return false;
+    })?.id || "dashboard";
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startXRef.current = e.touches[0].clientX;
@@ -105,6 +110,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile toggle button */}
       {!isOpen && (
         <button
           onClick={toggleSidebar}
@@ -114,6 +120,8 @@ export function Sidebar({ className = "" }: SidebarProps) {
           <Menu className="h-5 w-5 text-slate-600" />
         </button>
       )}
+
+      {/* Mobile overlay */}
       {isOpen && (
         <div
           ref={overlayRef}
@@ -124,22 +132,20 @@ export function Sidebar({ className = "" }: SidebarProps) {
           onTouchEnd={handleTouchEnd}
         />
       )}
+
+      {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
-    ${isCollapsed ? "w-36" : "w-72"}
-    md:translate-x-0 md:static md:z-auto
-    bg-gray-900 border-r border-gray-700
-    ${className}`}
+        className={`fixed top-0 left-0 h-screen z-40 flex flex-col transition-all duration-300
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isCollapsed ? "w-20" : "w-56 md:w-64"} 
+          bg-gray-900 border-r border-gray-700
+          ${className}`}
       >
+        {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-700">
-          <div
-            className={`text-2xl font-bold ${
-              isCollapsed ? "mx-auto text-white" : "text-white"
-            }`}
-          >
-            Syntory
-          </div>
+          {!isCollapsed && (
+            <div className="text-2xl font-bold text-white">Syntory</div>
+          )}
           <button
             onClick={toggleCollapse}
             className="hidden md:flex p-1.5 rounded-md hover:bg-gray-800 transition-all duration-200"
@@ -151,7 +157,9 @@ export function Sidebar({ className = "" }: SidebarProps) {
             )}
           </button>
         </div>
-        <nav className="flex-1 px-3 py-4 overflow-y-auto mt-2">
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 mt-2">
           <ul className="space-y-0.5">
             {navigationItems.map((item) => {
               const Icon = item.icon;
@@ -161,14 +169,17 @@ export function Sidebar({ className = "" }: SidebarProps) {
                   <button
                     onClick={() => handleItemClick(item)}
                     className={`w-full flex items-center rounded-md text-left transition-all duration-200 group
-                ${
-                  isActive
-                    ? "bg-blue-800 text-blue-200"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }
-                ${
-                  isCollapsed ? "justify-center p-3" : "space-x-3 px-3 py-2.5"
-                } cursor-pointer`}
+                      ${
+                        isActive
+                          ? "bg-blue-800 text-blue-200"
+                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                      }
+                      ${
+                        isCollapsed
+                          ? "justify-center p-3"
+                          : "space-x-3 px-3 py-2.5"
+                      }
+                      cursor-pointer`}
                     title={isCollapsed ? item.name : undefined}
                   >
                     <Icon
@@ -193,12 +204,14 @@ export function Sidebar({ className = "" }: SidebarProps) {
             })}
           </ul>
         </nav>
+
+        {/* Logout */}
         <div className="p-3 border-t border-gray-700 mt-auto">
           <button
             onClick={handleLogout}
             className={`w-full flex items-center rounded-md transition-all duration-200 group
-        ${isCollapsed ? "justify-center p-3" : "space-x-3 px-3 py-2.5"}
-        text-gray-300 hover:bg-gray-800 hover:text-red-500 cursor-pointer`}
+              ${isCollapsed ? "justify-center p-3" : "space-x-3 px-3 py-2.5"}
+              text-gray-300 hover:bg-gray-800 hover:text-red-500 cursor-pointer`}
             title={isCollapsed ? "Logout" : undefined}
           >
             <LogOut className="h-5 w-5 shrink-0 text-gray-300 group-hover:text-red-500" />
