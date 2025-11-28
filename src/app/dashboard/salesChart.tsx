@@ -3,7 +3,6 @@
 import {
   BarChart,
   Bar,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -39,7 +38,7 @@ export default function SalesChart() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <defs>
-              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#5EA8FF" stopOpacity={0.8} />
                 <stop offset="100%" stopColor="#5EA8FF" stopOpacity={0.3} />
               </linearGradient>
@@ -50,19 +49,34 @@ export default function SalesChart() {
             <XAxis dataKey="name" stroke="#fff" />
             <YAxis stroke="#fff" />
 
-            <Tooltip />
-            <Bar
-              dataKey="sales"
-              fill="url(#barGradient)"
-              radius={[20, 20, 20, 20]}
+            <Tooltip
+              content={({ payload, label }) => (
+                <div className="bg-black/80 backdrop-blur-sm border border-white/20 rounded-xl p-4 min-w-[180px]">
+                  <div className="text-white font-medium mb-3">{label}</div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-blue-400 font-medium">Sales:</span>
+                      <span className="text-white font-bold ml-4">
+                        {payload[0]?.payload.sales.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-green-400 font-medium">
+                        Revenue:
+                      </span>
+                      <span className="text-white font-bold ml-4">
+                        {payload[0]?.payload.revenue.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             />
 
-            <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="#4CB8FF"
-              strokeWidth={3}
-              dot={false}
+            <Bar
+              dataKey="sales"
+              fill="url(#salesGradient)"
+              radius={[20, 20, 20, 20]}
             />
           </BarChart>
         </ResponsiveContainer>
