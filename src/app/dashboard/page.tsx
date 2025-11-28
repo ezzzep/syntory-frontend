@@ -1,7 +1,13 @@
+import StatsCards from "./statsCards";
+import SalesChart from "./salesChart";
+import TopListsCards from "./topListCards";
+
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans bg-gray-900">
-      <h1 className="text-white">hoyhoy</h1>
+    <div className="min-h-screen w-full bg-gray-900 p-6">
+      <StatsCards />
+      <SalesChart />
+      <TopListsCards />
     </div>
   );
 }
