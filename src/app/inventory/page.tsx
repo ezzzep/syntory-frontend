@@ -5,6 +5,7 @@ import type { InventoryItem } from "@/types/inventory";
 import { getInventory, deleteInventoryItem } from "@/lib/api/inventory";
 import InventoryTable from "@/components/inventory/inventory-table";
 import AddItemDialog from "@/components/inventory/add-item-dialog";
+import { BouncingDots } from "@/components/bouncing-dots";
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -32,7 +33,12 @@ export default function InventoryPage() {
       prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
     );
 
-  if (loading) return <p className="p-6 text-white">Loading inventory...</p>;
+ if (loading)
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-900">
+        <BouncingDots />
+      </div>
+    );
 
   return (
     <div className="p-6 min-h-screen bg-gray-900">
