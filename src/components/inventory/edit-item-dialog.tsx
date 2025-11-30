@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Cookies from "js-cookie";
 
 interface EditItemDialogProps {
   item: InventoryItem;
@@ -22,25 +23,61 @@ export default function EditItemDialog({
   onUpdate,
 }: EditItemDialogProps) {
   const [form, setForm] = useState<InventoryItem>(item);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCsrf = async () => {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sanctum/csrf-cookie`, {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+  };
 
   const handleUpdate = async () => {
-    const sanitizedForm: UpdateInventoryDto = {
-      name: form.name ?? "",
-      category: form.category ?? undefined,
-      quantity: form.quantity ?? 0,
-      description: form.description ?? undefined,
-    };
+    setLoading(true);
+    setError(null);
 
-    const updated = await fetch(
-      `http://localhost:8000/api/inventory/${item.id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sanitizedForm),
+    try {
+      const sanitizedForm: UpdateInventoryDto = {
+        name: form.name ?? "",
+        category: form.category ?? undefined,
+        quantity: form.quantity ?? 0,
+        description: form.description ?? undefined,
+      };
+
+      await fetchCsrf();
+      const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${item.id}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+          },
+          body: JSON.stringify(sanitizedForm),
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to update item: ${res.status} ${text}`);
       }
-    ).then((res) => res.json());
 
-    onUpdate(updated);
+      const updated: InventoryItem = await res.json();
+      onUpdate(updated);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err) || "Failed to update item");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +92,8 @@ export default function EditItemDialog({
         <DialogHeader>
           <DialogTitle>Edit Inventory Item</DialogTitle>
         </DialogHeader>
+
+        {error && <p className="text-red-500 mb-2">{error}</p>}
 
         <div className="space-y-3 mt-2">
           <Input
@@ -78,8 +117,12 @@ export default function EditItemDialog({
           />
         </div>
 
-        <Button className="w-full mt-4" onClick={handleUpdate}>
-          Update Item
+        <Button
+          className="w-full mt-4"
+          onClick={handleUpdate}
+          disabled={loading}
+        >
+          {loading ? "Updating..." : "Update Item"}
         </Button>
       </DialogContent>
     </Dialog>
