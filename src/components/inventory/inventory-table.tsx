@@ -67,11 +67,15 @@ export default function InventoryTable({
                   {item.description ?? "-"}
                 </TableCell>
                 <TableCell className="px-4 py-3 flex gap-2 flex-wrap">
-                  <EditItemDialog item={item} onUpdate={onUpdate} />
+                  <EditItemDialog
+                    item={item}
+                    onUpdate={onUpdate}
+                    className="bg-transparent text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200"
+                  />
                   <Button
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    className="hover:bg-red-600"
+                    className="bg-transparent text-gray-300 hover:bg-red-600 hover:text-white cursor-pointer transition-colors duration-200"
                     onClick={() => onDelete(item.id)}
                   >
                     Delete
@@ -111,11 +115,15 @@ export default function InventoryTable({
             </div>
 
             <div className="flex gap-2 flex-wrap mt-3">
-              <EditItemDialog item={item} onUpdate={onUpdate} />
+              <EditItemDialog
+                item={item}
+                onUpdate={onUpdate}
+                className="bg-transparent text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200"
+              />
               <Button
-                variant="destructive"
+                variant="outline"
                 size="sm"
-                className="hover:bg-red-600"
+                className="bg-transparent text-gray-300 hover:bg-red-600 hover:text-white cursor-pointer transition-colors duration-200"
                 onClick={() => onDelete(item.id)}
               >
                 Delete

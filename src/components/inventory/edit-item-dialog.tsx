@@ -16,11 +16,13 @@ import Cookies from "js-cookie";
 interface EditItemDialogProps {
   item: InventoryItem;
   onUpdate: (updatedItem: InventoryItem) => void;
+  className?: string; // <-- add this
 }
 
 export default function EditItemDialog({
   item,
   onUpdate,
+  className = "", // default to empty string
 }: EditItemDialogProps) {
   const [form, setForm] = useState<InventoryItem>(item);
   const [loading, setLoading] = useState(false);
@@ -83,7 +85,11 @@ export default function EditItemDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          className={`bg-transparent hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200 ${className}`}
+        >
           Edit
         </Button>
       </DialogTrigger>
