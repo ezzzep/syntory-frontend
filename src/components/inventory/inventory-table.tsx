@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EditItemDialog from "./edit-item-dialog";
+import { inventoryTableStyles } from "@/styles/inventoryTable";
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -24,25 +25,25 @@ export default function InventoryTable({
   onUpdate,
 }: InventoryTableProps) {
   return (
-    <div className="w-full">
+    <div className={inventoryTableStyles.wrapper}>
       {/* Desktop / Tablet Table */}
-      <div className="hidden sm:block overflow-x-auto w-full">
-        <Table className="min-w-full border border-gray-700 rounded-lg overflow-hidden shadow-lg bg-white/5 backdrop-blur-sm">
-          <TableHeader className="bg-white/10">
+      <div className={inventoryTableStyles.desktopWrapper}>
+        <Table className={inventoryTableStyles.table}>
+          <TableHeader className={inventoryTableStyles.tableHeader}>
             <TableRow>
-              <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
+              <TableHead className={inventoryTableStyles.tableHeadCell}>
                 Name
               </TableHead>
-              <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
+              <TableHead className={inventoryTableStyles.tableHeadCell}>
                 Category
               </TableHead>
-              <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
+              <TableHead className={inventoryTableStyles.tableHeadCell}>
                 Quantity
               </TableHead>
-              <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
+              <TableHead className={inventoryTableStyles.tableHeadCell}>
                 Description
               </TableHead>
-              <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
+              <TableHead className={inventoryTableStyles.tableHeadCell}>
                 Actions
               </TableHead>
             </TableRow>
@@ -52,30 +53,26 @@ export default function InventoryTable({
             {items.map((item) => (
               <TableRow
                 key={item.id}
-                className="hover:bg-white/10 transition-colors duration-200"
+                className={inventoryTableStyles.tableRowHover}
               >
-                <TableCell className="px-4 py-3 font-medium text-gray-100">
+                <TableCell className={inventoryTableStyles.tableCellName}>
                   {item.name}
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-300">
+                <TableCell className={inventoryTableStyles.tableCell}>
                   {item.category ?? "-"}
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-300">
+                <TableCell className={inventoryTableStyles.tableCell}>
                   {item.quantity}
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-300">
+                <TableCell className={inventoryTableStyles.tableCell}>
                   {item.description ?? "-"}
                 </TableCell>
-                <TableCell className="px-4 py-3 flex gap-2 flex-wrap">
-                  <EditItemDialog
-                    item={item}
-                    onUpdate={onUpdate}
-                    className="bg-transparent text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200"
-                  />
+                <TableCell className={inventoryTableStyles.actionCell}>
+                  <EditItemDialog item={item} onUpdate={onUpdate} />
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-transparent text-gray-300 hover:bg-red-600 hover:text-white cursor-pointer transition-colors duration-200"
+                    className={inventoryTableStyles.button}
                     onClick={() => onDelete(item.id)}
                   >
                     Delete
@@ -90,40 +87,41 @@ export default function InventoryTable({
       {/* Mobile Card View */}
       <div className="sm:hidden flex flex-col gap-4">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white/5 backdrop-blur-sm rounded-lg shadow-lg p-4 hover:bg-white/10 transition-colors duration-200"
-          >
+          <div key={item.id} className={inventoryTableStyles.mobileCard}>
             <div className="flex flex-col gap-1">
-              <span className="text-gray-300 font-semibold">Name:</span>
-              <span className="text-gray-100">{item.name}</span>
+              <span className={inventoryTableStyles.mobileLabel}>Name:</span>
+              <span className={inventoryTableStyles.mobileValue}>
+                {item.name}
+              </span>
 
-              <span className="text-gray-300 font-semibold mt-1">
+              <span className={inventoryTableStyles.mobileLabel}>
                 Category:
               </span>
-              <span className="text-gray-300">{item.category ?? "-"}</span>
+              <span className={inventoryTableStyles.mobileValueSecondary}>
+                {item.category ?? "-"}
+              </span>
 
-              <span className="text-gray-300 font-semibold mt-1">
+              <span className={inventoryTableStyles.mobileLabel}>
                 Quantity:
               </span>
-              <span className="text-gray-300">{item.quantity}</span>
+              <span className={inventoryTableStyles.mobileValueSecondary}>
+                {item.quantity}
+              </span>
 
-              <span className="text-gray-300 font-semibold mt-1">
+              <span className={inventoryTableStyles.mobileLabel}>
                 Description:
               </span>
-              <span className="text-gray-300">{item.description ?? "-"}</span>
+              <span className={inventoryTableStyles.mobileValueSecondary}>
+                {item.description ?? "-"}
+              </span>
             </div>
 
-            <div className="flex gap-2 flex-wrap mt-3">
-              <EditItemDialog
-                item={item}
-                onUpdate={onUpdate}
-                className="bg-transparent text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200"
-              />
+            <div className={inventoryTableStyles.mobileActions}>
+              <EditItemDialog item={item} onUpdate={onUpdate} />
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-transparent text-gray-300 hover:bg-red-600 hover:text-white cursor-pointer transition-colors duration-200"
+                className={inventoryTableStyles.button}
                 onClick={() => onDelete(item.id)}
               >
                 Delete

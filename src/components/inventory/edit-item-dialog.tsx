@@ -16,13 +16,13 @@ import Cookies from "js-cookie";
 interface EditItemDialogProps {
   item: InventoryItem;
   onUpdate: (updatedItem: InventoryItem) => void;
-  className?: string; // <-- add this
+  className?: string; // optional extra styling
 }
 
 export default function EditItemDialog({
   item,
   onUpdate,
-  className = "", // default to empty string
+  className = "",
 }: EditItemDialogProps) {
   const [form, setForm] = useState<InventoryItem>(item);
   const [loading, setLoading] = useState(false);
@@ -72,11 +72,8 @@ export default function EditItemDialog({
       const updated: InventoryItem = await res.json();
       onUpdate(updated);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(String(err) || "Failed to update item");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError(String(err) || "Failed to update item");
     } finally {
       setLoading(false);
     }
@@ -88,7 +85,10 @@ export default function EditItemDialog({
         <Button
           variant="outline"
           size="sm"
-          className={`bg-transparent hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-200 ${className}`}
+          className={`bg-transparent border border-gray-500 text-gray-300
+            hover:bg-blue-600 hover:text-white cursor-pointer
+            transition-colors duration-300 rounded-md px-3 py-1 text-sm
+            ${className}`}
         >
           Edit
         </Button>
@@ -124,7 +124,7 @@ export default function EditItemDialog({
         </div>
 
         <Button
-          className="w-full mt-4"
+          className="w-full mt-4 bg-gray-800 text-white hover:bg-gray-700"
           onClick={handleUpdate}
           disabled={loading}
         >
