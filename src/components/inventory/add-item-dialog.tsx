@@ -44,7 +44,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Item</Button>
+        <Button className="bg-gray-500 cursor-pointer">Add Item</Button>
       </DialogTrigger>
 
       <DialogContent title="Add New Inventory Item">

@@ -27,8 +27,8 @@ export default function InventoryTable({
     <div className="w-full">
       {/* Desktop / Tablet Table */}
       <div className="hidden sm:block overflow-x-auto w-full">
-        <Table className="min-w-full border border-gray-700 rounded-lg overflow-hidden shadow-lg bg-gray-950">
-          <TableHeader className="bg-gray-900">
+        <Table className="min-w-full border border-gray-700 rounded-lg overflow-hidden shadow-lg bg-white/5 backdrop-blur-sm">
+          <TableHeader className="bg-white/10">
             <TableRow>
               <TableHead className="text-left text-gray-300 uppercase text-sm font-medium px-4 py-3">
                 Name
@@ -52,7 +52,7 @@ export default function InventoryTable({
             {items.map((item) => (
               <TableRow
                 key={item.id}
-                className="hover:bg-gray-800 transition-colors duration-200"
+                className="hover:bg-white/10 transition-colors duration-200"
               >
                 <TableCell className="px-4 py-3 font-medium text-gray-100">
                   {item.name}
@@ -88,7 +88,7 @@ export default function InventoryTable({
         {items.map((item) => (
           <div
             key={item.id}
-            className="bg-gray-950 rounded-lg shadow-lg p-4 hover:bg-gray-900 transition-colors duration-200"
+            className="bg-white/5 backdrop-blur-sm rounded-lg shadow-lg p-4 hover:bg-white/10 transition-colors duration-200"
           >
             <div className="flex flex-col gap-1">
               <span className="text-gray-300 font-semibold">Name:</span>
