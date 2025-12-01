@@ -11,7 +11,6 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import type { InventoryItem, CreateInventoryDto } from "@/types/inventory";
 import { createInventoryItem } from "@/lib/api/inventory";
 
-// Reusable Dialog Components
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 
@@ -23,10 +22,8 @@ interface DialogContentProps {
 export function DialogContent({ children, className }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
-      {/* Backdrop */}
       <DialogPrimitive.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
 
-      {/* Dialog */}
       <DialogPrimitive.Content
         className={`fixed z-50 w-[90%] max-w-lg max-h-[90vh] overflow-auto rounded-xl bg-white p-6 shadow-lg
           ${className ?? ""}`}
@@ -34,7 +31,7 @@ export function DialogContent({ children, className }: DialogContentProps) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          position: "fixed", // ensure fixed positioning
+          position: "fixed",
         }}
       >
         {children}
@@ -62,15 +59,13 @@ export function DialogTitle({
     <h2 className={`text-lg font-semibold ${className ?? ""}`}>{children}</h2>
   );
 }
-
-// Main AddItemDialog Component
 interface AddItemDialogProps {
   onAdd: (item: InventoryItem) => void;
 }
 
 export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   const toasts = useToasts();
-
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState<CreateInventoryDto>({
@@ -94,6 +89,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
     }
 
     try {
+      setLoading(true);
       const newItem = await createInventoryItem(form);
       onAdd(newItem);
 
@@ -105,6 +101,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
       console.error(error);
       toasts.error("Failed to save item");
     }
+    setLoading(false);
   };
 
   return (
@@ -114,17 +111,14 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
       </DialogTrigger>
 
       <DialogContent className="relative">
-        {/* Accessible Radix Title (hidden visually) */}
         <VisuallyHidden>
           <DialogPrimitive.Title>Add Inventory Item</DialogPrimitive.Title>
         </VisuallyHidden>
 
-        {/* Custom header */}
         <DialogHeader>
           <DialogTitle className="text-xl">Add Inventory Item</DialogTitle>
         </DialogHeader>
 
-        {/* Form */}
         <div className="space-y-4 mt-4">
           <Input
             placeholder="Name"
@@ -166,8 +160,9 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         <Button
           className="w-full mt-5 bg-blue-600 hover:bg-blue-700 cursor-pointer"
           onClick={handleSubmit}
+          disabled={loading}
         >
-          Save Item
+          {loading ? "Saving..." : "Save Item"}
         </Button>
       </DialogContent>
     </Dialog>
