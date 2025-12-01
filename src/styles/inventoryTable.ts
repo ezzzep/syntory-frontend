@@ -10,11 +10,11 @@ export const inventoryTableStyles = {
   table: `
     min-w-full table-fixed border border-gray-700
     rounded-2xl overflow-hidden shadow-xl
-    bg-white/5 backdrop-blur-lg
+    bg-white/10 backdrop-blur-lg
   `,
 
   tableHeader: `
-    bg-white/10 backdrop-blur-sm
+    bg-white/20 backdrop-blur-sm
   `,
 
   tableHeadCell: `
@@ -24,13 +24,15 @@ export const inventoryTableStyles = {
   `,
 
   tableRowHover: `
-    hover:bg-white/10 transition-colors duration-300 cursor-default
+     transition-colors duration-300 cursor-default
   `,
 
   tableCell: `
     px-5 py-3 text-gray-300
     max-w-[150px] truncate overflow-hidden whitespace-nowrap
   `,
+
+  tableHead: "px-5 py-3 text-left text-gray-300 w-36 truncate",
 
   tableCellName: `
     px-5 py-3 text-gray-100
@@ -70,7 +72,7 @@ export const inventoryTableStyles = {
   `,
 
   mobileValueSecondary: `
-    text-gray-300 text-sm
+    text-gray-300 text-sm text-wrap
   `,
 
   mobileActions: `

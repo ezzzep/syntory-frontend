@@ -24,7 +24,6 @@ export default function InventoryTable({
   onDelete,
   onUpdate,
 }: InventoryTableProps) {
-  // Group items by category
   const categories = {
     Appliances: items.filter((i) => i.category === "Appliances"),
     "Home & Living": items.filter((i) => i.category === "Home & Living"),
@@ -36,33 +35,34 @@ export default function InventoryTable({
     <div className="flex flex-col gap-10">
       {Object.entries(categories).map(([categoryName, categoryItems]) => (
         <div key={categoryName} className="w-full">
-          {/* Category Title */}
-          <h2 className="text-xl font-bold mb-4 text-white">{categoryName}</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-300">
+            {categoryName}
+          </h2>
 
-          {/* Desktop / Tablet Table */}
+          {/* Desktop Table */}
           <div className={inventoryTableStyles.desktopWrapper}>
             <Table className={inventoryTableStyles.table}>
               <TableHeader className={inventoryTableStyles.tableHeader}>
                 <TableRow>
-                  <TableHead className="px-5 py-3 text-left text-gray-300 w-48 truncate">
+                  <TableHead className={inventoryTableStyles.tableHead}>
                     Name
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-left text-gray-300 w-36 truncate">
+                  <TableHead className={inventoryTableStyles.tableHead}>
                     Category
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-left text-gray-300 w-24 truncate">
+                  <TableHead className={inventoryTableStyles.tableHead}>
                     Quantity
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-left text-gray-300 w-64 truncate">
+                  <TableHead className={inventoryTableStyles.tableHead}>
                     Description
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-left text-gray-300 w-32 truncate">
+                  <TableHead className={inventoryTableStyles.tableHead}>
                     Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
 
-              <TableBody className="divide-y divide-gray-700">
+              <TableBody className="divide-y divide-gray-600">
                 {categoryItems.length === 0 ? (
                   <TableRow>
                     <TableCell
@@ -78,7 +78,9 @@ export default function InventoryTable({
                       key={item.id}
                       className={inventoryTableStyles.tableRowHover}
                     >
-                      <TableCell className={inventoryTableStyles.tableCellName}>
+                      <TableCell
+                        className={inventoryTableStyles.tableCellName}
+                      >
                         {item.name}
                       </TableCell>
 
@@ -112,7 +114,7 @@ export default function InventoryTable({
             </Table>
           </div>
 
-          {/* Mobile Card View */}
+          {/* Mobile Cards */}
           <div className="sm:hidden flex flex-col gap-4 mt-4">
             {categoryItems.length === 0 ? (
               <p className="text-gray-400 text-center">
@@ -120,7 +122,10 @@ export default function InventoryTable({
               </p>
             ) : (
               categoryItems.map((item) => (
-                <div key={item.id} className={inventoryTableStyles.mobileCard}>
+                <div
+                  key={item.id}
+                  className={inventoryTableStyles.mobileCard}
+                >
                   <div className="flex flex-col gap-1">
                     <span className={inventoryTableStyles.mobileLabel}>
                       Name:
@@ -132,21 +137,27 @@ export default function InventoryTable({
                     <span className={inventoryTableStyles.mobileLabel}>
                       Category:
                     </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
+                    <span
+                      className={inventoryTableStyles.mobileValueSecondary}
+                    >
                       {item.category ?? "-"}
                     </span>
 
                     <span className={inventoryTableStyles.mobileLabel}>
                       Quantity:
                     </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
+                    <span
+                      className={inventoryTableStyles.mobileValueSecondary}
+                    >
                       {item.quantity}
                     </span>
 
                     <span className={inventoryTableStyles.mobileLabel}>
                       Description:
                     </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
+                    <span
+                      className={inventoryTableStyles.mobileValueSecondary } 
+                    >
                       {item.description ?? "-"}
                     </span>
                   </div>

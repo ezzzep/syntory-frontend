@@ -33,7 +33,7 @@ export default function InventoryPage() {
       prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
     );
 
- if (loading)
+  if (loading)
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-900">
         <BouncingDots />
@@ -42,8 +42,8 @@ export default function InventoryPage() {
 
   return (
     <div className="p-6 min-h-screen bg-gray-900">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-white">Inventory</h1>
+      <div className="flex items-center justify-between mb-6 pb-5">
+        <h1 className="text-3xl font-bold text-blue-400">Inventory</h1>
         <AddItemDialog onAdd={handleAdd} />
       </div>
 
