@@ -6,7 +6,6 @@ import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToasts } from "@/components/toast";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 import type { InventoryItem, CreateInventoryDto } from "@/types/inventory";
 import { createInventoryItem } from "@/lib/api/inventory";
@@ -25,7 +24,7 @@ export function DialogContent({ children, className }: DialogContentProps) {
       <DialogPrimitive.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
 
       <DialogPrimitive.Content
-        className={`fixed z-50 w-[90%] max-w-lg max-h-[90vh] overflow-auto rounded-xl bg-white p-6 shadow-lg
+        className={`fixed z-50 w-[95%] max-w-2xl max-h-[90vh] overflow-auto rounded-xl bg-gray-800 p-8 shadow-lg
           ${className ?? ""}`}
         style={{
           top: "50%",
@@ -36,7 +35,7 @@ export function DialogContent({ children, className }: DialogContentProps) {
       >
         {children}
 
-        <DialogPrimitive.Close className="absolute right-4 top-4 p-1 hover:bg-gray-200 rounded-full cursor-pointer z-60">
+        <DialogPrimitive.Close className="absolute text-white right-4 top-4 p-1 hover:bg-gray-800 rounded-full cursor-pointer z-60">
           <X size={20} />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
@@ -45,7 +44,7 @@ export function DialogContent({ children, className }: DialogContentProps) {
 }
 
 export function DialogHeader({ children }: { children: React.ReactNode }) {
-  return <div className="mb-4">{children}</div>;
+  return <div className="mb-6">{children}</div>;
 }
 
 export function DialogTitle({
@@ -56,9 +55,10 @@ export function DialogTitle({
   className?: string;
 }) {
   return (
-    <h2 className={`text-lg font-semibold ${className ?? ""}`}>{children}</h2>
+    <h2 className={`text-2xl font-semibold ${className ?? ""}`}>{children}</h2>
   );
 }
+
 interface AddItemDialogProps {
   onAdd: (item: InventoryItem) => void;
 }
@@ -110,24 +110,37 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         <Button className="bg-gray-500 cursor-pointer">Add Item</Button>
       </DialogTrigger>
 
-      <DialogContent className="relative">
-        <VisuallyHidden>
-          <DialogPrimitive.Title>Add Inventory Item</DialogPrimitive.Title>
-        </VisuallyHidden>
+      <DialogPrimitive.Title className="sr-only">
+        Add Inventory Item
+      </DialogPrimitive.Title>
 
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-xl">Add Inventory Item</DialogTitle>
+          <DialogTitle className="text-gray-400 text-2xl">
+            Add Inventory Item
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
-          <Input
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <Input
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="flex-1 bg-gray-600 placeholder:text-gray-400 text-white"
+            />
+            <Input
+              type="number"
+              placeholder="Quantity"
+              value={form.quantity}
+              onChange={(e) =>
+                setForm({ ...form, quantity: Number(e.target.value) })
+              }
+              className="w-32 bg-gray-600 !text-white "
+            />
+          </div>
           <select
-            className="w-full border rounded-md p-2 bg-white cursor-pointer"
+            className="w-full border rounded-md p-3 bg-gray-600 text-white cursor-pointer"
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           >
@@ -140,25 +153,16 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               </option>
             ))}
           </select>
-
-          <Input
-            type="number"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={(e) =>
-              setForm({ ...form, quantity: Number(e.target.value) })
-            }
-          />
-
-          <Input
+          <textarea
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="w-full h-32 p-3 bg-gray-600 text-white placeholder:text-gray-400 rounded-lg resize-none"
           />
         </div>
 
         <Button
-          className="w-full mt-5 bg-blue-600 hover:bg-blue-700 cursor-pointer"
+          className="w-full mt-6 bg-blue-900 hover:bg-blue-800 cursor-pointer"
           onClick={handleSubmit}
           disabled={loading}
         >
