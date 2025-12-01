@@ -2,24 +2,41 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import clsx from "clsx";
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 
 interface DialogContentProps {
-  title: string;
+  title?: string; // make optional
   children: React.ReactNode;
+  className?: string; // allow custom class
 }
 
-export function DialogContent({ title, children }: DialogContentProps) {
+export function DialogContent({
+  title,
+  children,
+  className,
+}: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
-      <DialogPrimitive.Content className="fixed left-1/2 top-1/2 w-[90%] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-lg">
-        <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
+      <DialogPrimitive.Content
+        className={clsx(
+          "fixed left-1/2 top-1/2 w-[90%] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-lg",
+          className
+        )}
+      >
+        {title && (
+          <DialogPrimitive.Title className="text-lg font-semibold mb-4">
+            {title}
+          </DialogPrimitive.Title>
+        )}
+
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4">
-          <X />
+
+        <DialogPrimitive.Close className="absolute right-4 top-4 p-1 hover:bg-gray-200 rounded-full cursor-pointer">
+          <X size={20} />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
@@ -30,6 +47,15 @@ export function DialogHeader({ children }: { children: React.ReactNode }) {
   return <div className="mb-4">{children}</div>;
 }
 
-export function DialogTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-lg font-semibold">{children}</h2>;
+export function DialogTitle({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h2 className={clsx("text-lg font-semibold", className)}>{children}</h2>
+  );
 }
+

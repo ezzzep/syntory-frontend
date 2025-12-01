@@ -8,7 +8,7 @@ export const inventoryTableStyles = {
   `,
 
   table: `
-    min-w-full border border-gray-700
+    min-w-full table-fixed border border-gray-700
     rounded-2xl overflow-hidden shadow-xl
     bg-white/5 backdrop-blur-lg
   `,
@@ -20,6 +20,7 @@ export const inventoryTableStyles = {
   tableHeadCell: `
     text-left text-gray-300 uppercase text-sm font-semibold
     px-5 py-3 tracking-wide
+    max-w-[200px] truncate overflow-hidden whitespace-nowrap
   `,
 
   tableRowHover: `
@@ -28,14 +29,16 @@ export const inventoryTableStyles = {
 
   tableCell: `
     px-5 py-3 text-gray-300
+    max-w-[150px] truncate overflow-hidden whitespace-nowrap
   `,
 
   tableCellName: `
-    px-5 py-3 font-semibold text-gray-100
+    px-5 py-3 text-gray-100
+    max-w-[200px] truncate overflow-hidden whitespace-nowrap
   `,
 
   actionCell: `
-    px-5 py-3 flex gap-3 flex-wrap items-center
+    px-5 py-3 flex gap-3 flex-wrap items-center min-w-[120px]
   `,
 
   button: `
