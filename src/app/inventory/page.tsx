@@ -43,7 +43,10 @@ export default function InventoryPage() {
   return (
     <div className="p-6 min-h-screen bg-gray-900">
       <div className="flex items-center justify-between mb-6 pb-5">
-        <h1 className="text-3xl font-bold text-blue-400">Inventory</h1>
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600">
+          Inventory
+        </h1>
+
         <AddItemDialog onAdd={handleAdd} />
       </div>
 
