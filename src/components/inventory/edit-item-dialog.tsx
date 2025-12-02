@@ -25,7 +25,7 @@ export default function EditItemDialog({
   onUpdate,
   className = "",
 }: EditItemDialogProps) {
-  const toast = useToasts(); // returns an object, NOT a function
+  const toast = useToasts();
   const [form, setForm] = useState<InventoryItem>(item);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
