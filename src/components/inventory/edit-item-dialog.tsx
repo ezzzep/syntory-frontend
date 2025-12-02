@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import Cookies from "js-cookie";
+import { useToasts } from "@/components/toast";
 
 interface EditItemDialogProps {
   item: InventoryItem;
@@ -24,9 +25,10 @@ export default function EditItemDialog({
   onUpdate,
   className = "",
 }: EditItemDialogProps) {
+  const toast = useToasts(); // returns an object, NOT a function
   const [form, setForm] = useState<InventoryItem>(item);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   const categories = [
     "Appliances",
@@ -44,7 +46,6 @@ export default function EditItemDialog({
 
   const handleUpdate = async () => {
     setLoading(true);
-    setError(null);
 
     try {
       const sanitized: UpdateInventoryDto = {
@@ -71,21 +72,25 @@ export default function EditItemDialog({
         }
       );
 
-      if (!res.ok) throw new Error("Failed to update item");
+      if (!res.ok) {
+        toast.error("Update failed. Please try again.");
+        return;
+      }
 
       const updated: InventoryItem = await res.json();
       onUpdate(updated);
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update item";
-      setError(message);
+
+      toast.success(`${updated.name} has been updated.`);
+      setOpen(false);
+    } catch {
+      toast.error("Unable to update item. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -100,8 +105,6 @@ export default function EditItemDialog({
         <DialogHeader>
           <DialogTitle>Edit Inventory Item</DialogTitle>
         </DialogHeader>
-
-        {error && <p className="text-red-500 mb-2">{error}</p>}
 
         <div className="space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
