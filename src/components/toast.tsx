@@ -65,7 +65,7 @@ const ToastContainer = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-16 right-4 z-9999 w-[420px] pointer-events-none">
+    <div className="fixed bottom-16 right-4 z-[9999] w-[420px] pointer-events-none">
       {toasts.map((toast) => (
         <div
           key={toast.id}
@@ -125,16 +125,16 @@ export const useToasts = () => ({
     mountContainer();
     toastStore.add({ type: msg.type || "message", ...msg });
   }, []),
-  success: useCallback(
-    (text: string) => toastStore.add({ type: "success", text }),
-    []
-  ),
-  warning: useCallback(
-    (text: string) => toastStore.add({ type: "warning", text }),
-    []
-  ),
-  error: useCallback(
-    (text: string) => toastStore.add({ type: "error", text }),
-    []
-  ),
+  success: useCallback((text: string) => {
+    mountContainer();
+    toastStore.add({ type: "success", text });
+  }, []),
+  warning: useCallback((text: string) => {
+    mountContainer();
+    toastStore.add({ type: "warning", text });
+  }, []),
+  error: useCallback((text: string) => {
+    mountContainer();
+    toastStore.add({ type: "error", text });
+  }, []),
 });
