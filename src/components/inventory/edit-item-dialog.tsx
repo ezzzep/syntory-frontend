@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +8,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import Cookies from "js-cookie";
 
 interface EditItemDialogProps {
   item: InventoryItem;
   onUpdate: (updatedItem: InventoryItem) => void;
-  className?: string; // optional extra styling
+  className?: string;
 }
 
 export default function EditItemDialog({
@@ -27,6 +27,13 @@ export default function EditItemDialog({
   const [form, setForm] = useState<InventoryItem>(item);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const categories = [
+    "Appliances",
+    "Home & Living",
+    "Gadgets",
+    "Home Cleaning",
+  ];
 
   const fetchCsrf = async () => {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sanctum/csrf-cookie`, {
@@ -40,7 +47,7 @@ export default function EditItemDialog({
     setError(null);
 
     try {
-      const sanitizedForm: UpdateInventoryDto = {
+      const sanitized: UpdateInventoryDto = {
         name: form.name ?? "",
         category: form.category ?? undefined,
         quantity: form.quantity ?? 0,
@@ -48,7 +55,7 @@ export default function EditItemDialog({
       };
 
       await fetchCsrf();
-      const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+      const xsrf = Cookies.get("XSRF-TOKEN") ?? "";
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${item.id}`,
@@ -58,22 +65,20 @@ export default function EditItemDialog({
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+            "X-XSRF-TOKEN": decodeURIComponent(xsrf),
           },
-          body: JSON.stringify(sanitizedForm),
+          body: JSON.stringify(sanitized),
         }
       );
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Failed to update item: ${res.status} ${text}`);
-      }
+      if (!res.ok) throw new Error("Failed to update item");
 
       const updated: InventoryItem = await res.json();
       onUpdate(updated);
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError(String(err) || "Failed to update item");
+      const message =
+        err instanceof Error ? err.message : "Failed to update item";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -85,46 +90,63 @@ export default function EditItemDialog({
         <Button
           variant="outline"
           size="sm"
-          className={`bg-transparent border border-gray-500 text-gray-300
-            hover:bg-blue-600 hover:text-white cursor-pointer
-            transition-colors duration-300 rounded-md px-3 py-1 text-sm
-            ${className}`}
+          className={`bg-transparent border border-gray-500 text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-300 rounded-md px-3 py-1 text-sm ${className}`}
         >
           Edit
         </Button>
       </DialogTrigger>
 
-      <DialogContent title="Edit Inventory Item">
+      <DialogContent className="text-white">
         <DialogHeader>
           <DialogTitle>Edit Inventory Item</DialogTitle>
         </DialogHeader>
 
         {error && <p className="text-red-500 mb-2">{error}</p>}
 
-        <div className="space-y-3 mt-2">
-          <Input
-            value={form.name ?? ""}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <Input
+        <div className="space-y-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+            <Input
+              placeholder="Name"
+              value={form.name ?? ""}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full md:flex-1 bg-gray-600 placeholder:text-gray-400 text-white"
+            />
+            <Input
+              type="number"
+              placeholder="Quantity"
+              value={form.quantity ?? 0}
+              onChange={(e) =>
+                setForm({ ...form, quantity: Number(e.target.value) })
+              }
+              className="w-full md:w-32 bg-gray-600 text-white"
+            />
+          </div>
+
+          <select
+            className="w-full border rounded-md p-3 bg-gray-600 text-white cursor-pointer"
             value={form.category ?? ""}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
-          />
-          <Input
-            type="number"
-            value={form.quantity ?? 0}
-            onChange={(e) =>
-              setForm({ ...form, quantity: Number(e.target.value) })
-            }
-          />
-          <Input
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <textarea
+            placeholder="Description"
             value={form.description ?? ""}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="w-full h-32 p-3 bg-gray-600 text-white placeholder:text-gray-400 rounded-lg resize-none"
           />
         </div>
 
         <Button
-          className="w-full mt-4 bg-gray-800 text-white hover:bg-gray-700"
+          className="w-full mt-6 bg-blue-900 hover:bg-blue-800 cursor-pointer"
           onClick={handleUpdate}
           disabled={loading}
         >

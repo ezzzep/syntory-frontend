@@ -2,62 +2,19 @@
 
 import { useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToasts } from "@/components/toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import type { InventoryItem, CreateInventoryDto } from "@/types/inventory";
 import { createInventoryItem } from "@/lib/api/inventory";
-
-export const Dialog = DialogPrimitive.Root;
-export const DialogTrigger = DialogPrimitive.Trigger;
-
-interface DialogContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function DialogContent({ children, className }: DialogContentProps) {
-  return (
-    <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
-
-      <DialogPrimitive.Content
-        className={`fixed z-50 w-[95%] max-w-2xl max-h-[90vh] overflow-auto rounded-xl bg-gray-800 p-8 shadow-lg
-          ${className ?? ""}`}
-        style={{
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          position: "fixed",
-        }}
-      >
-        {children}
-
-        <DialogPrimitive.Close className="absolute text-white right-4 top-4 p-1 hover:bg-gray-800 rounded-full cursor-pointer z-60">
-          <X size={20} />
-        </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
-    </DialogPrimitive.Portal>
-  );
-}
-
-export function DialogHeader({ children }: { children: React.ReactNode }) {
-  return <div className="mb-6">{children}</div>;
-}
-
-export function DialogTitle({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <h2 className={`text-2xl font-semibold ${className ?? ""}`}>{children}</h2>
-  );
-}
 
 interface AddItemDialogProps {
   onAdd: (item: InventoryItem) => void;
@@ -122,13 +79,14 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
             <Input
               placeholder="Name"
-              value={form.name}
+              value={form.name ?? ""}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="flex-1 bg-gray-600 placeholder:text-gray-400 text-white"
+              className="w-full md:flex-1 bg-gray-600 placeholder:text-gray-400 text-white"
             />
+
             <Input
               type="number"
               placeholder="Quantity"
@@ -136,9 +94,10 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               onChange={(e) =>
                 setForm({ ...form, quantity: Number(e.target.value) })
               }
-              className="w-32 bg-gray-600 !text-white "
+              className="w-full md:w-32 bg-gray-600 text-white"
             />
           </div>
+
           <select
             className="w-full border rounded-md p-3 bg-gray-600 text-white cursor-pointer"
             value={form.category}
@@ -153,6 +112,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               </option>
             ))}
           </select>
+
           <textarea
             placeholder="Description"
             value={form.description}
