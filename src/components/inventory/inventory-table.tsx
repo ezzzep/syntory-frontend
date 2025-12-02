@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import EditItemDialog from "./edit-item-dialog";
 import { inventoryTableStyles } from "@/styles/inventoryTable";
+import ItemDetails from "./item-details";
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -38,8 +39,6 @@ export default function InventoryTable({
           <h2 className="text-xl font-bold mb-4 text-gray-300">
             {categoryName}
           </h2>
-
-          {/* Desktop Table */}
           <div className={inventoryTableStyles.desktopWrapper}>
             <Table className={inventoryTableStyles.table}>
               <TableHeader className={inventoryTableStyles.tableHeader}>
@@ -78,10 +77,12 @@ export default function InventoryTable({
                       key={item.id}
                       className={inventoryTableStyles.tableRowHover}
                     >
-                      <TableCell
-                        className={inventoryTableStyles.tableCellName}
-                      >
-                        {item.name}
+                      <TableCell className={inventoryTableStyles.tableCellName}>
+                        <ItemDetails item={item}>
+                          <span className="cursor-pointer hover:underline hover:text-blue-300 text-white">
+                            {item.name}
+                          </span>
+                        </ItemDetails>
                       </TableCell>
 
                       <TableCell className={inventoryTableStyles.tableCell}>
@@ -113,8 +114,7 @@ export default function InventoryTable({
               </TableBody>
             </Table>
           </div>
-
-          {/* Mobile Cards */}
+          
           <div className="sm:hidden flex flex-col gap-4 mt-4">
             {categoryItems.length === 0 ? (
               <p className="text-gray-400 text-center">
@@ -122,14 +122,13 @@ export default function InventoryTable({
               </p>
             ) : (
               categoryItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={inventoryTableStyles.mobileCard}
-                >
+                <div key={item.id} className={inventoryTableStyles.mobileCard}>
                   <div className="flex flex-col gap-1">
-                    <span className={inventoryTableStyles.mobileLabel}>
-                      Name:
-                    </span>
+                    <ItemDetails item={item}>
+                      <span className={inventoryTableStyles.mobileLabel}>
+                        Name:
+                      </span>
+                    </ItemDetails>
                     <span className={inventoryTableStyles.mobileValue}>
                       {item.name}
                     </span>
@@ -137,27 +136,21 @@ export default function InventoryTable({
                     <span className={inventoryTableStyles.mobileLabel}>
                       Category:
                     </span>
-                    <span
-                      className={inventoryTableStyles.mobileValueSecondary}
-                    >
+                    <span className={inventoryTableStyles.mobileValueSecondary}>
                       {item.category ?? "-"}
                     </span>
 
                     <span className={inventoryTableStyles.mobileLabel}>
                       Quantity:
                     </span>
-                    <span
-                      className={inventoryTableStyles.mobileValueSecondary}
-                    >
+                    <span className={inventoryTableStyles.mobileValueSecondary}>
                       {item.quantity}
                     </span>
 
                     <span className={inventoryTableStyles.mobileLabel}>
                       Description:
                     </span>
-                    <span
-                      className={inventoryTableStyles.mobileValueSecondary } 
-                    >
+                    <span className={inventoryTableStyles.mobileValueSecondary}>
                       {item.description ?? "-"}
                     </span>
                   </div>

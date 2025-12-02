@@ -64,11 +64,11 @@ export const inventoryTableStyles = {
   `,
 
   mobileLabel: `
-    text-gray-300 font-semibold text-sm
+    text-blue-200 font-bold text-medium
   `,
 
   mobileValue: `
-    text-gray-100 font-medium text-sm
+    text-gray-100 font-light text-sm
   `,
 
   mobileValueSecondary: `
