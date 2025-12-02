@@ -32,6 +32,12 @@ export default function InventoryTable({
     "Home Cleaning": items.filter((i) => i.category === "Home Cleaning"),
   };
 
+  const getQuantityColor = (quantity: number) => {
+    if (quantity < 10) return "bg-red-900";
+    if (quantity < 20) return "bg-yellow-600";
+    return "bg-blue-800";
+  };
+
   return (
     <div className="flex flex-col gap-10">
       {Object.entries(categories).map(([categoryName, categoryItems]) => (
@@ -39,6 +45,8 @@ export default function InventoryTable({
           <h2 className="text-xl font-bold mb-4 text-gray-300">
             {categoryName}
           </h2>
+
+          {/* Desktop Table */}
           <div className={inventoryTableStyles.desktopWrapper}>
             <Table className={inventoryTableStyles.table}>
               <TableHeader className={inventoryTableStyles.tableHeader}>
@@ -90,7 +98,13 @@ export default function InventoryTable({
                       </TableCell>
 
                       <TableCell className={inventoryTableStyles.tableCell}>
-                        {item.quantity}
+                        <span
+                          className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold ${getQuantityColor(
+                            item.quantity
+                          )}`}
+                        >
+                          {item.quantity}
+                        </span>
                       </TableCell>
 
                       <TableCell className={inventoryTableStyles.tableCell}>
@@ -114,7 +128,8 @@ export default function InventoryTable({
               </TableBody>
             </Table>
           </div>
-          
+
+          {/* Mobile Cards */}
           <div className="sm:hidden flex flex-col gap-4 mt-4">
             {categoryItems.length === 0 ? (
               <p className="text-gray-400 text-center">
@@ -143,7 +158,11 @@ export default function InventoryTable({
                     <span className={inventoryTableStyles.mobileLabel}>
                       Quantity:
                     </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
+                    <span
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-white ${getQuantityColor(
+                        item.quantity
+                      )}`}
+                    >
                       {item.quantity}
                     </span>
 
