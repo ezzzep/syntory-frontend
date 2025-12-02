@@ -22,7 +22,7 @@ export default function StatsCards({
   monthlyRevenue,
   customerSatisfaction,
   items,
-  lowStockThreshold = 10,
+  lowStockThreshold = 9,
 }: StatsCardsProps) {
   const lowStockByCategory: Record<string, number> = {};
   items.forEach((i) => {
