@@ -1,6 +1,5 @@
 import React from "react";
 
-// Table
 export function Table({
   children,
   className,
@@ -8,7 +7,6 @@ export function Table({
   return <table className={className}>{children}</table>;
 }
 
-// TableHeader
 export function TableHeader({
   children,
   className,
@@ -16,7 +14,6 @@ export function TableHeader({
   return <thead className={className}>{children}</thead>;
 }
 
-// TableBody
 export function TableBody({
   children,
   className,
@@ -24,7 +21,6 @@ export function TableBody({
   return <tbody className={className}>{children}</tbody>;
 }
 
-// TableRow
 export function TableRow({
   children,
   className,
@@ -32,7 +28,6 @@ export function TableRow({
   return <tr className={className}>{children}</tr>;
 }
 
-// TableHead
 export function TableHead({
   children,
   className,
@@ -40,7 +35,6 @@ export function TableHead({
   return <th className={className}>{children}</th>;
 }
 
-// TableCell
 export function TableCell({
   children,
   className,
