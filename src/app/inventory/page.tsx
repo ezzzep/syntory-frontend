@@ -35,26 +35,31 @@ export default function InventoryPage() {
 
   if (loading)
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-900">
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
         <BouncingDots />
       </div>
     );
 
   return (
-    <div className="p-6 min-h-screen bg-gray-900">
-      <div className="flex items-center justify-between mb-6 pb-5">
-        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600">
-          Inventory
-        </h1>
+    <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 md:mb-10 pb-5">
+        <div className="mb-4 sm:mb-0">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent pb-2">
+            Inventory Management
+          </h1>
+          <div className="h-1 w-24 sm:w-32 bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 mt-3 sm:mt-4 rounded-full"></div>
+        </div>
 
         <AddItemDialog onAdd={handleAdd} />
       </div>
 
-      <InventoryTable
-        items={items}
-        onDelete={handleDelete}
-        onUpdate={handleUpdate}
-      />
+      <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 hover:shadow-2xl transition-all duration-300">
+        <InventoryTable
+          items={items}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+        />
+      </div>
     </div>
   );
 }
