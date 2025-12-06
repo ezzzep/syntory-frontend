@@ -1,8 +1,17 @@
 {
-  "abcAnalysis": [
-    { "name": "A - High Value", "value": 75 },
-    { "name": "B - Medium Value", "value": 18 },
-    { "name": "C - Low Value", "value": 7 }
+   "seasonalDemand": [
+    { "month": "Jan", "winter": 4000, "spring": 2400, "summer": 2400, "autumn": 3200 },
+    { "month": "Feb", "winter": 3000, "spring": 1398, "summer": 2210, "autumn": 3100 },
+    { "month": "Mar", "winter": 2000, "spring": 3800, "summer": 2290, "autumn": 2900 },
+    { "month": "Apr", "winter": 2780, "spring": 3908, "summer": 2000, "autumn": 2181 },
+    { "month": "May", "winter": 1890, "spring": 4800, "summer": 2181, "autumn": 2500 },
+    { "month": "Jun", "winter": 2390, "spring": 3800, "summer": 3500, "autumn": 2100 },
+    { "month": "Jul", "winter": 3490, "spring": 4300, "summer": 4100, "autumn": 2400 },
+    { "month": "Aug", "winter": 3200, "spring": 4100, "summer": 4200, "autumn": 2800 },
+    { "month": "Sep", "winter": 2800, "spring": 3200, "summer": 3600, "autumn": 3900 },
+    { "month": "Oct", "winter": 3100, "spring": 2800, "summer": 3200, "autumn": 4200 },
+    { "month": "Nov", "winter": 3800, "spring": 2500, "summer": 2800, "autumn": 4100 },
+    { "month": "Dec", "winter": 4300, "spring": 2100, "summer": 2400, "autumn": 3800 }
   ],
   "supplierReliability": [
     { "name": "Delivery Accuracy", "value": 88 },
@@ -57,6 +66,27 @@
       "value": "$4,521"
     },
     {
+      "product": "LED Warehouse Lights",
+      "category": "Electronics",
+      "country": "🇫🇷",
+      "cr": "PO-48295",
+      "value": "$7,523"
+    },
+        {
+      "product": "LED Warehouse Lights",
+      "category": "Electronics",
+      "country": "🇫🇷",
+      "cr": "PO-48295",
+      "value": "$7,523"
+    },
+        {
+      "product": "LED Warehouse Lights",
+      "category": "Electronics",
+      "country": "🇫🇷",
+      "cr": "PO-48295",
+      "value": "$7,523"
+    },
+        {
       "product": "LED Warehouse Lights",
       "category": "Electronics",
       "country": "🇫🇷",
