@@ -23,7 +23,7 @@ import {
   Inbox,
   Trash2,
 } from "lucide-react";
-import { inventoryTableStyles } from "@/styles/inventoryTable";
+import { inventoryTableStyles } from "@/styles/inventoryTable"; 
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -56,6 +56,18 @@ export default function InventoryTable({
   const [activeTab, setActiveTab] = useState(categories[0].name);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  const lowQuantityCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+
+    categories.forEach((category) => {
+      counts[category.name] = items.filter(
+        (item) => item.category === category.name && item.quantity < 10
+      ).length;
+    });
+
+    return counts;
+  }, [items]);
 
   const getQuantityClass = (quantity: number) => {
     if (quantity < 10)
@@ -143,6 +155,7 @@ export default function InventoryTable({
           const itemCount = items.filter(
             (i) => i.category === category.name
           ).length;
+          const lowItemCount = lowQuantityCounts[category.name] || 0;
 
           return (
             <button
@@ -176,6 +189,10 @@ export default function InventoryTable({
 
               {isActive && (
                 <div className={inventoryTableStyles.tabIndicator}></div>
+              )}
+              {lowItemCount > 0 && (
+                <div className={inventoryTableStyles.lowQuantityIndicator}>
+                </div>
               )}
             </button>
           );

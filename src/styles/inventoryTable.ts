@@ -229,4 +229,12 @@ export const inventoryTableStyles = {
     w-16 h-16 mx-auto mb-4 text-slate-500
     cursor-pointer
   `,
+
+  lowQuantityIndicator: `
+    absolute -top-1 -right-1 flex items-center justify-center 
+    bg-red-500 text-white rounded-full w-2 h-2 text-xs
+    shadow-lg shadow-red-500/30 border border-red-600/50
+    z-10 animate-pulse
+    cursor-pointer
+  `,
 };
