@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import type { InventoryItem } from "@/types/inventory";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EditItemDialog from "./edit-item-dialog";
-import { inventoryTableStyles } from "@/styles/inventoryTable";
 import ItemDetails from "./item-details";
+import {
+  Search,
+  Package,
+  Home,
+  Cpu,
+  Sparkles,
+  Inbox,
+  Trash2,
+} from "lucide-react";
+import { inventoryTableStyles } from "@/styles/inventoryTable";
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -25,156 +35,273 @@ export default function InventoryTable({
   onDelete,
   onUpdate,
 }: InventoryTableProps) {
-  const categories = {
-    Appliances: items.filter((i) => i.category === "Appliances"),
-    "Home & Living": items.filter((i) => i.category === "Home & Living"),
-    Gadgets: items.filter((i) => i.category === "Gadgets"),
-    "Home Cleaning": items.filter((i) => i.category === "Home Cleaning"),
+  const categories = [
+    { name: "Appliances", icon: Package, color: "from-blue-500 to-cyan-500" },
+    {
+      name: "Home & Living",
+      icon: Home,
+      color: "from-green-500 to-emerald-500",
+    },
+    { name: "Gadgets", icon: Cpu, color: "from-purple-500 to-pink-500" },
+    {
+      name: "Home Cleaning",
+      icon: Sparkles,
+      color: "from-orange-500 to-red-500",
+    },
+  ];
+
+  const [activeTab, setActiveTab] = useState(categories[0].name);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  const getQuantityClass = (quantity: number) => {
+    if (quantity < 10)
+      return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityLow}`;
+    if (quantity < 20)
+      return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityMedium}`;
+    return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityHigh}`;
   };
 
-  const getQuantityColor = (quantity: number) => {
-    if (quantity < 10) return "bg-red-900";
-    if (quantity < 20) return "bg-yellow-600";
-    return "bg-blue-800";
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesCategory = item.category === activeTab;
+      const matchesSearch =
+        searchTerm === "" ||
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.description &&
+          item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [items, activeTab, searchTerm]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedItems(filteredItems.map((item) => item.id));
+    } else {
+      setSelectedItems([]);
+    }
   };
+
+  const handleSelectItem = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedItems((prev) => [...prev, id]);
+    } else {
+      setSelectedItems((prev) => prev.filter((item) => item !== id));
+    }
+  };
+
+  const isAllSelected =
+    filteredItems.length > 0 && selectedItems.length === filteredItems.length;
+  const isIndeterminate =
+    selectedItems.length > 0 && selectedItems.length < filteredItems.length;
 
   return (
-    <div className="flex flex-col gap-10">
-      {Object.entries(categories).map(([categoryName, categoryItems]) => (
-        <div key={categoryName} className="w-full">
-          <h2 className="text-xl font-bold mb-4 text-gray-300">
-            {categoryName}
-          </h2>
+    <div className={inventoryTableStyles.wrapper}>
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className={inventoryTableStyles.searchContainer}>
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={inventoryTableStyles.searchInput}
+          />
+        </div>
 
-          {/* Desktop Table */}
-          <div className={inventoryTableStyles.desktopWrapper}>
-            <Table className={inventoryTableStyles.table}>
-              <TableHeader className={inventoryTableStyles.tableHeader}>
-                <TableRow>
-                  <TableHead className={inventoryTableStyles.tableHead}>
-                    Name
-                  </TableHead>
-                  <TableHead className={inventoryTableStyles.tableHead}>
-                    Category
-                  </TableHead>
-                  <TableHead className={inventoryTableStyles.tableHead}>
-                    Quantity
-                  </TableHead>
-                  <TableHead className={inventoryTableStyles.tableHead}>
-                    Description
-                  </TableHead>
-                  <TableHead className={inventoryTableStyles.tableHead}>
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody className="divide-y divide-gray-600">
-                {categoryItems.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center py-4 text-gray-400"
-                    >
-                      No items found in this category.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  categoryItems.map((item) => (
-                    <TableRow
-                      key={item.id}
-                      className={inventoryTableStyles.tableRowHover}
-                    >
-                      <TableCell className={inventoryTableStyles.tableCellName}>
-                        <ItemDetails item={item}>
-                          <span className="cursor-pointer hover:underline hover:text-blue-300 text-white">
-                            {item.name}
-                          </span>
-                        </ItemDetails>
-                      </TableCell>
-
-                      <TableCell className={inventoryTableStyles.tableCell}>
-                        {item.category ?? "-"}
-                      </TableCell>
-
-                      <TableCell className={inventoryTableStyles.tableCell}>
-                        <span
-                          className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold ${getQuantityColor(
-                            item.quantity
-                          )}`}
-                        >
-                          {item.quantity}
-                        </span>
-                      </TableCell>
-
-                      <TableCell className={inventoryTableStyles.tableCell}>
-                        {item.description ?? "-"}
-                      </TableCell>
-
-                      <TableCell className={inventoryTableStyles.actionCell}>
-                        <EditItemDialog item={item} onUpdate={onUpdate} />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={inventoryTableStyles.button}
-                          onClick={() => onDelete(item.id)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+        {selectedItems.length > 0 && (
+          <div className={inventoryTableStyles.selectedItemsBar}>
+            <span className={inventoryTableStyles.selectedCount}>
+              {selectedItems.length} item{selectedItems.length > 1 ? "s" : ""}{" "}
+              selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className={inventoryTableStyles.button}
+              onClick={() => {
+                selectedItems.forEach((id) => onDelete(id));
+                setSelectedItems([]);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
+        )}
+      </div>
 
-          {/* Mobile Cards */}
-          <div className="sm:hidden flex flex-col gap-4 mt-4">
-            {categoryItems.length === 0 ? (
-              <p className="text-gray-400 text-center">
-                No items found in this category.
-              </p>
+      <div className={inventoryTableStyles.tabsContainer}>
+        {categories.map((category) => {
+          const Icon = category.icon;
+          const isActive = activeTab === category.name;
+          const itemCount = items.filter(
+            (i) => i.category === category.name
+          ).length;
+
+          return (
+            <button
+              key={category.name}
+              onClick={() => setActiveTab(category.name)}
+              className={`${inventoryTableStyles.tabButton} ${
+                isActive
+                  ? inventoryTableStyles.tabActive
+                  : inventoryTableStyles.tabInactive
+              }`}
+            >
+              <div
+                className={`${inventoryTableStyles.tabGradient} ${
+                  isActive ? "opacity-100" : "opacity-0"
+                }`}
+              ></div>
+
+              <div className={inventoryTableStyles.tabContent}>
+                <Icon className="w-4 h-4" />
+                <span>{category.name}</span>
+                <span
+                  className={`${inventoryTableStyles.tabBadge} ${
+                    isActive
+                      ? inventoryTableStyles.tabBadgeActive
+                      : inventoryTableStyles.tabBadgeInactive
+                  }`}
+                >
+                  {itemCount}
+                </span>
+              </div>
+
+              {isActive && (
+                <div className={inventoryTableStyles.tabIndicator}></div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={inventoryTableStyles.desktopWrapper}>
+        <Table
+          className={inventoryTableStyles.table}
+          style={{ tableLayout: "fixed", minWidth: "1100px" }}
+        >
+          <TableHeader className={inventoryTableStyles.tableHeader}>
+            <TableRow>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "60px" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  ref={(el) => {
+                    if (el) el.indeterminate = isIndeterminate;
+                  }}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className={`${inventoryTableStyles.checkbox} ${
+                    isAllSelected ? inventoryTableStyles.checkboxChecked : ""
+                  }`}
+                />
+              </TableHead>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "250px" }}
+              >
+                Name
+              </TableHead>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "180px" }}
+              >
+                Category
+              </TableHead>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "120px" }}
+              >
+                Quantity
+              </TableHead>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "300px" }}
+              >
+                Description
+              </TableHead>
+              <TableHead
+                className={inventoryTableStyles.tableHeadCell}
+                style={{ width: "180px" }}
+              >
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {filteredItems.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className={inventoryTableStyles.emptyState}
+                >
+                  <Inbox className={inventoryTableStyles.emptyStateIcon} />
+                  <p className="text-lg font-medium mb-2">
+                    {searchTerm
+                      ? "No items found matching your search."
+                      : "No items found in this category."}
+                  </p>
+                  <p className="text-sm">
+                    {searchTerm
+                      ? "Try adjusting your search terms."
+                      : "Items will appear here once added."}
+                  </p>
+                </TableCell>
+              </TableRow>
             ) : (
-              categoryItems.map((item) => (
-                <div key={item.id} className={inventoryTableStyles.mobileCard}>
-                  <div className="flex flex-col gap-1">
+              filteredItems.map((item) => (
+                <TableRow
+                  key={item.id}
+                  className={`${inventoryTableStyles.tableRowHover} ${
+                    selectedItems.includes(item.id) ? "bg-slate-700/10" : ""
+                  }`}
+                >
+                  <TableCell className={inventoryTableStyles.tableCell}>
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.id)}
+                      onChange={(e) =>
+                        handleSelectItem(item.id, e.target.checked)
+                      }
+                      className={`${inventoryTableStyles.checkbox} ${
+                        selectedItems.includes(item.id)
+                          ? inventoryTableStyles.checkboxChecked
+                          : ""
+                      }`}
+                    />
+                  </TableCell>
+                  <TableCell className={inventoryTableStyles.tableCellName}>
                     <ItemDetails item={item}>
-                      <span className={inventoryTableStyles.mobileLabel}>
-                        Name:
+                      <span className="cursor-pointer hover:text-blue-300 transition-colors truncate block">
+                        {item.name}
                       </span>
                     </ItemDetails>
-                    <span className={inventoryTableStyles.mobileValue}>
-                      {item.name}
-                    </span>
+                  </TableCell>
 
-                    <span className={inventoryTableStyles.mobileLabel}>
-                      Category:
-                    </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
+                  <TableCell className={inventoryTableStyles.tableCell}>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-700/30 text-slate-300 border border-slate-600/30 truncate">
                       {item.category ?? "-"}
                     </span>
+                  </TableCell>
 
-                    <span className={inventoryTableStyles.mobileLabel}>
-                      Quantity:
-                    </span>
-                    <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-white ${getQuantityColor(
-                        item.quantity
-                      )}`}
-                    >
+                  <TableCell className={inventoryTableStyles.tableCell}>
+                    <span className={getQuantityClass(item.quantity)}>
                       {item.quantity}
                     </span>
+                  </TableCell>
 
-                    <span className={inventoryTableStyles.mobileLabel}>
-                      Description:
-                    </span>
-                    <span className={inventoryTableStyles.mobileValueSecondary}>
-                      {item.description ?? "-"}
-                    </span>
-                  </div>
+                  <TableCell
+                    className={inventoryTableStyles.tableCellDescription}
+                    title={item.description || ""}
+                  >
+                    {item.description ?? "-"}
+                  </TableCell>
 
-                  <div className={inventoryTableStyles.mobileActions}>
+                  <TableCell className={inventoryTableStyles.actionCell}>
                     <EditItemDialog item={item} onUpdate={onUpdate} />
                     <Button
                       variant="outline"
@@ -182,15 +309,102 @@ export default function InventoryTable({
                       className={inventoryTableStyles.button}
                       onClick={() => onDelete(item.id)}
                     >
-                      Delete
+                      <Trash2 className="w-4 h-4" />
                     </Button>
-                  </div>
-                </div>
+                  </TableCell>
+                </TableRow>
               ))
             )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="sm:hidden flex flex-col gap-4">
+        {filteredItems.length === 0 ? (
+          <div className={inventoryTableStyles.emptyState}>
+            <Inbox className={inventoryTableStyles.emptyStateIcon} />
+            <p className="text-lg font-medium mb-2">
+              {searchTerm
+                ? "No items found matching your search."
+                : "No items found in this category."}
+            </p>
+            <p className="text-sm">
+              {searchTerm
+                ? "Try adjusting your search terms."
+                : "Items will appear here once added."}
+            </p>
           </div>
-        </div>
-      ))}
+        ) : (
+          filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className={`${inventoryTableStyles.mobileCard} ${
+                selectedItems.includes(item.id) ? "ring-2 ring-blue-500/50" : ""
+              }`}
+            >
+              <div className="flex items-start gap-3 mb-4">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.includes(item.id)}
+                  onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                  className={`${inventoryTableStyles.checkbox} mt-1 ${
+                    selectedItems.includes(item.id)
+                      ? inventoryTableStyles.checkboxChecked
+                      : ""
+                  }`}
+                />
+                <div className="flex-1 min-w-0">
+                  <ItemDetails item={item}>
+                    <span className="font-medium text-white cursor-pointer hover:text-blue-300 transition-colors truncate block">
+                      {item.name}
+                    </span>
+                  </ItemDetails>
+                </div>
+                <span className={getQuantityClass(item.quantity)}>
+                  {item.quantity}
+                </span>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <div>
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Category:{" "}
+                  </span>
+                  <span className={inventoryTableStyles.mobileValueSecondary}>
+                    {item.category ?? "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Description:{" "}
+                  </span>
+                  <span
+                    className={inventoryTableStyles.mobileValueSecondary}
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
+                    {item.description ?? "-"}
+                  </span>
+                </div>
+              </div>
+
+              <div className={inventoryTableStyles.mobileActions}>
+                <EditItemDialog item={item} onUpdate={onUpdate} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(item.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

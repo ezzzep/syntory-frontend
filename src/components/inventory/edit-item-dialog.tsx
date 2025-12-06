@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import Cookies from "js-cookie";
 import { useToasts } from "@/components/toast";
+import { Edit } from "lucide-react";
 
 interface EditItemDialogProps {
   item: InventoryItem;
@@ -97,7 +98,7 @@ export default function EditItemDialog({
           size="sm"
           className={`bg-transparent border border-gray-500 text-gray-300 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-300 rounded-md px-3 py-1 text-sm ${className}`}
         >
-          Edit
+          <Edit className="w-4 h-4"></Edit>
         </Button>
       </DialogTrigger>
 
