@@ -23,7 +23,7 @@ import {
   Inbox,
   Trash2,
 } from "lucide-react";
-import { inventoryTableStyles } from "@/styles/inventoryTable";
+import { inventoryTableStyles } from "@/styles/inventory/inventoryTable";
 
 interface InventoryTableProps {
   items: InventoryItem[];
