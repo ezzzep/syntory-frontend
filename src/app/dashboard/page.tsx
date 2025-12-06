@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import StatsCards from "./statsCards";
-import SalesChart from "./salesChart";
-import TopListsCards from "./topListCards";
+import StatsCards from "../../components/dashboard/statsCards";
+import SalesChart from "../../components/dashboard/salesChart";
+import TopListsCards from "../../components/dashboard/topListCards";
 import type { InventoryItem } from "@/types/inventory";
 import { getInventory } from "@/lib/api/inventory";
 import { BouncingDots } from "@/components/bouncing-dots";

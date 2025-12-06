@@ -14,9 +14,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import type { InventoryItem } from "@/types/inventory";
 
-// Define a type for our data structure for better type safety
 type AnalyticsData = {
   abcAnalysis: { name: string; value: number }[];
   supplierReliability: { name: string; value: number }[];
