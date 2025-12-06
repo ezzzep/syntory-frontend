@@ -426,6 +426,7 @@ export default function InventoryTable({
                 <Button
                   variant="outline"
                   size="sm"
+                  className={inventoryTableStyles.button}
                   onClick={() => onDelete(item.id)}
                 >
                   <Trash2 className="w-4 h-4" />
