@@ -199,25 +199,14 @@ export const inventoryTableStyles = {
     cursor-pointer
   `,
 
-  quantityBadge: `
-    inline-flex items-center justify-center 
-    w-8 h-8 rounded-full text-xs font-bold text-white
-    transition-all duration-300
-    hover:scale-110
+  quantityNumber: `
+    text-gray-200 text-sm font-medium
   `,
 
-  quantityLow: `
-  bg-red-600/90
-  `,
-
-  quantityMedium: `
-    bg-gradient-to-br from-yellow-500 to-yellow-600 
-    shadow-yellow-500/30
-  `,
-
-  quantityHigh: `
-    bg-gradient-to-br from-blue-500 to-blue-600 
-    shadow-blue-500/30
+  quantityLowIndicator: `
+    w-2 h-2 bg-red-500 rounded-full
+    shadow-lg shadow-red-500/30 border border-red-600/50
+    animate-pulse
   `,
 
   emptyState: `

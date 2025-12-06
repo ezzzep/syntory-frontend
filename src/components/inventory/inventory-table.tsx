@@ -23,7 +23,7 @@ import {
   Inbox,
   Trash2,
 } from "lucide-react";
-import { inventoryTableStyles } from "@/styles/inventoryTable"; 
+import { inventoryTableStyles } from "@/styles/inventoryTable";
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -68,14 +68,6 @@ export default function InventoryTable({
 
     return counts;
   }, [items]);
-
-  const getQuantityClass = (quantity: number) => {
-    if (quantity < 10)
-      return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityLow}`;
-    if (quantity < 20)
-      return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityMedium}`;
-    return `${inventoryTableStyles.quantityBadge} ${inventoryTableStyles.quantityHigh}`;
-  };
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -191,8 +183,9 @@ export default function InventoryTable({
                 <div className={inventoryTableStyles.tabIndicator}></div>
               )}
               {lowItemCount > 0 && (
-                <div className={inventoryTableStyles.lowQuantityIndicator}>
-                </div>
+                <div
+                  className={inventoryTableStyles.lowQuantityIndicator}
+                ></div>
               )}
             </button>
           );
@@ -312,9 +305,16 @@ export default function InventoryTable({
                   </TableCell>
 
                   <TableCell className={inventoryTableStyles.tableCell}>
-                    <span className={getQuantityClass(item.quantity)}>
-                      {item.quantity}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={inventoryTableStyles.quantityNumber}>
+                        {item.quantity}
+                      </span>
+                      {item.quantity < 10 && (
+                        <div
+                          className={inventoryTableStyles.quantityLowIndicator}
+                        ></div>
+                      )}
+                    </div>
                   </TableCell>
 
                   <TableCell
@@ -383,9 +383,16 @@ export default function InventoryTable({
                     </span>
                   </ItemDetails>
                 </div>
-                <span className={getQuantityClass(item.quantity)}>
-                  {item.quantity}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={inventoryTableStyles.quantityNumber}>
+                    {item.quantity}
+                  </span>
+                  {item.quantity < 10 && (
+                    <div
+                      className={inventoryTableStyles.quantityLowIndicator}
+                    ></div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2 mb-4">
