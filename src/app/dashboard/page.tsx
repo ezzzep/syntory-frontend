@@ -5,7 +5,7 @@ import StatsCards from "./statsCards";
 import SalesChart from "./salesChart";
 import TopListsCards from "./topListCards";
 import type { InventoryItem } from "@/types/inventory";
-import { getInventory } from "@/lib/api/inventory"; // your API function
+import { getInventory } from "@/lib/api/inventory";
 import { BouncingDots } from "@/components/bouncing-dots";
 
 export default function DashboardPage() {

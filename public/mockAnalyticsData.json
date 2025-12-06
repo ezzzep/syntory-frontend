@@ -1,0 +1,129 @@
+{
+  "abcAnalysis": [
+    { "name": "A - High Value", "value": 75 },
+    { "name": "B - Medium Value", "value": 18 },
+    { "name": "C - Low Value", "value": 7 }
+  ],
+  "supplierReliability": [
+    { "name": "Delivery Accuracy", "value": 88 },
+    { "name": "Quantity Accuracy", "value": 92 },
+    { "name": "Price Stability", "value": 85 },
+    { "name": "On-time Delivery", "value": 78 }
+  ],
+  "shrinkageAndLoss": {
+    "data": [
+      { "name": "Missing", "value": 18 },
+      { "name": "Damaged", "value": 12 },
+      { "name": "Adjustments", "value": 7 }
+    ],
+    "colors": ["#ef4444", "#facc15", "#3b82f6"]
+  },
+  "monthlyTarget": {
+    "progress": 82.4,
+    "change": "+15%",
+    "earningsToday": "$4,520",
+    "description": "You earned $4,520 today, it's higher than yesterday. Keep up the good work!",
+    "target": { "value": "$25K", "trend": "↓" },
+    "revenue": { "value": "$28K", "trend": "↑" },
+    "todayValue": { "value": "$4.5K", "trend": "↑" }
+  },
+  "recentOrders": [
+    {
+      "product": "Bulk Toner Cartridges",
+      "category": "Supplies",
+      "country": "🇺🇸",
+      "cr": "PO-48291",
+      "value": "$8,250"
+    },
+    {
+      "product": "Ergonomic Office Chairs",
+      "category": "Furniture",
+      "country": "🇨🇦",
+      "cr": "PO-48292",
+      "value": "$12,100"
+    },
+    {
+      "product": "Warehouse Safety Gloves",
+      "category": "Safety",
+      "country": "🇩🇪",
+      "cr": "PO-48293",
+      "value": "$1,850"
+    },
+    {
+      "product": "Industrial Shelving Unit",
+      "category": "Furniture",
+      "country": "🇬🇧",
+      "cr": "PO-48294",
+      "value": "$4,521"
+    },
+    {
+      "product": "LED Warehouse Lights",
+      "category": "Electronics",
+      "country": "🇫🇷",
+      "cr": "PO-48295",
+      "value": "$7,523"
+    }
+  ],
+  "recentActivityFeed": [
+    {
+      "id": 1,
+      "type": "order",
+      "icon": "📦",
+      "title": "New Bulk Order Received",
+      "description": "Order #PO-48295 for LED Warehouse Lights has been placed.",
+      "time": "Just now",
+      "color": "bg-blue-500/20",
+      "iconColor": "text-blue-400"
+    },
+    {
+      "id": 2,
+      "type": "delivery",
+      "icon": "🚚",
+      "title": "Shipment Arrived",
+      "description": "Shipment from 'Global Imports Inc.' has been received at dock B.",
+      "time": "15 min ago",
+      "color": "bg-green-500/20",
+      "iconColor": "text-green-400"
+    },
+    {
+      "id": 3,
+      "type": "alert",
+      "icon": "⚠️",
+      "title": "Critical Stock Alert",
+      "description": "Product 'Safety Gloves' is critically low on inventory.",
+      "time": "1 hour ago",
+      "color": "bg-yellow-500/20",
+      "iconColor": "text-yellow-400"
+    },
+    {
+      "id": 4,
+      "type": "return",
+      "icon": "↩️",
+      "title": "Return Processed",
+      "description": "Return request #R-1123 for Office Chairs has been approved.",
+      "time": "3 hours ago",
+      "color": "bg-purple-500/20",
+      "iconColor": "text-purple-400"
+    },
+    {
+      "id": 5,
+      "type": "payment",
+      "icon": "💳",
+      "title": "Invoice Paid",
+      "description": "Payment of $12,100 received for order #PO-48292.",
+      "time": "5 hours ago",
+      "color": "bg-indigo-500/20",
+      "iconColor": "text-indigo-400"
+    },
+    {
+      "id": 6,
+      "type": "system",
+      "icon": "🔧",
+      "title": "System Update",
+      "description": "Inventory database synchronized successfully.",
+      "time": "Yesterday",
+      "color": "bg-gray-500/20",
+      "iconColor": "text-gray-400"
+    }
+  ]
+}
