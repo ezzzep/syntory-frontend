@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import type { InventoryItem } from "@/types/inventory";
 import { getInventory, deleteInventoryItem } from "@/lib/api/inventory";
 import InventoryTable from "@/components/inventory/inventory-table";
-import AddItemDialog from "@/components/inventory/add-item-dialog";
 import { BouncingDots } from "@/components/bouncing-dots";
 
 export default function InventoryPage() {
@@ -49,8 +48,6 @@ export default function InventoryPage() {
           </h1>
           <div className="h-1 w-24 sm:w-32 bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 mt-3 sm:mt-4 rounded-full"></div>
         </div>
-
-        <AddItemDialog onAdd={handleAdd} />
       </div>
 
       <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 hover:shadow-2xl transition-all duration-300">
@@ -58,6 +55,7 @@ export default function InventoryPage() {
           items={items}
           onDelete={handleDelete}
           onUpdate={handleUpdate}
+          onAdd={handleAdd}
         />
       </div>
     </div>

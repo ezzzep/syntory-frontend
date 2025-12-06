@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EditItemDialog from "./edit-item-dialog";
+import AddItemDialog from "./add-item-dialog";
 import ItemDetails from "./item-details";
 import {
   Search,
@@ -28,12 +29,14 @@ interface InventoryTableProps {
   items: InventoryItem[];
   onDelete: (id: number) => void;
   onUpdate: (updatedItem: InventoryItem) => void;
+  onAdd: (item: InventoryItem) => void;
 }
 
 export default function InventoryTable({
   items,
   onDelete,
   onUpdate,
+  onAdd,
 }: InventoryTableProps) {
   const categories = [
     { name: "Appliances", icon: Package, color: "from-blue-500 to-cyan-500" },
@@ -98,15 +101,18 @@ export default function InventoryTable({
   return (
     <div className={inventoryTableStyles.wrapper}>
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className={inventoryTableStyles.searchContainer}>
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={inventoryTableStyles.searchInput}
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className={inventoryTableStyles.searchContainer}>
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search items..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={inventoryTableStyles.searchInput}
+            />
+          </div>
+          <AddItemDialog onAdd={onAdd} />
         </div>
 
         {selectedItems.length > 0 && (
@@ -124,7 +130,7 @@ export default function InventoryTable({
                 setSelectedItems([]);
               }}
             >
-              <Trash2 className="w-4 h-4" />
+              Delete
             </Button>
           </div>
         )}
