@@ -2,7 +2,7 @@
 
 import { ReactNode, useCallback, useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
-import { Button } from "@/components/button-1";
+import { Button } from "@/components/ui/button-1";
 
 type ToastType = "message" | "success" | "warning" | "error";
 type ToastPosition =

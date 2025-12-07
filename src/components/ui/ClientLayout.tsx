@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/navbar";
-import { Sidebar } from "@/components/modern-side-bar";
+import Navbar from "@/components/ui/navbar";
+import { Sidebar } from "@/components/ui/modern-side-bar";
 import { BouncingDots } from "./bouncing-dots";
 import { usePathname } from "next/navigation";
 

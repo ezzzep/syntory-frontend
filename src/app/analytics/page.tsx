@@ -8,7 +8,7 @@ import SupplierReliabilityChart from "@/styles/analytics/supplierReliabilityChar
 import MonthlyTargetCard from "@/styles/analytics/monthlyTargetCard";
 import RecentOrdersTable from "@/styles/analytics/recentOrdersTable";
 import RecentActivityFeed from "@/styles/analytics/recentActivityFeed";
-import { BouncingDots } from "@/components/bouncing-dots";
+import { BouncingDots } from "@/components/ui/bouncing-dots";
 
 type AnalyticsData = {
   seasonalDemand: {

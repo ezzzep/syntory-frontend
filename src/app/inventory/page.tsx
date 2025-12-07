@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { InventoryItem } from "@/types/inventory";
 import { getInventory, deleteInventoryItem } from "@/lib/api/inventory";
 import InventoryTable from "@/components/inventory/inventory-table";
-import { BouncingDots } from "@/components/bouncing-dots";
+import { BouncingDots } from "@/components/ui/bouncing-dots";
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);

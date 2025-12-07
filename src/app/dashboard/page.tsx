@@ -6,7 +6,7 @@ import SalesChart from "../../components/dashboard/salesChart";
 import TopListsCards from "../../components/dashboard/topListCards";
 import type { InventoryItem } from "@/types/inventory";
 import { getInventory } from "@/lib/api/inventory";
-import { BouncingDots } from "@/components/bouncing-dots";
+import { BouncingDots } from "@/components/ui/bouncing-dots";
 
 export default function DashboardPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);

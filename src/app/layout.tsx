@@ -1,5 +1,5 @@
 import "./globals.css";
-import ClientLayout from "@/components/ClientLayout";
+import ClientLayout from "@/components/ui/ClientLayout";
 
 export default function RootLayout({
   children,

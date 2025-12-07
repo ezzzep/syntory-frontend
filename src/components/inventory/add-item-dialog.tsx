@@ -4,7 +4,7 @@ import { useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToasts } from "@/components/toast";
+import { useToasts } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,

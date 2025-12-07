@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import Cookies from "js-cookie";
-import { useToasts } from "@/components/toast";
+import { useToasts } from "@/components/ui/toast";
 import { Edit } from "lucide-react";
 
 interface EditItemDialogProps {
@@ -123,7 +123,9 @@ export default function EditItemDialog({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-blue-300">Quantity</label>
+              <label className="text-sm font-medium text-blue-300">
+                Quantity
+              </label>
               <Input
                 type="number"
                 placeholder="0"
@@ -137,7 +139,9 @@ export default function EditItemDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-blue-300">Category</label>
+            <label className="text-sm font-medium text-blue-300">
+              Category
+            </label>
             <select
               className="w-full border rounded-lg p-3 bg-gradient-to-r from-slate-700/50 to-slate-800/50 text-white border-slate-600/40 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 cursor-pointer transition-all duration-300"
               value={form.category ?? ""}
@@ -155,11 +159,15 @@ export default function EditItemDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-blue-300">Description</label>
+            <label className="text-sm font-medium text-blue-300">
+              Description
+            </label>
             <textarea
               placeholder="Item description"
               value={form.description ?? ""}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               className="w-full h-32 p-3 bg-gradient-to-r from-slate-700/50 to-slate-800/50 text-white placeholder:text-slate-400 rounded-lg border border-slate-600/40 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-300"
             />
           </div>

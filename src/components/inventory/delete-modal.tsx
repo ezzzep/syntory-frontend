@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { InventoryItem } from "@/types/inventory";
 import { Dialog, DialogContent } from "../ui/dialog";
-import { useToasts } from "@/components/toast";
+import { useToasts } from "@/components/ui/toast";
 
 interface DeleteItemModalProps {
   isOpen: boolean;
