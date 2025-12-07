@@ -32,8 +32,8 @@ export default function LoginForm() {
       notifyAuthChanged();
       router.push("/dashboard");
     } catch (err: unknown) {
-      if (err instanceof Error) alert(err.message);
-      else alert("Login failed");
+      if (err instanceof Error) setError(err.message);
+      else setError("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -48,12 +48,14 @@ export default function LoginForm() {
         mx-auto
       "
     >
-      <h2 className="text-3xl sm:text-4xl font-bold text-center text-white">
-        Login
-      </h2>
+      <div className="text-center">
+        <h2 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent p-1">
+          Login
+        </h2>
+      </div>
 
       {error && (
-        <div className="bg-red-200 text-red-800 px-4 py-3 rounded text-sm">
+        <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm backdrop-blur-sm">
           {error}
         </div>
       )}
@@ -69,6 +71,7 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={loading}
+          variant="dark"
         />
       </div>
 
@@ -83,22 +86,23 @@ export default function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={loading}
+          variant="dark"
         />
       </div>
 
       <Button
         type="submit"
         disabled={loading}
-        className="bg-blue-950 cursor-pointer w-full"
+        className="w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
       >
         {loading ? "Logging in..." : "Login"}
       </Button>
 
       <p className="text-center text-sm sm:text-base text-gray-200 mt-4">
-        Don’t have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link
           href="/auth/register"
-          className="text-white font-medium underline"
+          className="font-medium bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent hover:from-blue-300 hover:via-purple-300 hover:to-pink-300 transition-all"
         >
           Register
         </Link>

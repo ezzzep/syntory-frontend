@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/ui/navbar";
 import { Sidebar } from "@/components/ui/modern-side-bar";
 import { BouncingDots } from "./bouncing-dots";
 import { usePathname } from "next/navigation";
@@ -40,13 +39,11 @@ export default function ClientLayout({
 
   return (
     <div className="flex">
-      {showSidebar ? (
+      {showSidebar && (
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
         />
-      ) : (
-        <Navbar />
       )}
       <main
         className={`flex-1 transition-all duration-300 ${
