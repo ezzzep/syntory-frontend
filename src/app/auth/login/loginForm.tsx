@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,33 +11,79 @@ import Link from "next/link";
 export default function LoginForm() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (!email || !password) {
-      setError("Please fill in both email and password");
-      setLoading(false);
-      return;
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("loginEmail") || "";
     }
+    return "";
+  });
 
-    try {
-      await login({ email, password });
-      notifyAuthChanged();
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Login failed. Please try again.");
-    } finally {
-      setLoading(false);
+  const [password, setPassword] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("loginPassword") || "";
     }
-  }
+    return "";
+  });
+
+  const [error, setError] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("loginError") || "";
+    }
+    return "";
+  });
+
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("loginLoading") === "true";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("loginEmail", email);
+      localStorage.setItem("loginPassword", password);
+      localStorage.setItem("loginError", error);
+      localStorage.setItem("loginLoading", loading.toString());
+    }
+  }, [email, password, error, loading]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
+
+      if (!email || !password) {
+        setError("Please fill in both email and password");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await login({ email, password });
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("loginEmail");
+          localStorage.removeItem("loginPassword");
+          localStorage.removeItem("loginError");
+          localStorage.removeItem("loginLoading");
+        }
+        notifyAuthChanged();
+        router.push("/dashboard");
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError("Login failed. Please try again.");
+        setLoading(false);
+      }
+    },
+    [email, password, router]
+  );
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && loading) {
+      console.log("Login was interrupted. Please try again.");
+    }
+  }, [loading]);
 
   return (
     <form

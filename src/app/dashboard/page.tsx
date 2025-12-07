@@ -46,7 +46,6 @@ export default function DashboardPage() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
           Dashboard
         </h1>
-        <div className="h-1 w-24 sm:w-32 bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 mt-3 sm:mt-4 rounded-full"></div>
       </div>
 
       <div className="mb-8">

@@ -30,7 +30,7 @@ export default function ClientLayout({
 
   if (loading)
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-900">
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
         <BouncingDots />
       </div>
     );

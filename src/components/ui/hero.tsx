@@ -50,7 +50,7 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
       <section
         ref={ref}
         className={cn(
-          "relative z-0 flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-gray-900",
+          "relative z-0 flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950",
           className
         )}
         {...props}
@@ -94,8 +94,8 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
                 [--conic-position:from_70deg_at_center_top]
               "
             >
-              <div className="absolute w-full left-0 bg-gray-900 h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
-              <div className="absolute w-40 h-full left-0 bg-gray-900 bottom-0 z-20 mask-[linear-gradient(to_right,white,transparent)]" />
+              <div className="absolute w-full left-0  h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
+              <div className="absolute w-40 h-full left-0  bottom-0 z-20 mask-[linear-gradient(to_right,white,transparent)]" />
             </motion.div>
 
             <motion.div
@@ -114,8 +114,8 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               "
             >
               {" "}
-              <div className="absolute w-40 h-full right-0 bg-gray-900 bottom-0 z-20 mask-[linear-gradient(to_left,white,transparent)]" />
-              <div className="absolute w-full right-0 bg-gray-900 h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
+              <div className="absolute w-40 h-full right-0 bottom-0 z-20 mask-[linear-gradient(to_left,white,transparent)]" />
+              <div className="absolute w-full right-0 h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]" />
             </motion.div>
           </div>
         )}
@@ -130,7 +130,7 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
           <div className="flex flex-col items-center text-center space-y-4">
             <h1
               className={cn(
-                "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white",
+                "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white",
                 titleClassName
               )}
             >
@@ -138,13 +138,23 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
             </h1>
 
             {subtitle && (
-              <p className={cn("text-xl text-gray-300", subtitleClassName)}>
+              <p
+                className={cn(
+                  "text-lg sm:text-xl text-gray-300",
+                  subtitleClassName
+                )}
+              >
                 {subtitle}
               </p>
             )}
 
             {actions && actions.length > 0 && (
-              <div className={cn("flex gap-4 pt-8", actionsClassName)}>
+              <div
+                className={cn(
+                  "flex flex-col sm:flex-row gap-4 pt-8 w-full sm:w-auto",
+                  actionsClassName
+                )}
+              >
                 {actions.map((action, index) => {
                   const isLogin = action.label.toLowerCase() === "login";
 
@@ -152,11 +162,12 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
                     <Button
                       key={index}
                       variant={action.variant || "default"}
-                      className={
+                      className={cn(
+                        "w-full sm:w-auto",
                         isLogin
                           ? "bg-gray-900 text-white border border-white hover:bg-gray-900"
                           : "bg-white text-black border border-white hover:bg-gray-200"
-                      }
+                      )}
                       asChild
                     >
                       <Link href={action.href}>{action.label}</Link>

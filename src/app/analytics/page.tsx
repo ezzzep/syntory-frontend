@@ -73,9 +73,8 @@ export default function AnalyticsPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
-  // --- LOADING STATE ---
   if (loading)
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
@@ -83,7 +82,6 @@ export default function AnalyticsPage() {
       </div>
     );
 
-  // --- ERROR STATE ---
   if (error || !data) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
@@ -92,44 +90,28 @@ export default function AnalyticsPage() {
     );
   }
 
-  // --- SUCCESS STATE: Render UI with fetched data ---
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
-      {/* Header */}
       <div className="mb-6 sm:mb-8 md:mb-10 relative">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent pb-2">
           Analytics
         </h1>
-        <div className="h-1 w-24 sm:w-32 bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 mt-3 sm:mt-4 rounded-full"></div>
       </div>
 
-      {/* --- CARDS --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
-        {/* Overstock Risk Card */}
         <OverstockRiskCard />
-
-        {/* Shrinkage & Loss Card */}
         <ShrinkageLossCard
           data={data.shrinkageAndLoss.data}
           colors={data.shrinkageAndLoss.colors}
         />
       </div>
-
-      {/* --- CHARTS --- */}
       <SeasonalDemandChart data={data.seasonalDemand} />
 
       <SupplierReliabilityChart data={data.supplierReliability} />
-
-      {/* --- TABLES & LISTS --- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Monthly Target Card */}
         <MonthlyTargetCard data={data.monthlyTarget} />
-
-        {/* Recent Orders Table */}
         <RecentOrdersTable data={data.recentOrders} />
       </div>
-
-      {/* Recent Activity Feed */}
       <RecentActivityFeed data={data.recentActivityFeed} />
     </div>
   );
