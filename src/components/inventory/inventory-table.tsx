@@ -312,6 +312,7 @@ export default function InventoryTable({
                       {item.quantity < 10 && (
                         <div
                           className={inventoryTableStyles.quantityLowIndicator}
+                          title="Low quantity"
                         ></div>
                       )}
                     </div>
@@ -390,6 +391,7 @@ export default function InventoryTable({
                   {item.quantity < 10 && (
                     <div
                       className={inventoryTableStyles.quantityLowIndicator}
+                      title="Low quantity"
                     ></div>
                   )}
                 </div>

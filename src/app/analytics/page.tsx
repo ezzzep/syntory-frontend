@@ -8,6 +8,7 @@ import SupplierReliabilityChart from "@/styles/analytics/supplierReliabilityChar
 import MonthlyTargetCard from "@/styles/analytics/monthlyTargetCard";
 import RecentOrdersTable from "@/styles/analytics/recentOrdersTable";
 import RecentActivityFeed from "@/styles/analytics/recentActivityFeed";
+import { BouncingDots } from "@/components/bouncing-dots";
 
 type AnalyticsData = {
   seasonalDemand: {
@@ -75,13 +76,12 @@ export default function AnalyticsPage() {
   }, []); // Empty dependency array means this runs once on mount
 
   // --- LOADING STATE ---
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <p>Loading Analytics...</p>
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
+        <BouncingDots />
       </div>
     );
-  }
 
   // --- ERROR STATE ---
   if (error || !data) {

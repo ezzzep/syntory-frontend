@@ -206,7 +206,7 @@ export const inventoryTableStyles = {
   quantityLowIndicator: `
     w-2 h-2 bg-red-500 rounded-full
     shadow-lg shadow-red-500/30 border border-red-600/50
-    animate-pulse
+    animate-pulse cursor-pointer
   `,
 
   emptyState: `
