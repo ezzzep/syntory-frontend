@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import OverstockRiskCard from "@/styles/analytics/overstockRiskCard";
-import ShrinkageLossCard from "@/styles/analytics/shrinkageLossCard";
-import SeasonalDemandChart from "@/styles/analytics/seasonalDemandChart";
-import SupplierReliabilityChart from "@/styles/analytics/supplierReliabilityChart";
-import MonthlyTargetCard from "@/styles/analytics/monthlyTargetCard";
-import RecentOrdersTable from "@/styles/analytics/recentOrdersTable";
-import RecentActivityFeed from "@/styles/analytics/recentActivityFeed";
+import OverstockRiskCard from "@/components/analytics/overstockRiskCard";
+import ShrinkageLossCard from "@/components/analytics/shrinkageLossCard";
+import SeasonalDemandChart from "@/components/analytics/seasonalDemandChart";
+import SupplierReliabilityChart from "@/components/analytics/supplierReliabilityChart";
+import MonthlyTargetCard from "@/components/analytics/monthlyTargetCard";
+import RecentOrdersTable from "@/components/analytics/recentOrdersTable";
+import RecentActivityFeed from "@/components/analytics/recentActivityFeed";
 import { BouncingDots } from "@/components/ui/bouncing-dots";
 
 type AnalyticsData = {
