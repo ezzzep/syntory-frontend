@@ -34,9 +34,9 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   });
 
   const categories = [
-    "Gadgets",
-    "Home & Living",
     "Appliances",
+    "Home & Living",
+    "Gadgets",
     "Home Cleaning",
   ];
 

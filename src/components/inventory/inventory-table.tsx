@@ -14,6 +14,8 @@ import {
 import EditItemDialog from "./edit-item-dialog";
 import AddItemDialog from "./add-item-dialog";
 import ItemDetails from "./item-details";
+import DeleteItemModal from "./delete-modal";
+
 import {
   Search,
   Package,
@@ -57,6 +59,11 @@ export default function InventoryTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
+  const [itemsToDelete, setItemsToDelete] = useState<InventoryItem[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const lowQuantityCounts = useMemo(() => {
     const counts: Record<string, number> = {};
 
@@ -97,6 +104,43 @@ export default function InventoryTable({
     }
   };
 
+  const handleDeleteClick = (item: InventoryItem) => {
+    setItemToDelete(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleBulkDeleteClick = () => {
+    const selectedItemsData = items.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+    setItemsToDelete(selectedItemsData);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      if (itemsToDelete.length > 0) {
+        // Process all delete operations in parallel
+        await Promise.all(itemsToDelete.map((item) => onDelete(item.id)));
+        setSelectedItems([]);
+      } else if (itemToDelete) {
+        await onDelete(itemToDelete.id);
+      }
+
+      // Only close the modal and reset state if deletion was successful
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+      setItemsToDelete([]);
+    } catch (error) {
+      console.error("Error deleting item(s):", error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const isAllSelected =
     filteredItems.length > 0 && selectedItems.length === filteredItems.length;
   const isIndeterminate =
@@ -129,10 +173,8 @@ export default function InventoryTable({
               variant="outline"
               size="sm"
               className={inventoryTableStyles.button}
-              onClick={() => {
-                selectedItems.forEach((id) => onDelete(id));
-                setSelectedItems([]);
-              }}
+              onClick={handleBulkDeleteClick}
+              disabled={isDeleting}
             >
               Delete
             </Button>
@@ -331,7 +373,8 @@ export default function InventoryTable({
                       variant="outline"
                       size="sm"
                       className={inventoryTableStyles.button}
-                      onClick={() => onDelete(item.id)}
+                      onClick={() => handleDeleteClick(item)}
+                      disabled={isDeleting}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -429,7 +472,8 @@ export default function InventoryTable({
                   variant="outline"
                   size="sm"
                   className={inventoryTableStyles.button}
-                  onClick={() => onDelete(item.id)}
+                  onClick={() => handleDeleteClick(item)}
+                  disabled={isDeleting}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -438,6 +482,19 @@ export default function InventoryTable({
           ))
         )}
       </div>
+      <DeleteItemModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
+            setItemsToDelete([]);
+          }
+        }}
+        onConfirm={handleConfirmDelete}
+        item={itemToDelete}
+        items={itemsToDelete}
+      />
     </div>
   );
 }

@@ -20,7 +20,6 @@ export default function InventoryPage() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
     await deleteInventoryItem(id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
