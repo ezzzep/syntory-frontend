@@ -27,15 +27,16 @@ export const suppliersTableStyles = {
     flex space-x-1 sm:space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide
     -webkit-overflow-scrolling: touch
   `,
+
   tabButton: `
     relative flex-shrink-0 px-3 py-2 sm:px-4 rounded-lg transition-all duration-200 overflow-hidden
-    min-w-fit
+    min-w-fit border border-transparent
   `,
   tabActive: `
     bg-slate-800/50 text-white border border-slate-700
   `,
   tabInactive: `
-    text-gray-400 hover:text-white hover:bg-slate-800/30
+    text-gray-400 hover:text-white hover:bg-slate-800/30 border border-transparent
   `,
   tabGradient: `
     absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-200
