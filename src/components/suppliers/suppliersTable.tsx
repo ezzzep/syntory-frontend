@@ -243,11 +243,8 @@ export default function SuppliersTable({
   return (
     <div className={`${suppliersTableStyles.wrapper} px-2 sm:px-0`}>
       <div className="max-w-7xl mx-auto w-full">
-        {/* Header section with search, selected items, and add button */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Top row with search, selected items, and add button */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            {/* Left side: Search and selected items */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
               <div className="relative flex-1 w-full sm:max-w-md">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -279,12 +276,11 @@ export default function SuppliersTable({
               )}
             </div>
 
-            {/* Right side: Add button */}
+
             <AddSupplierDialog onAdd={onAdd} />
           </div>
         </div>
 
-        {/* Tabs Container - Made responsive */}
         <div className="mb-6">
           <div className="flex flex-wrap gap-2 sm:gap-3 md:flex-nowrap md:overflow-x-auto md:pb-2 md:scrollbar-hide">
             {categories.map((category) => {
@@ -349,7 +345,6 @@ export default function SuppliersTable({
           </div>
         </div>
 
-        {/* Desktop view */}
         <div className={suppliersTableStyles.desktopWrapper}>
           <div className="overflow-x-auto">
             <Table
@@ -736,7 +731,6 @@ export default function SuppliersTable({
           </div>
         </div>
 
-        {/* Mobile view */}
         <div className={suppliersTableStyles.mobileWrapper}>
           {filteredSuppliers.length === 0 ? (
             <div className={suppliersTableStyles.emptyState}>

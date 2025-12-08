@@ -1,8 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Supplier } from "@/types/supplier";
-
 
 interface DeleteSupplierModalProps {
   isOpen: boolean;
@@ -19,30 +24,30 @@ export default function DeleteSupplierModal({
   supplier,
   suppliers = [],
 }: DeleteSupplierModalProps) {
-  if (!isOpen) return null;
-
   const isBulkDelete = suppliers.length > 0;
   const targetSupplier = isBulkDelete ? null : supplier;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-xl border border-indigo-900/30 w-full max-w-md p-6">
-        <h2 className="text-xl font-bold text-white mb-4">
-          {isBulkDelete
-            ? `Delete ${suppliers.length} Suppliers?`
-            : "Delete Supplier?"}
-        </h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-slate-900 border border-indigo-900/30 text-white max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">
+            {isBulkDelete
+              ? `Delete ${suppliers.length} Suppliers?`
+              : "Delete Supplier?"}
+          </DialogTitle>
+        </DialogHeader>
 
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300">
           {isBulkDelete
             ? `Are you sure you want to delete ${suppliers.length} suppliers? This action cannot be undone.`
             : `Are you sure you want to delete ${targetSupplier?.name}? This action cannot be undone.`}
         </p>
 
         {!isBulkDelete && targetSupplier && (
-          <div className="bg-slate-800 rounded-lg p-4 mb-6">
+          <div className="bg-slate-800 rounded-lg p-4">
             <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-3">
                 {targetSupplier.name.charAt(0)}
               </div>
               <div>
@@ -58,7 +63,7 @@ export default function DeleteSupplierModal({
         )}
 
         {isBulkDelete && (
-          <div className="bg-slate-800 rounded-lg p-4 mb-6 max-h-40 overflow-y-auto">
+          <div className="bg-slate-800 rounded-lg p-4 max-h-40 overflow-y-auto">
             <p className="text-sm text-gray-300 mb-2">
               Suppliers to be deleted:
             </p>
@@ -72,21 +77,22 @@ export default function DeleteSupplierModal({
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-6">
           <Button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 transition-colors"
+            variant="outline"
+            className="flex-1 px-4 py-2 bg-transparent text-white rounded-md hover:bg-slate-400 transition-colors cursor-pointer border-slate-700"
           >
             Cancel
           </Button>
           <Button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
           >
             Delete
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
