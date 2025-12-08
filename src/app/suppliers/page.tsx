@@ -1,7 +1,80 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { type Supplier } from "@/types/supplier";
+import SuppliersTable from "@/components/suppliers/suppliersTable";
+import { BouncingDots } from "@/components/ui/bouncing-dots";
+
 export default function SuppliersPage() {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/mockSuppliersData.json")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch suppliers data");
+        }
+        return res.json();
+      })
+      .then((suppliersData: Supplier[]) => {
+        setSuppliers(suppliersData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleDelete = (id: number) => {
+    setSuppliers(suppliers.filter((supplier) => supplier.id !== id));
+  };
+
+  const handleUpdate = (updatedSupplier: Supplier) => {
+    setSuppliers(
+      suppliers.map((supplier) =>
+        supplier.id === updatedSupplier.id ? updatedSupplier : supplier
+      )
+    );
+  };
+
+  const handleAdd = (newSupplier: Supplier) => {
+    setSuppliers([...suppliers, newSupplier]);
+  };
+
+  if (loading)
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
+        <BouncingDots />
+      </div>
+    );
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <p>Error loading suppliers data: {error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans bg-gray-900">
-      <h1 className="text-white">Suppliers</h1>
+    <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
+      <div className="mb-6 sm:mb-8 md:mb-10 relative">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent pb-2">
+          Supplier Status
+        </h1>
+      </div>
+      <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 hover:shadow-2xl transition-all duration-300">
+        <SuppliersTable
+          suppliers={suppliers}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+          onAdd={handleAdd}
+        />
+      </div>
     </div>
   );
 }

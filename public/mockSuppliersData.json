@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Global Supplies Inc.",
+    "contactPerson": "John Smith",
+    "email": "john@globalsupplies.com",
+    "phone": "+1 (555) 123-4567",
+    "location": "New York, USA",
+    "category": "appliances",
+    "lastDelivery": "2024-05-15",
+    "totalOrders": 47,
+    "rating": 4.5
+  },
+  {
+    "id": 2,
+    "name": "Asia Trading Co.",
+    "contactPerson": "Mei Lin",
+    "email": "mei@asiatrading.com",
+    "phone": "+86 21 1234 5678",
+    "location": "Shanghai, China",
+    "category": "gadgets",
+    "lastDelivery": "2024-05-18",
+    "totalOrders": 32,
+    "rating": 4.2
+  },
+  {
+    "id": 3,
+    "name": "Euro Parts Ltd.",
+    "contactPerson": "Hans Mueller",
+    "email": "hans@europarts.com",
+    "phone": "+49 89 123 4567",
+    "location": "Munich, Germany",
+    "category": "appliances",
+    "lastDelivery": "2024-05-10",
+    "totalOrders": 18,
+    "rating": 3.8
+  },
+  {
+    "id": 4,
+    "name": "Local Materials Co.",
+    "contactPerson": "Sarah Johnson",
+    "email": "sarah@localmaterials.com",
+    "phone": "+1 (555) 987-6543",
+    "location": "Chicago, USA",
+    "category": "home-living",
+    "lastDelivery": "2024-05-20",
+    "totalOrders": 63,
+    "rating": 4.7
+  },
+  {
+    "id": 5,
+    "name": "South American Imports",
+    "contactPerson": "Carlos Rodriguez",
+    "email": "carlos@saimports.com",
+    "phone": "+55 11 98765 4321",
+    "location": "São Paulo, Brazil",
+    "category": "home-cleaning",
+    "lastDelivery": "2024-04-22",
+    "totalOrders": 25,
+    "rating": 3.5
+  },
+  {
+    "id": 6,
+    "name": "jordan",
+    "contactPerson": "Carlos Rodriguez",
+    "email": "carlos@saimports.com",
+    "phone": "+55 11 98765 4321",
+    "location": "São Paulo, Brazil",
+    "category": "home-cleaning",
+    "lastDelivery": "2024-04-22",
+    "totalOrders": 25,
+    "rating": 3.5
+  }
+]

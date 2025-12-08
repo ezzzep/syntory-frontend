@@ -122,20 +122,16 @@ export default function InventoryTable({
 
     try {
       if (itemsToDelete.length > 0) {
-        // Process all delete operations in parallel
         await Promise.all(itemsToDelete.map((item) => onDelete(item.id)));
         setSelectedItems([]);
       } else if (itemToDelete) {
         await onDelete(itemToDelete.id);
       }
-
-      // Only close the modal and reset state if deletion was successful
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
       setItemsToDelete([]);
     } catch (error) {
       console.error("Error deleting item(s):", error);
-      // You might want to show an error message to the user here
     } finally {
       setIsDeleting(false);
     }
