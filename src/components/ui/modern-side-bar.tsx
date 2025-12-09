@@ -89,12 +89,17 @@ export function Sidebar({
     },
   ];
 
-  const activeItem =
-    navigationItems.find((item) => {
-      if (item.href) return item.href === pathname;
-      if (item.id === "profile") return pathname.startsWith("/account");
-      return false;
-    })?.id || "dashboard";
+  const getActiveItem = () => {
+
+    if (pathname.startsWith("/suppliers")) return "supplier";
+    if (pathname.startsWith("/account")) return "profile";
+    const exactMatch = navigationItems.find((item) => item.href === pathname);
+    if (exactMatch) return exactMatch.id;
+
+    return "dashboard";
+  };
+
+  const activeItem = getActiveItem();
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startXRef.current = e.touches[0].clientX;

@@ -55,7 +55,7 @@ export default function SupplierCard({
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-3">
+            <div className="h-10 w-10 rounded-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-3">
               {supplier.name.charAt(0)}
             </div>
             <div className="min-w-0 flex-1">
@@ -69,7 +69,7 @@ export default function SupplierCard({
           </div>
         </div>
         <span
-          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(
+          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border shrink-0 ${getCategoryColor(
             supplier.category
           )}`}
         >
@@ -81,16 +81,16 @@ export default function SupplierCard({
       <div className="space-y-3 mb-4">
         <div>
           <div className="flex items-center text-sm text-gray-300 mb-1">
-            <Mail className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+            <Mail className="h-4 w-4 mr-2 text-gray-400 shrink-0" />
             <span className="truncate">{supplier.email}</span>
           </div>
           <div className="flex items-center text-sm text-gray-300">
-            <Phone className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+            <Phone className="h-4 w-4 mr-2 text-gray-400 shrink-0" />
             <span className="truncate">{supplier.phone}</span>
           </div>
         </div>
         <div className="flex items-center text-sm text-gray-300">
-          <Calendar className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+          <Calendar className="h-4 w-4 mr-2 text-gray-400 shrink-0" />
           <span>{supplier.last_delivery}</span>
         </div>
         <div className="flex items-center">

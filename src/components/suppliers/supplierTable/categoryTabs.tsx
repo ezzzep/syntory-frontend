@@ -66,7 +66,7 @@ export default function CategoryTabs({
               key={category.value}
               onClick={() => setActiveTab(category.value)}
               className={`
-                relative flex-shrink-0 px-3 py-2 sm:px-4 rounded-lg transition-all duration-200 overflow-hidden
+                relative shrink-0 px-3 py-2 sm:px-4 rounded-lg transition-all duration-200 overflow-hidden
                 min-w-fit flex items-center gap-1 sm:gap-2
                 ${
                   isActive

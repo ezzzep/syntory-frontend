@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Mail, Phone, Calendar, Trash2, Star } from "lucide-react";
+import Link from "next/link";
 import { suppliersTableStyles } from "@/styles/supplierStatus/supplierTable";
 import StarRating from "./starRating";
 
@@ -154,13 +155,13 @@ export default function SupplierTable({
                 </TableCell>
                 <TableCell className={suppliersTableStyles.tableCellName}>
                   <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-3">
-                      {supplier.name.charAt(0)}
-                    </div>
                     <div>
-                      <div className="text-sm font-medium text-white truncate block">
+                      <Link
+                        href={`/suppliers/${supplier.id}`}
+                        className="text-sm font-medium text-blue-300 hover:text-blue-400 transition-colors truncate block cursor-pointer"
+                      >
                         {supplier.name}
-                      </div>
+                      </Link>
                       <div className="text-xs text-gray-400 truncate block">
                         {supplier.contact_person}
                       </div>
