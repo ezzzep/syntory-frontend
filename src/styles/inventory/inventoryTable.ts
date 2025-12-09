@@ -138,7 +138,7 @@ export const inventoryTableStyles = {
   tabButton: `
     relative px-5 py-2.5 rounded-xl font-medium text-sm 
     transition-all duration-300 min-w-[140px] justify-center
-    cursor-pointer
+    cursor-pointer  border border-transparent
   `,
 
   tabActive: `
@@ -150,7 +150,7 @@ export const inventoryTableStyles = {
 
   tabInactive: `
     text-slate-400 hover:text-white hover:bg-slate-700/20
-    cursor-pointer
+    cursor-pointer  border border-transparent
   `,
 
   tabGradient: `

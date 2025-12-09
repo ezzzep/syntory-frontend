@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToasts } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -8,11 +10,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Supplier } from "@/types/supplier";
+import { deleteSupplier } from "@/lib/api/suppliers";
+import { Star } from "lucide-react";
 
 interface DeleteSupplierModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   supplier?: Supplier | null;
   suppliers?: Supplier[];
 }
@@ -24,19 +28,83 @@ export default function DeleteSupplierModal({
   supplier,
   suppliers = [],
 }: DeleteSupplierModalProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const toasts = useToasts();
+
   const isBulkDelete = suppliers.length > 0;
   const targetSupplier = isBulkDelete ? null : supplier;
 
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      if (isBulkDelete) {
+        // Delete multiple suppliers
+        await Promise.all(suppliers.map((s) => deleteSupplier(s.id)));
+        toasts.success(`Successfully deleted ${suppliers.length} suppliers`);
+      } else if (targetSupplier) {
+        // Delete single supplier
+        await deleteSupplier(targetSupplier.id);
+        toasts.itemDeleted(` ${targetSupplier.name} Successfully`);
+      }
+
+      // Call the parent's onConfirm if provided
+      if (onConfirm) {
+        onConfirm();
+      }
+
+      // Close the modal
+      onClose();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete supplier(s)";
+      setError(errorMessage);
+      toasts.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Function to render star rating
+  const renderRating = (rating: number) => {
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-3 w-3 ${
+              star <= rating
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-gray-600"
+            }`}
+          />
+        ))}
+        <span className="ml-1 text-xs text-gray-400">({rating})</span>
+      </div>
+    );
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-slate-900 border border-indigo-900/30 text-white max-w-md">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && !isDeleting && onClose()}
+    >
+      <DialogContent className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl text-white border border-slate-700/50 rounded-2xl shadow-2xl max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
+          <DialogTitle className="text-xl font-bold text-white">
             {isBulkDelete
               ? `Delete ${suppliers.length} Suppliers?`
               : "Delete Supplier?"}
           </DialogTitle>
         </DialogHeader>
+
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 text-red-300 px-4 py-2 rounded-md">
+            {error}
+          </div>
+        )}
 
         <p className="text-gray-300">
           {isBulkDelete
@@ -54,8 +122,8 @@ export default function DeleteSupplierModal({
                 <div className="text-sm font-medium text-white">
                   {targetSupplier.name}
                 </div>
-                <div className="text-xs text-gray-400">
-                  {targetSupplier.contactPerson}
+                <div className="flex items-center mt-1">
+                  {renderRating(targetSupplier.rating || 0)}
                 </div>
               </div>
             </div>
@@ -82,14 +150,16 @@ export default function DeleteSupplierModal({
             onClick={onClose}
             variant="outline"
             className="flex-1 px-4 py-2 bg-transparent text-white rounded-md hover:bg-slate-400 transition-colors cursor-pointer border-slate-700"
+            disabled={isDeleting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
+            disabled={isDeleting}
           >
-            Delete
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </div>
       </DialogContent>

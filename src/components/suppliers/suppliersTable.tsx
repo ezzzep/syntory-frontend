@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { type Supplier, type SupplierCategory } from "@/types/supplier"; // Import both types
+import { useState, useMemo, useCallback, useRef } from "react";
+import { type Supplier, type SupplierCategory } from "@/types/supplier";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -107,6 +107,22 @@ export default function SuppliersTable({
     communication: 0,
   });
 
+  // Store individual ratings for each supplier
+  const [supplierIndividualRatings, setSupplierIndividualRatings] = useState<
+    Record<
+      number,
+      {
+        overall: number;
+        quality: number;
+        delivery: number;
+        communication: number;
+      }
+    >
+  >({});
+
+  // Track processed suppliers to prevent duplicates
+  const processedSuppliers = useRef<Set<number>>(new Set());
+
   const filteredSuppliers = useMemo(() => {
     return suppliers.filter((supplier) => {
       const matchesCategory =
@@ -114,7 +130,7 @@ export default function SuppliersTable({
       const matchesSearch =
         searchTerm === "" ||
         supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        supplier.contactPerson
+        supplier.contact_person
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         supplier.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -122,15 +138,18 @@ export default function SuppliersTable({
     });
   }, [suppliers, activeTab, searchTerm]);
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedSuppliers(filteredSuppliers.map((supplier) => supplier.id));
-    } else {
-      setSelectedSuppliers([]);
-    }
-  };
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        setSelectedSuppliers(filteredSuppliers.map((supplier) => supplier.id));
+      } else {
+        setSelectedSuppliers([]);
+      }
+    },
+    [filteredSuppliers]
+  );
 
-  const handleSelectSupplier = (id: number, checked: boolean) => {
+  const handleSelectSupplier = useCallback((id: number, checked: boolean) => {
     if (checked) {
       setSelectedSuppliers((prev) => [...prev, id]);
     } else {
@@ -138,22 +157,22 @@ export default function SuppliersTable({
         prev.filter((supplier) => supplier !== id)
       );
     }
-  };
+  }, []);
 
-  const handleDeleteClick = (supplier: Supplier) => {
+  const handleDeleteClick = useCallback((supplier: Supplier) => {
     setSupplierToDelete(supplier);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handleBulkDeleteClick = () => {
+  const handleBulkDeleteClick = useCallback(() => {
     const selectedSuppliersData = suppliers.filter((supplier) =>
       selectedSuppliers.includes(supplier.id)
     );
     setSuppliersToDelete(selectedSuppliersData);
     setIsDeleteModalOpen(true);
-  };
+  }, [suppliers, selectedSuppliers]);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
 
     try {
@@ -173,33 +192,92 @@ export default function SuppliersTable({
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [suppliersToDelete, supplierToDelete, onDelete]);
 
-  const openRatingModal = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setIsRatingModalOpen(true);
-    setRating({
-      overall: 0,
-      quality: 0,
-      delivery: 0,
-      communication: 0,
-    });
-  };
+  const openRatingModal = useCallback(
+    (supplier: Supplier) => {
+      setSelectedSupplier(supplier);
+      setIsRatingModalOpen(true);
 
-  const closeRatingModal = () => {
+      // Get the individual ratings for this supplier, or use the overall rating as fallback
+      const individualRatings = supplierIndividualRatings[supplier.id];
+
+      if (individualRatings) {
+        setRating(individualRatings);
+      } else {
+        // If no individual ratings stored, use the overall rating for all categories
+        // Convert rating to number in case it's a string
+        const ratingValue = parseFloat(String(supplier.rating)) || 0;
+        setRating({
+          overall: ratingValue,
+          quality: ratingValue,
+          delivery: ratingValue,
+          communication: ratingValue,
+        });
+      }
+    },
+    [supplierIndividualRatings]
+  );
+
+  const closeRatingModal = useCallback(() => {
     setIsRatingModalOpen(false);
     setSelectedSupplier(null);
-  };
+  }, []);
 
-  const handleRatingChange = (category: keyof typeof rating, value: number) => {
-    setRating((prev) => ({ ...prev, [category]: value }));
-  };
+  const handleRatingChange = useCallback(
+    (category: keyof typeof rating, value: number) => {
+      setRating((prev) => ({ ...prev, [category]: value }));
+    },
+    []
+  );
 
-  const submitRating = () => {
-    console.log("Submitting rating for supplier:", selectedSupplier?.id);
-    console.log("Rating:", rating);
-    closeRatingModal();
-  };
+  const submitRating = useCallback(
+    (updatedSupplier: Supplier) => {
+      // Store the individual ratings for this supplier
+      setSupplierIndividualRatings((prev) => ({
+        ...prev,
+        [updatedSupplier.id]: rating,
+      }));
+
+      // Update the supplier with the new rating
+      onUpdate(updatedSupplier);
+      closeRatingModal();
+    },
+    [rating, onUpdate, closeRatingModal]
+  );
+
+  // Prevent duplicate suppliers from being added
+  const handleAddSupplier = useCallback(
+    (supplier: Supplier) => {
+      console.log("handleAddSupplier called with:", supplier);
+
+      // Check if we've already processed this supplier
+      if (processedSuppliers.current.has(supplier.id)) {
+        console.warn("Supplier already processed:", supplier.id);
+        return;
+      }
+
+      // Mark as processed
+      processedSuppliers.current.add(supplier.id);
+
+      console.log("Adding supplier to list:", supplier);
+
+      // Call the original onAdd function
+      onAdd(supplier);
+    },
+    [onAdd]
+  );
+
+  // Clean up processed suppliers when suppliers list changes
+  useMemo(() => {
+    const currentSupplierIds = new Set(suppliers.map((s) => s.id));
+    // Remove any processed suppliers that are no longer in the list
+    processedSuppliers.current = new Set(
+      Array.from(processedSuppliers.current).filter((id) =>
+        currentSupplierIds.has(id)
+      )
+    );
+  }, [suppliers]);
 
   const isAllSelected =
     filteredSuppliers.length > 0 &&
@@ -223,19 +301,38 @@ export default function SuppliersTable({
     }
   };
 
-  const renderStars = (rating: number) => {
+  // Updated renderStars function to support decimal ratings
+  const renderStars = (rating: number | string) => {
+    // Convert rating to number
+    const ratingValue = parseFloat(String(rating)) || 0;
+    const fullStars = Math.floor(ratingValue);
+    const hasHalfStar = ratingValue % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
     return (
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-5 w-5 ${
-              star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-400"
-            }`}
-          />
-        ))}
+      <div className="flex items-center">
+        <div className="flex space-x-1">
+          {[...Array(fullStars)].map((_, i) => (
+            <Star
+              key={`full-${i}`}
+              className="h-5 w-5 fill-yellow-400 text-yellow-400"
+            />
+          ))}
+          {hasHalfStar && (
+            <div className="relative">
+              <Star className="h-5 w-5 text-gray-400" />
+              <div className="absolute top-0 left-0 overflow-hidden w-1/2">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              </div>
+            </div>
+          )}
+          {[...Array(emptyStars)].map((_, i) => (
+            <Star key={`empty-${i}`} className="h-5 w-5 text-gray-400" />
+          ))}
+        </div>
+        <span className="ml-2 text-sm text-gray-300">
+          {ratingValue.toFixed(1)}/5
+        </span>
       </div>
     );
   };
@@ -276,8 +373,7 @@ export default function SuppliersTable({
               )}
             </div>
 
-
-            <AddSupplierDialog onAdd={onAdd} />
+            <AddSupplierDialog onAdd={handleAddSupplier} />
           </div>
         </div>
 
@@ -471,7 +567,7 @@ export default function SuppliersTable({
                               {supplier.name}
                             </div>
                             <div className="text-xs text-gray-400 truncate block">
-                              {supplier.contactPerson}
+                              {supplier.contact_person}
                             </div>
                           </div>
                         </div>
@@ -504,17 +600,12 @@ export default function SuppliersTable({
                       <TableCell className={suppliersTableStyles.tableCell}>
                         <div className="flex items-center text-sm text-gray-300">
                           <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                          {supplier.lastDelivery}
+                          {supplier.last_delivery}
                         </div>
                       </TableCell>
 
                       <TableCell className={suppliersTableStyles.tableCell}>
-                        <div className="flex items-center">
-                          {renderStars(supplier.rating)}
-                          <span className="ml-2 text-sm text-gray-300">
-                            {supplier.rating}
-                          </span>
-                        </div>
+                        {renderStars(supplier.rating)}
                       </TableCell>
 
                       <TableCell className={suppliersTableStyles.actionCell}>
@@ -665,7 +756,7 @@ export default function SuppliersTable({
                               {supplier.name}
                             </div>
                             <div className="text-xs text-gray-400 truncate block">
-                              {supplier.contactPerson}
+                              {supplier.contact_person}
                             </div>
                           </div>
                         </div>
@@ -696,12 +787,7 @@ export default function SuppliersTable({
                       </TableCell>
 
                       <TableCell className={suppliersTableStyles.tableCell}>
-                        <div className="flex items-center">
-                          {renderStars(supplier.rating)}
-                          <span className="ml-2 text-sm text-gray-300">
-                            {supplier.rating}
-                          </span>
-                        </div>
+                        {renderStars(supplier.rating)}
                       </TableCell>
 
                       <TableCell className={suppliersTableStyles.actionCell}>
@@ -785,7 +871,7 @@ export default function SuppliersTable({
                             {supplier.name}
                           </div>
                           <div className="text-xs text-gray-400 truncate">
-                            {supplier.contactPerson}
+                            {supplier.contact_person}
                           </div>
                         </div>
                       </div>
@@ -813,13 +899,10 @@ export default function SuppliersTable({
                     </div>
                     <div className="flex items-center text-sm text-gray-300">
                       <Calendar className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-                      <span>{supplier.lastDelivery}</span>
+                      <span>{supplier.last_delivery}</span>
                     </div>
                     <div className="flex items-center">
                       {renderStars(supplier.rating)}
-                      <span className="ml-2 text-sm text-gray-300">
-                        {supplier.rating}
-                      </span>
                     </div>
                   </div>
 

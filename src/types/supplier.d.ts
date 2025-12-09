@@ -7,12 +7,34 @@ export type SupplierCategory =
 export interface Supplier {
   id: number;
   name: string;
-  contactPerson: string;
+  contact_person: string;
   email: string;
   phone: string;
   location: string;
   category: SupplierCategory;
-  lastDelivery: string;
-  totalOrders: number;
+  last_delivery: string;
+  total_orders: number;
+  rating: number;
+}
+
+export interface CreateSupplier {
+  name: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  location: string;
+  category: SupplierCategory;
+  last_delivery: string;
+}
+
+export interface UpdateSupplier {
+  name: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  location: string;
+  category: SupplierCategory;
+  last_delivery: string;
+  total_orders: number;
   rating: number;
 }

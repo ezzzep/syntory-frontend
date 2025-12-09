@@ -234,7 +234,7 @@ export const useToasts = () => ({
       mountContainer();
       return toastStore.add({
         type: "message",
-        text: `${itemName} deleted`,
+        text: `${itemName} Deleted`,
         ...options,
       });
     },
