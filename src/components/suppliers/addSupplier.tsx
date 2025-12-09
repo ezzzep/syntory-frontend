@@ -15,7 +15,6 @@ import {
 import { Supplier, type SupplierCategory } from "@/types/supplier";
 import { createSupplier } from "@/lib/api/suppliers";
 
-
 interface AddSupplierDialogProps {
   onAdd: (supplier: Supplier) => void;
 }
@@ -36,6 +35,8 @@ export default function AddSupplierDialog({ onAdd }: AddSupplierDialogProps) {
     location: "",
     category: "appliances",
     last_delivery: new Date().toISOString().split("T")[0],
+    image_path: "", // Added missing property
+    image_url: "", // Added missing property
   });
 
   const categories = [
@@ -72,6 +73,8 @@ export default function AddSupplierDialog({ onAdd }: AddSupplierDialogProps) {
         location: "",
         category: "appliances",
         last_delivery: new Date().toISOString().split("T")[0],
+        image_path: "", // Added missing property to reset form
+        image_url: "", // Added missing property to reset form
       });
       setOpen(false);
     } catch (error) {

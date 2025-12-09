@@ -13,23 +13,23 @@ import {
   Mail,
   Phone,
   Package,
-  Calendar,
+  CalendarDays,
   User,
   Building,
   Edit,
   Save,
   X,
-  ArrowLeft,
   Camera,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Define the update data types for each section
 type NameUpdate = {
   name?: string;
-  image_path?: string; // Changed from image_url
+  image_path?: string;
 };
 
 type ContactUpdate = {
@@ -49,6 +49,146 @@ type DeliveryUpdate = {
 
 type UpdateData = NameUpdate | ContactUpdate | BusinessUpdate | DeliveryUpdate;
 
+interface CalendarPickerProps {
+  value: string;
+  onChange: (date: string) => void;
+  onClose: () => void;
+}
+
+const CalendarPicker: React.FC<CalendarPickerProps> = ({
+  value,
+  onChange,
+  onClose,
+}) => {
+  const [currentDate, setCurrentDate] = useState(new Date(value || new Date()));
+  const [selectedDate, setSelectedDate] = useState(
+    new Date(value || new Date())
+  );
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const daysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const firstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
+    );
+  };
+
+  const handleDateClick = (day: number) => {
+    const newDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+    setSelectedDate(newDate);
+    const dateString = newDate.toISOString().split("T")[0];
+    onChange(dateString);
+    onClose();
+  };
+
+  const renderCalendarDays = () => {
+    const days = [];
+    const totalDays = daysInMonth(currentDate);
+    const startDay = firstDayOfMonth(currentDate);
+    const today = new Date();
+
+    for (let i = 0; i < startDay; i++) {
+      days.push(<div key={`empty-${i}`} className="p-2"></div>);
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const isToday =
+        today.getDate() === day &&
+        today.getMonth() === currentDate.getMonth() &&
+        today.getFullYear() === currentDate.getFullYear();
+
+      const isSelected =
+        selectedDate.getDate() === day &&
+        selectedDate.getMonth() === currentDate.getMonth() &&
+        selectedDate.getFullYear() === currentDate.getFullYear();
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => handleDateClick(day)}
+          className={`p-2 rounded-lg transition-all duration-200 ${
+            isSelected
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : isToday
+              ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
+              : "text-gray-300 hover:bg-slate-700 hover:text-white"
+          }`}
+        >
+          {day}
+        </button>
+      );
+    }
+
+    return days;
+  };
+
+  return (
+    <div className="absolute z-50 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-4 min-w-[320px]">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={handlePrevMonth}
+          className="p-1 rounded-lg hover:bg-slate-700 text-gray-300 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <h3 className="text-white font-semibold">
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+        </h3>
+        <button
+          onClick={handleNextMonth}
+          className="p-1 rounded-lg hover:bg-slate-700 text-gray-300 hover:text-white transition-colors"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+          <div
+            key={index}
+            className="text-center text-xs text-gray-400 font-medium p-2"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
+    </div>
+  );
+};
+
 export default function SupplierDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -59,20 +199,19 @@ export default function SupplierDetailPage() {
   const [formData, setFormData] = useState<UpdateData>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [imagePath, setImagePath] = useState<string>(""); // Changed from imageUrl
+  const [imagePath, setImagePath] = useState<string>("");
+  const [showCalendar, setShowCalendar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
   const toasts = useToasts();
 
-  // Helper function to ensure full URL
   const getFullImageUrl = (path: string | null | undefined) => {
     if (!path) return "";
 
-    // If URL already starts with http, return as is
     if (path.startsWith("http")) {
       return path;
     }
 
-    // Otherwise, prepend the full URL
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
     const cleanBaseUrl = baseUrl.replace(/\/$/, "");
     const cleanPath = path.replace(/^\//, "");
@@ -86,14 +225,10 @@ export default function SupplierDetailPage() {
         if (params.id) {
           const id = Number(params.id);
           const data = await getSupplierById(id);
-          console.log("Supplier data loaded:", data);
-          console.log("Raw image_path from DB:", data.image_path);
 
           setSupplier(data);
 
-          // Ensure we have the full URL for display
           const fullImageUrl = getFullImageUrl(data.image_path);
-          console.log("Full image URL:", fullImageUrl);
           setImagePath(fullImageUrl);
         }
       } catch (err) {
@@ -106,14 +241,30 @@ export default function SupplierDetailPage() {
     fetchSupplier();
   }, [params.id]);
 
-  // Add this useEffect to set the active navigation item
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("activeNav", "suppliers");
     }
   }, [pathname]);
 
-  // Function to render star rating
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
+        setShowCalendar(false);
+      }
+    };
+
+    if (showCalendar) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCalendar]);
   const renderRating = (rating: number) => {
     return (
       <div className="flex items-center">
@@ -132,7 +283,6 @@ export default function SupplierDetailPage() {
     );
   };
 
-  // Format category for display
   const formatCategory = (category: string) => {
     return category
       .split("-")
@@ -140,15 +290,12 @@ export default function SupplierDetailPage() {
       .join(" ");
   };
 
-  // Save image path to database
   const saveImagePathToDatabase = async (url: string) => {
     if (!supplier) return;
 
     try {
-      const updatePayload = { image_path: url }; // Changed from image_url
-      console.log("Saving image path to database:", updatePayload);
+      const updatePayload = { image_path: url };
       const updatedSupplier = await updateSupplier(supplier.id, updatePayload);
-      console.log("Supplier updated with new image:", updatedSupplier);
       setSupplier(updatedSupplier);
       return updatedSupplier;
     } catch (error) {
@@ -157,36 +304,20 @@ export default function SupplierDetailPage() {
     }
   };
 
-  // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !supplier) return;
-
-    console.log("Starting image upload for file:", file.name);
     setIsUploading(true);
 
     try {
-      // Create FormData to send file
       const formData = new FormData();
       formData.append("image", file);
-
-      // Upload to your API endpoint
-      console.log("Calling upload API...");
       const result = await uploadSupplierImage(supplier.id, formData);
-      console.log("Upload response:", result);
 
       if (result && result.image_url) {
-        // Extract just the path part from the returned URL
-        // Since Laravel returns: http://domain/storage/suppliers/filename.jpg
-        // We want to save: suppliers/filename.jpg
         const pathOnly = result.image_url.replace(/.*\/storage\//, "");
         const fullImageUrl = getFullImageUrl(pathOnly);
-
-        console.log("Setting image path to:", pathOnly);
-        console.log("Full image URL:", fullImageUrl);
         setImagePath(fullImageUrl);
-
-        // Automatically save image path to database
         await saveImagePathToDatabase(pathOnly);
 
         toasts.success("Image uploaded and saved successfully");
@@ -206,20 +337,17 @@ export default function SupplierDetailPage() {
     }
   };
 
-  // Trigger file input click
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
-  // Start editing a section
   const startEditing = (section: string) => {
     if (!supplier) return;
 
-    // Set form data based on section
     if (section === "name") {
       setFormData({
         name: supplier.name,
-        image_path: imagePath || supplier.image_path || "", // Changed from image_url
+        image_path: imagePath || supplier.image_path || "",
       } as NameUpdate);
     } else if (section === "contact") {
       setFormData({
@@ -241,36 +369,30 @@ export default function SupplierDetailPage() {
     setEditSection(section);
   };
 
-  // Cancel editing
   const cancelEditing = () => {
     setEditSection(null);
     setFormData({});
-    // Reset image path to original value from database
+    setShowCalendar(false);
     if (supplier) {
       const dbImagePath = getFullImageUrl(supplier.image_path);
       setImagePath(dbImagePath);
     }
   };
 
-  // Save changes
   const saveChanges = async () => {
     if (!supplier) return;
 
     setIsSaving(true);
     try {
-      // Create the update payload with only the changed fields
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updatePayload: any = {};
 
-      // Add the fields from the current edit section
       Object.assign(updatePayload, formData);
-
-      console.log("Saving supplier with data:", updatePayload);
       const updatedSupplier = await updateSupplier(supplier.id, updatePayload);
-      console.log("Updated supplier:", updatedSupplier);
       setSupplier(updatedSupplier);
       setEditSection(null);
       setFormData({});
+      setShowCalendar(false);
       toasts.success("Supplier information updated successfully");
     } catch (err) {
       console.error("Failed to update supplier:", err);
@@ -280,14 +402,26 @@ export default function SupplierDetailPage() {
     }
   };
 
-  // Handle form input changes
   const handleInputChange = (field: string, value: string | number) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  // Navigate back to suppliers page
+  const handleDateChange = (date: string) => {
+    handleInputChange("last_delivery", date);
+  };
+
   const navigateToSuppliers = () => {
     router.push("/suppliers");
+  };
+
+  const formatDateDisplay = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
@@ -304,7 +438,6 @@ export default function SupplierDetailPage() {
           </div>
         ) : supplier ? (
           <div className="max-w-4xl mx-auto">
-            {/* Header with supplier name and avatar */}
             <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-5 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -314,14 +447,13 @@ export default function SupplierDetailPage() {
                       <img
                         src={imagePath}
                         alt={supplier.name}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover cursor-pointer"
                         onError={(e) => {
                           console.error("Image failed to load:", imagePath);
                           console.error(
                             "Supplier image_path from DB:",
                             supplier.image_path
                           );
-                          // Fallback to initial
                           if (
                             supplier.image_path &&
                             supplier.image_path !== imagePath
@@ -339,7 +471,7 @@ export default function SupplierDetailPage() {
                       />
                     ) : null}
                     {!imagePath && (
-                      <div className="h-full w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl">
+                      <div className="h-full w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl cursor-pointer">
                         {supplier.name.charAt(0)}
                       </div>
                     )}
@@ -347,7 +479,7 @@ export default function SupplierDetailPage() {
                       <button
                         onClick={triggerFileInput}
                         disabled={isUploading}
-                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity disabled:cursor-not-allowed"
+                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity disabled:cursor-not-allowed cursor-pointer"
                       >
                         {isUploading ? (
                           <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
@@ -416,9 +548,7 @@ export default function SupplierDetailPage() {
               </div>
             </div>
 
-            {/* Supplier details grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              {/* Contact Information */}
               <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-white flex items-center">
@@ -513,8 +643,6 @@ export default function SupplierDetailPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Business Information */}
               <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-white flex items-center">
@@ -580,7 +708,7 @@ export default function SupplierDetailPage() {
                           onChange={(e) =>
                             handleInputChange("category", e.target.value)
                           }
-                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded"
+                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
                         >
                           <option value="appliances">Appliances</option>
                           <option value="home-living">Home & Living</option>
@@ -604,12 +732,10 @@ export default function SupplierDetailPage() {
                 </div>
               </div>
             </div>
-
-            {/* Delivery Information - Smaller version */}
             <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-4 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-semibold text-white flex items-center">
-                  <Calendar className="mr-2 h-4 w-4 text-blue-400" />
+                  <CalendarDays className="mr-2 h-4 w-4 text-blue-400" />
                   Delivery Information
                 </h2>
                 {editSection !== "delivery" ? (
@@ -643,36 +769,47 @@ export default function SupplierDetailPage() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 text-gray-400 mr-3 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-400">Last Delivery</p>
+              <div className="flex items-start">
+                <div className="flex-1 relative" ref={calendarRef}>
+                  <p className="text-sm text-gray-400 mb-1">Last Delivery</p>
                   {editSection === "delivery" ? (
-                    <Input
-                      type="date"
-                      value={(formData as DeliveryUpdate).last_delivery || ""}
-                      onChange={(e) =>
-                        handleInputChange("last_delivery", e.target.value)
-                      }
-                      className="bg-slate-700/50 border border-slate-600/40 text-white"
-                    />
-                  ) : (
-                    <p className="text-white">
-                      {new Date(supplier.last_delivery).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
+                    <div className="max-w-xs">
+                      {" "}
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendar(!showCalendar)}
+                        className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded-lg text-left flex items-center justify-between hover:bg-slate-700 transition-colors"
+                      >
+                        <span className="truncate">
+                          {(formData as DeliveryUpdate).last_delivery
+                            ? formatDateDisplay(
+                                (formData as DeliveryUpdate).last_delivery!
+                              )
+                            : "Select date"}
+                        </span>
+                        <CalendarDays className="h-4 w-4 text-gray-400 shrink-0 ml-2" />
+                      </button>
+                      {showCalendar && (
+                        <CalendarPicker
+                          value={
+                            (formData as DeliveryUpdate).last_delivery || ""
+                          }
+                          onChange={handleDateChange}
+                          onClose={() => setShowCalendar(false)}
+                        />
                       )}
-                    </p>
+                    </div>
+                  ) : (
+                    <div className="max-w-xs">
+                      {" "}
+                      <p className="text-white truncate">
+                        {formatDateDisplay(supplier.last_delivery)}
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
-
-            {/* Navigation buttons */}
             <div className="flex justify-end gap-3">
               <Button
                 onClick={navigateToSuppliers}
