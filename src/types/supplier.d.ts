@@ -5,6 +5,7 @@ export type SupplierCategory =
   | "home-cleaning";
 
 export interface Supplier {
+  image_url: string;
   id: number;
   name: string;
   contact_person: string;

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { getSupplierById, updateSupplier } from "@/lib/api/suppliers";
 import type { Supplier } from "@/types/supplier";
@@ -16,6 +16,7 @@ import {
   Save,
   X,
   ArrowLeft,
+  Camera,
 } from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { Input } from "@/components/ui/input";
 // Define the update data types for each section
 type NameUpdate = {
   name?: string;
+  image_url?: string;
 };
 
 type ContactUpdate = {
@@ -52,6 +54,8 @@ export default function SupplierDetailPage() {
   const [editSection, setEditSection] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateData>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const toasts = useToasts();
 
   useEffect(() => {
@@ -61,6 +65,14 @@ export default function SupplierDetailPage() {
           const id = Number(params.id);
           const data = await getSupplierById(id);
           setSupplier(data);
+
+          // Check if there's a saved image in localStorage for this supplier
+          const savedImage = localStorage.getItem(`supplier_image_${id}`);
+          if (savedImage) {
+            setImageUrl(savedImage);
+          } else {
+            setImageUrl(data.image_url || "");
+          }
         }
       } catch (err) {
         console.warn("Failed to fetch supplier:", err);
@@ -113,6 +125,37 @@ export default function SupplierDetailPage() {
       .join(" ");
   };
 
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Create a FileReader to convert the image to a data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // This will be a base64 string that can be stored permanently
+        const base64String = reader.result as string;
+        setImageUrl(base64String);
+        setFormData({ ...formData, image_url: base64String });
+
+        // Store the image in localStorage for persistence
+        if (params.id) {
+          localStorage.setItem(`supplier_image_${params.id}`, base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+
+      // If not already editing the name section, start editing it
+      if (editSection !== "name") {
+        startEditing("name");
+      }
+    }
+  };
+
+  // Trigger file input click
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   // Start editing a section
   const startEditing = (section: string) => {
     if (!supplier) return;
@@ -121,6 +164,7 @@ export default function SupplierDetailPage() {
     if (section === "name") {
       setFormData({
         name: supplier.name,
+        image_url: imageUrl || supplier.image_url || "",
       } as NameUpdate);
     } else if (section === "contact") {
       setFormData({
@@ -146,6 +190,11 @@ export default function SupplierDetailPage() {
   const cancelEditing = () => {
     setEditSection(null);
     setFormData({});
+    // Reset image URL to original value
+    if (supplier) {
+      const savedImage = localStorage.getItem(`supplier_image_${supplier.id}`);
+      setImageUrl(savedImage || supplier.image_url || "");
+    }
   };
 
   // Save changes
@@ -202,9 +251,35 @@ export default function SupplierDetailPage() {
             <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-5 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="h-20 w-20 rounded-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl mr-6">
-                    {supplier.name.charAt(0)}
+                  <div className="relative h-20 w-20 rounded-full overflow-hidden mr-6">
+                    {imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imageUrl}
+                        alt={supplier.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl">
+                        {supplier.name.charAt(0)}
+                      </div>
+                    )}
+                    {editSection === "name" && (
+                      <button
+                        onClick={triggerFileInput}
+                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                      >
+                        <Camera className="h-6 w-6 text-white" />
+                      </button>
+                    )}
                   </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
                   <div>
                     {editSection === "name" ? (
                       <Input
