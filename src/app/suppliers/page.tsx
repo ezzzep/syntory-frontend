@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Supplier } from "@/types/supplier";
 import { getSuppliers, deleteSupplier } from "@/lib/api/suppliers";
-import SuppliersTable from "@/components/suppliers/suppliersTable";
+import SuppliersTable from "@/components/suppliers/supplierTable/suppliersTable";
 import { BouncingDots } from "@/components/ui/bouncing-dots";
 
 export default function SuppliersPage() {
