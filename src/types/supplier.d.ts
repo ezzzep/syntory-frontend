@@ -16,6 +16,7 @@ export interface Supplier {
   last_delivery: string;
   total_orders: number;
   rating: number;
+  image_path: string;
 }
 
 export interface CreateSupplier {

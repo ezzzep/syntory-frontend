@@ -70,23 +70,23 @@ export async function createSupplier(data: CreateSupplier): Promise<Supplier> {
   return handleResponse<Supplier>(res);
 }
 
-export async function updateSupplier(
-  id: number,
-  data: UpdateSupplier
-): Promise<Supplier> {
+export async function updateSupplier(id: number, data: Partial<Supplier>) {
   await fetchCsrf();
   const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
 
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
-    },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${id}`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   return handleResponse<Supplier>(res);
 }
@@ -106,3 +106,24 @@ export async function deleteSupplier(id: number): Promise<{ message: string }> {
 
   return handleResponse<{ message: string }>(res);
 }
+
+export async function uploadSupplierImage(id: number, formData: FormData) {
+  await fetchCsrf();
+  const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${id}/image`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+      },
+      body: formData,
+    }
+  );
+
+  return handleResponse<{ image_url: string }>(res);
+}
+

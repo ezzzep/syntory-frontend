@@ -1,7 +1,11 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
-import { getSupplierById, updateSupplier } from "@/lib/api/suppliers";
+import {
+  getSupplierById,
+  updateSupplier,
+  uploadSupplierImage,
+} from "@/lib/api/suppliers";
 import type { Supplier } from "@/types/supplier";
 import {
   Star,
@@ -25,7 +29,7 @@ import { Input } from "@/components/ui/input";
 // Define the update data types for each section
 type NameUpdate = {
   name?: string;
-  image_url?: string;
+  image_path?: string; // Changed from image_url
 };
 
 type ContactUpdate = {
@@ -48,15 +52,33 @@ type UpdateData = NameUpdate | ContactUpdate | BusinessUpdate | DeliveryUpdate;
 export default function SupplierDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const pathname = usePathname(); // Add this to get the current path
+  const pathname = usePathname();
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [loading, setLoading] = useState(true);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateData>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [imagePath, setImagePath] = useState<string>(""); // Changed from imageUrl
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toasts = useToasts();
+
+  // Helper function to ensure full URL
+  const getFullImageUrl = (path: string | null | undefined) => {
+    if (!path) return "";
+
+    // If URL already starts with http, return as is
+    if (path.startsWith("http")) {
+      return path;
+    }
+
+    // Otherwise, prepend the full URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+    const cleanPath = path.replace(/^\//, "");
+
+    return `${cleanBaseUrl}/storage/${cleanPath}`;
+  };
 
   useEffect(() => {
     const fetchSupplier = async () => {
@@ -64,15 +86,15 @@ export default function SupplierDetailPage() {
         if (params.id) {
           const id = Number(params.id);
           const data = await getSupplierById(id);
+          console.log("Supplier data loaded:", data);
+          console.log("Raw image_path from DB:", data.image_path);
+
           setSupplier(data);
 
-          // Check if there's a saved image in localStorage for this supplier
-          const savedImage = localStorage.getItem(`supplier_image_${id}`);
-          if (savedImage) {
-            setImageUrl(savedImage);
-          } else {
-            setImageUrl(data.image_url || "");
-          }
+          // Ensure we have the full URL for display
+          const fullImageUrl = getFullImageUrl(data.image_path);
+          console.log("Full image URL:", fullImageUrl);
+          setImagePath(fullImageUrl);
         }
       } catch (err) {
         console.warn("Failed to fetch supplier:", err);
@@ -86,15 +108,8 @@ export default function SupplierDetailPage() {
 
   // Add this useEffect to set the active navigation item
   useEffect(() => {
-    // This will be used by the sidebar component to determine which tab is active
-    // The sidebar should check if pathname includes '/suppliers' to highlight the Suppliers tab
-    // If your sidebar uses a different method, adjust accordingly
     if (typeof window !== "undefined") {
-      // Store the current active section in localStorage or a global state
       localStorage.setItem("activeNav", "suppliers");
-
-      // If your sidebar uses a context or state management, you would update it here
-      // For example: setActiveNav('suppliers');
     }
   }, [pathname]);
 
@@ -125,29 +140,69 @@ export default function SupplierDetailPage() {
       .join(" ");
   };
 
+  // Save image path to database
+  const saveImagePathToDatabase = async (url: string) => {
+    if (!supplier) return;
+
+    try {
+      const updatePayload = { image_path: url }; // Changed from image_url
+      console.log("Saving image path to database:", updatePayload);
+      const updatedSupplier = await updateSupplier(supplier.id, updatePayload);
+      console.log("Supplier updated with new image:", updatedSupplier);
+      setSupplier(updatedSupplier);
+      return updatedSupplier;
+    } catch (error) {
+      console.error("Failed to save image path:", error);
+      throw error;
+    }
+  };
+
   // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Create a FileReader to convert the image to a data URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // This will be a base64 string that can be stored permanently
-        const base64String = reader.result as string;
-        setImageUrl(base64String);
-        setFormData({ ...formData, image_url: base64String });
+    if (!file || !supplier) return;
 
-        // Store the image in localStorage for persistence
-        if (params.id) {
-          localStorage.setItem(`supplier_image_${params.id}`, base64String);
-        }
-      };
-      reader.readAsDataURL(file);
+    console.log("Starting image upload for file:", file.name);
+    setIsUploading(true);
 
-      // If not already editing the name section, start editing it
-      if (editSection !== "name") {
-        startEditing("name");
+    try {
+      // Create FormData to send file
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Upload to your API endpoint
+      console.log("Calling upload API...");
+      const result = await uploadSupplierImage(supplier.id, formData);
+      console.log("Upload response:", result);
+
+      if (result && result.image_url) {
+        // Extract just the path part from the returned URL
+        // Since Laravel returns: http://domain/storage/suppliers/filename.jpg
+        // We want to save: suppliers/filename.jpg
+        const pathOnly = result.image_url.replace(/.*\/storage\//, "");
+        const fullImageUrl = getFullImageUrl(pathOnly);
+
+        console.log("Setting image path to:", pathOnly);
+        console.log("Full image URL:", fullImageUrl);
+        setImagePath(fullImageUrl);
+
+        // Automatically save image path to database
+        await saveImagePathToDatabase(pathOnly);
+
+        toasts.success("Image uploaded and saved successfully");
+      } else {
+        console.error("Invalid response from server:", result);
+        throw new Error("Invalid response from server");
       }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toasts.error(
+        `Failed to upload image: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -164,7 +219,7 @@ export default function SupplierDetailPage() {
     if (section === "name") {
       setFormData({
         name: supplier.name,
-        image_url: imageUrl || supplier.image_url || "",
+        image_path: imagePath || supplier.image_path || "", // Changed from image_url
       } as NameUpdate);
     } else if (section === "contact") {
       setFormData({
@@ -190,10 +245,10 @@ export default function SupplierDetailPage() {
   const cancelEditing = () => {
     setEditSection(null);
     setFormData({});
-    // Reset image URL to original value
+    // Reset image path to original value from database
     if (supplier) {
-      const savedImage = localStorage.getItem(`supplier_image_${supplier.id}`);
-      setImageUrl(savedImage || supplier.image_url || "");
+      const dbImagePath = getFullImageUrl(supplier.image_path);
+      setImagePath(dbImagePath);
     }
   };
 
@@ -210,7 +265,9 @@ export default function SupplierDetailPage() {
       // Add the fields from the current edit section
       Object.assign(updatePayload, formData);
 
+      console.log("Saving supplier with data:", updatePayload);
       const updatedSupplier = await updateSupplier(supplier.id, updatePayload);
+      console.log("Updated supplier:", updatedSupplier);
       setSupplier(updatedSupplier);
       setEditSection(null);
       setFormData({});
@@ -252,14 +309,36 @@ export default function SupplierDetailPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="relative h-20 w-20 rounded-full overflow-hidden mr-6">
-                    {imageUrl ? (
+                    {imagePath ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={imageUrl}
+                        src={imagePath}
                         alt={supplier.name}
                         className="h-full w-full object-cover"
+                        onError={(e) => {
+                          console.error("Image failed to load:", imagePath);
+                          console.error(
+                            "Supplier image_path from DB:",
+                            supplier.image_path
+                          );
+                          // Fallback to initial
+                          if (
+                            supplier.image_path &&
+                            supplier.image_path !== imagePath
+                          ) {
+                            const fallbackUrl = getFullImageUrl(
+                              supplier.image_path
+                            );
+                            console.log("Trying fallback URL:", fallbackUrl);
+                            setImagePath(fallbackUrl);
+                          }
+                        }}
+                        onLoad={() => {
+                          console.log("Image loaded successfully:", imagePath);
+                        }}
                       />
-                    ) : (
+                    ) : null}
+                    {!imagePath && (
                       <div className="h-full w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl">
                         {supplier.name.charAt(0)}
                       </div>
@@ -267,9 +346,14 @@ export default function SupplierDetailPage() {
                     {editSection === "name" && (
                       <button
                         onClick={triggerFileInput}
-                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                        disabled={isUploading}
+                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity disabled:cursor-not-allowed"
                       >
-                        <Camera className="h-6 w-6 text-white" />
+                        {isUploading ? (
+                          <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
+                        ) : (
+                          <Camera className="h-6 w-6 text-white" />
+                        )}
                       </button>
                     )}
                   </div>
@@ -314,8 +398,8 @@ export default function SupplierDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={saveChanges}
-                      disabled={isSaving}
-                      className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
+                      disabled={isSaving || isUploading}
+                      className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="h-4 w-4" />
                     </Button>
