@@ -44,7 +44,7 @@ export default function SuppliersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 md:mb-10 pb-5">
         <div className="mb-4 sm:mb-0">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent pb-2">
-            Supplier Management
+            Supplier Status
           </h1>
         </div>
       </div>

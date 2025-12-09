@@ -100,18 +100,10 @@ export const inventoryTableStyles = {
     cursor-pointer
   `,
 
-  searchContainer: "relative flex items-center",
+  searchContainer: "relative flex-1 max-w-md",
 
   searchInput: `
-    w-full pl-12 pr-4 py-2.5
-    bg-gradient-to-r from-slate-700/50 to-slate-800/50 
-    border border-slate-600/40 
-    text-white placeholder:text-slate-400 
-    rounded-xl
-    focus:outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20
-    transition-all duration-300
-    sm:min-w-[400px]
-    md:min-w-[500px]
+   w-full pl-12 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none  focus:border-transparent
   `,
 
   selectedItemsBar: `
