@@ -100,19 +100,18 @@ export const inventoryTableStyles = {
     cursor-pointer
   `,
 
-  searchContainer: `
-    relative flex-1 max-w-md
-  `,
+  searchContainer: "relative flex items-center",
 
   searchInput: `
-    w-full pl-12 pr-4 py-3 
-    bg-gradient-to-r from-slate-800/50 to-slate-900/50 
-    border border-slate-600/40 rounded-xl 
-    text-white placeholder-slate-400 
-    focus:outline-none focus:border-blue-500/60 
-    focus:ring-2 focus:ring-blue-500/20 
-    focus:from-slate-800/60 focus:to-slate-900/60
-    transition-all duration-300 text-sm
+    w-full pl-12 pr-4 py-2.5
+    bg-gradient-to-r from-slate-700/50 to-slate-800/50 
+    border border-slate-600/40 
+    text-white placeholder:text-slate-400 
+    rounded-xl
+    focus:outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20
+    transition-all duration-300
+    sm:min-w-[400px]
+    md:min-w-[500px]
   `,
 
   selectedItemsBar: `
@@ -225,5 +224,8 @@ export const inventoryTableStyles = {
     shadow-lg shadow-red-500/30 border border-red-600/50
     z-10 animate-pulse
     cursor-pointer
+  `,
+  trashButton: `
+    bg-slate-800 hover:bg-slate-700 text-white border-slate-700 cursor-pointer hover:text-red-400
   `,
 };

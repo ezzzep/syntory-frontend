@@ -1,4 +1,3 @@
-// SearchAndActions.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ interface SearchAndActionsProps {
   selectedSuppliers: number[];
   onBulkDelete: () => void;
   isDeleting: boolean;
-  // Corrected: Use the specific Supplier type instead of any
   onAdd: (supplier: Supplier) => void;
 }
 
