@@ -1,5 +1,4 @@
 "use client";
-import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SupplierMainCard } from "@/components/suppliers/supplierId/SupplierMainCard";
 import { ContactInfoCard } from "@/components/suppliers/supplierId/ContactInfoCard";
@@ -18,38 +17,16 @@ export default function SupplierDetailPage() {
     imagePath,
     showCalendar,
     fileInputRef,
-    getFullImageUrl,
-    formatCategory,
-    formatDateDisplay,
     triggerFileInput,
     handleImageUpload,
     startEditing,
     cancelEditing,
     saveChanges,
     handleInputChange,
-    handleDateChange,
     navigateToSuppliers,
     toggleCalendar,
     closeCalendar,
   } = useSupplierLogic();
-
-  const renderRating = (rating: number) => {
-    return (
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              star <= rating
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-600"
-            }`}
-          />
-        ))}
-        <span className="ml-2 text-sm text-gray-300">({rating}/5)</span>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">

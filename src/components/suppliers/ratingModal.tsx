@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ type RatingCategory = "overall" | "quality" | "delivery" | "communication";
 interface RatingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm?: (updatedSupplier: Supplier) => void; 
+  onConfirm?: (updatedSupplier: Supplier) => void;
   supplier: Supplier | null;
   rating: {
     overall: number;
@@ -38,6 +38,12 @@ export default function RatingModal({
 }: RatingModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [internalRating, setInternalRating] = useState({
+    overall: 0,
+    quality: 0,
+    delivery: 0,
+    communication: 0,
+  });
 
   const [hoveredRatings, setHoveredRatings] = useState({
     overall: 0,
@@ -46,12 +52,47 @@ export default function RatingModal({
     communication: 0,
   });
 
+  useEffect(() => {
+    if (isOpen && supplier) {
+
+      const overallRating = Number(supplier.rating) || 0;
+      const qualityRating = Number(supplier.quality_rating) || 0;
+      const deliveryRating = Number(supplier.delivery_rating) || 0;
+      const communicationRating = Number(supplier.communication_rating) || 0;
+
+      if (qualityRating || deliveryRating || communicationRating) {
+        setInternalRating({
+          overall: overallRating,
+          quality: qualityRating,
+          delivery: deliveryRating,
+          communication: communicationRating,
+        });
+      } else {
+
+        setInternalRating({
+          overall: overallRating,
+          quality: overallRating,
+          delivery: overallRating,
+          communication: overallRating,
+        });
+      }
+
+      setHoveredRatings({
+        overall: 0,
+        quality: 0,
+        delivery: 0,
+        communication: 0,
+      });
+    }
+  }, [isOpen, supplier]);
+
   const handleStarHover = (category: RatingCategory, value: number) => {
     setHoveredRatings((prev) => ({
       ...prev,
       [category]: value,
     }));
   };
+
   const handleStarHoverLeave = (category: RatingCategory) => {
     setHoveredRatings((prev) => ({
       ...prev,
@@ -67,7 +108,6 @@ export default function RatingModal({
     const displayValue = hoveredRatings[category] || ratingValue;
     const fullStars = Math.floor(displayValue);
     const hasHalfStar = displayValue % 1 >= 0.5;
-
 
     return (
       <div className="flex items-center">
@@ -126,10 +166,21 @@ export default function RatingModal({
           })}
         </div>
         <span className="ml-2 text-sm text-gray-400">
-          {displayValue.toFixed(1)}/5
+          {Number(displayValue).toFixed(1)}/5
         </span>
       </div>
     );
+  };
+
+  const handleInternalRatingChange = (
+    category: RatingCategory,
+    value: number
+  ) => {
+    setInternalRating((prev) => ({
+      ...prev,
+      [category]: value,
+    }));
+    onRatingChange(category, value);
   };
 
   const handleSubmit = async () => {
@@ -141,10 +192,10 @@ export default function RatingModal({
     try {
       const averageRating = parseFloat(
         (
-          (rating.overall +
-            rating.quality +
-            rating.delivery +
-            rating.communication) /
+          (internalRating.overall +
+            internalRating.quality +
+            internalRating.delivery +
+            internalRating.communication) /
           4
         ).toFixed(1)
       );
@@ -152,7 +203,11 @@ export default function RatingModal({
       const updatedSupplier = {
         ...supplier,
         rating: averageRating,
+        quality_rating: internalRating.quality,
+        delivery_rating: internalRating.delivery,
+        communication_rating: internalRating.communication,
       };
+
       await updateSupplier(supplier.id, updatedSupplier);
       if (onConfirm) {
         onConfirm(updatedSupplier);
@@ -207,8 +262,8 @@ export default function RatingModal({
                     Overall Service Rating
                   </label>
                 </div>
-                {renderStars("overall", rating.overall, (value) =>
-                  onRatingChange("overall", value)
+                {renderStars("overall", internalRating.overall, (value) =>
+                  handleInternalRatingChange("overall", value)
                 )}
               </div>
 
@@ -218,8 +273,8 @@ export default function RatingModal({
                     Quality of Products
                   </label>
                 </div>
-                {renderStars("quality", rating.quality, (value) =>
-                  onRatingChange("quality", value)
+                {renderStars("quality", internalRating.quality, (value) =>
+                  handleInternalRatingChange("quality", value)
                 )}
               </div>
 
@@ -229,8 +284,8 @@ export default function RatingModal({
                     Delivery Time
                   </label>
                 </div>
-                {renderStars("delivery", rating.delivery, (value) =>
-                  onRatingChange("delivery", value)
+                {renderStars("delivery", internalRating.delivery, (value) =>
+                  handleInternalRatingChange("delivery", value)
                 )}
               </div>
 
@@ -240,8 +295,10 @@ export default function RatingModal({
                     Communication
                   </label>
                 </div>
-                {renderStars("communication", rating.communication, (value) =>
-                  onRatingChange("communication", value)
+                {renderStars(
+                  "communication",
+                  internalRating.communication,
+                  (value) => handleInternalRatingChange("communication", value)
                 )}
               </div>
             </div>

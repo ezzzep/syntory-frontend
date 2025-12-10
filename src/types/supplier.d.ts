@@ -17,6 +17,9 @@ export interface Supplier {
   total_orders: number;
   rating: number;
   image_path: string;
+  quality_rating?: number;
+  delivery_rating?: number;
+  communication_rating?: number;
 }
 
 export interface CreateSupplier {
@@ -39,4 +42,7 @@ export interface UpdateSupplier {
   last_delivery: string;
   total_orders: number;
   rating: number;
+  quality_rating?: number;
+  delivery_rating?: number;
+  communication_rating?: number;
 }
