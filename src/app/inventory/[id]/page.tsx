@@ -6,9 +6,9 @@ import {
   updateInventoryItem,
   uploadItemImage,
 } from "@/lib/api/inventory";
-import { getSuppliers } from "@/lib/api/suppliers"; // Import the suppliers API
+import { getSuppliers } from "@/lib/api/suppliers";
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
-import type { Supplier } from "@/types/supplier"; // Import the Supplier type
+import type { Supplier } from "@/types/supplier";
 import { Edit, Save, X, Camera, Tag, Package, Building } from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ type StockUpdate = {
 type DetailsUpdate = {
   category?: string;
   description?: string;
-  supplier_id?: number; // Add supplier_id to the DetailsUpdate type
 };
 
 type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
@@ -36,7 +35,7 @@ export default function InventoryItemDetails() {
   const router = useRouter();
   const pathname = usePathname();
   const [item, setItem] = useState<InventoryItem | null>(null);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]); // State for suppliers
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateData>({});
@@ -67,13 +66,26 @@ export default function InventoryItemDetails() {
     return `${cleanBaseUrl}/storage/${cleanPath}`;
   };
 
+  // Function to determine stock status based on quantity
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) {
+      return { status: "Out of Stock", color: "text-red-500" };
+    } else if (quantity < 10) {
+      return { status: "Very Low Stock", color: "text-red-400" };
+    } else if (quantity <= 20) {
+      return { status: "Low Stock", color: "text-yellow-400" };
+    } else {
+      return { status: "High Stock", color: "text-green-400" };
+    }
+  };
+
   useEffect(() => {
     const fetchItem = async () => {
       try {
         if (params.id) {
           const id = Number(params.id);
           const data = await getItemById(id);
-
+          console.log("Fetched item data:", data); // Debug log to check if supplier_id is included
           setItem(data);
 
           const fullImageUrl = getFullImageUrl(data.image_path);
@@ -120,7 +132,11 @@ export default function InventoryItemDetails() {
         image_path: url,
       } as unknown as UpdateInventoryDto;
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
-      setItem(updatedItem);
+      // Preserve supplier information when updating
+      setItem({
+        ...updatedItem,
+        supplier_name: item.supplier_name,
+      });
       return updatedItem;
     } catch (error) {
       console.error("Failed to save image path:", error);
@@ -181,7 +197,6 @@ export default function InventoryItemDetails() {
       setFormData({
         category: item.category || "",
         description: item.description || "",
-        supplier_id: item.supplier_id || 0, // Include supplier_id in the form data
       } as DetailsUpdate);
     } else if (section === "description") {
       setFormData({
@@ -211,7 +226,13 @@ export default function InventoryItemDetails() {
 
       Object.assign(updatePayload, formData);
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
-      setItem(updatedItem);
+
+      // Preserve supplier information when updating
+      setItem({
+        ...updatedItem,
+        supplier_name: item.supplier_name,
+      });
+
       setEditSection(null);
       setFormData({});
       toasts.success("Item information updated successfully");
@@ -427,43 +448,13 @@ export default function InventoryItemDetails() {
                       )}
                     </div>
                   </div>
-                  {/* Add suppliers dropdown */}
                   <div className="flex items-start">
                     <Building className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400">Supplier</p>
-                      {editSection === "details" ? (
-                        <select
-                          value={(formData as DetailsUpdate).supplier_id || 0}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "supplier_id",
-                              parseInt(e.target.value)
-                            )
-                          }
-                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
-                        >
-                          <option value={0} className="bg-slate-800">
-                            No Supplier
-                          </option>
-                          {suppliers.map((supplier) => (
-                            <option
-                              key={supplier.id}
-                              value={supplier.id}
-                              className="bg-slate-800"
-                            >
-                              {supplier.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-white">
-                          {item.supplier_id
-                            ? suppliers.find((s) => s.id === item.supplier_id)
-                                ?.name || "Unknown Supplier"
-                            : "No supplier"}
-                        </p>
-                      )}
+                      <p className="text-sm text-gray-400">Supplier Name</p>
+                      <p className="text-white">
+                        {item.supplier_name ? item.supplier_name : "No supplier"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -531,12 +522,8 @@ export default function InventoryItemDetails() {
                     <div className="h-5 w-5 mr-3 mt-0.5"></div>
                     <div className="flex-1">
                       <p className="text-sm text-gray-400">Status</p>
-                      <p
-                        className={
-                          item.quantity > 0 ? "text-green-400" : "text-red-400"
-                        }
-                      >
-                        {item.quantity > 0 ? "In Stock" : "Out of Stock"}
+                      <p className={getStockStatus(item.quantity).color}>
+                        {getStockStatus(item.quantity).status}
                       </p>
                     </div>
                   </div>

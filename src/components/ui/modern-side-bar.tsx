@@ -92,6 +92,7 @@ export function Sidebar({
   const getActiveItem = () => {
 
     if (pathname.startsWith("/suppliers")) return "supplier";
+     if (pathname.startsWith("/inventory")) return "inventory";
     if (pathname.startsWith("/account")) return "profile";
     const exactMatch = navigationItems.find((item) => item.href === pathname);
     if (exactMatch) return exactMatch.id;

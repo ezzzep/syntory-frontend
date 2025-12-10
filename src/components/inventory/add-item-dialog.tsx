@@ -32,13 +32,13 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   const [suppliersLoading, setSuppliersLoading] = useState(false);
 
   const [form, setForm] = useState<
-    CreateInventoryDto & { supplier_id?: number }
+    CreateInventoryDto & { supplier_name?: string }
   >({
     name: "",
     category: "",
     quantity: 0,
     description: "",
-    supplier_id: undefined,
+    supplier_name: "",
   });
 
   const categories = [
@@ -82,7 +82,8 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         category: "",
         quantity: 0,
         description: "",
-        supplier_id: undefined,
+  
+        supplier_name: "",
       });
 
       setOpen(false);
@@ -158,16 +159,11 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               Supplier
             </label>
             <SelectFive
-              value={form.supplier_id || ""}
-              onChange={(v) =>
-                setForm({
-                  ...form,
-                  supplier_id: v ? Number(v) : undefined,
-                })
-              }
+              value={form.supplier_name || ""}
+              onChange={(v) => setForm({ ...form, supplier_name: v || "" })}
               options={suppliers.map((s) => ({
                 label: s.name,
-                value: s.id,
+                value: s.name,
               }))}
               placeholder={
                 suppliersLoading ? "Loading suppliers..." : "Select Supplier"
