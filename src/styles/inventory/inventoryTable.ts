@@ -106,8 +106,7 @@ export const inventoryTableStyles = {
    w-full pl-12 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none  focus:border-transparent
   `,
 
-  ediItem:
-  `cursor-pointer bg-transparent hover:bg-blue-700 text-blue-400 border-blue-600 hover:border-blue-700 hover:text-blue-100
+  ediItem: `cursor-pointer bg-transparent hover:bg-blue-700 text-blue-400 border-blue-600 hover:border-blue-700 hover:text-blue-100
   `,
 
   selectedItemsBar: `
@@ -223,5 +222,21 @@ export const inventoryTableStyles = {
   `,
   trashButton: `
     bg-slate-800 hover:bg-slate-700 text-white border-slate-700 cursor-pointer hover:text-red-400
+  `,
+
+  appliancesCategory: `
+    inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border truncate bg-blue-500/20 text-blue-300 border-blue-500/30
+  `,
+
+  homeLivingCategory: `
+   inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border truncate bg-green-500/20 text-green-300 border-green-500/30
+  `,
+
+  gadgetsCategory: `
+   inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border truncate bg-purple-500/20 text-purple-300 border-purple-500/30
+  `,
+
+  homeCleaningCategory: `
+  inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border truncate bg-orange-500/20 text-orange-300 border-orange-500/30
   `,
 };

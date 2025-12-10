@@ -45,13 +45,17 @@ export default function InventoryTable({
   const [itemsToDelete, setItemsToDelete] = useState<InventoryItem[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const lowQuantityCounts = useMemo(() => {
-    return calculateLowQuantityCounts(items, CATEGORIES);
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => b.id - a.id);
   }, [items]);
 
+  const lowQuantityCounts = useMemo(() => {
+    return calculateLowQuantityCounts(sortedItems, CATEGORIES);
+  }, [sortedItems]);
+
   const filteredItems = useMemo(() => {
-    return filterItems(items, activeTab, searchTerm);
-  }, [items, activeTab, searchTerm]);
+    return filterItems(sortedItems, activeTab, searchTerm);
+  }, [sortedItems, activeTab, searchTerm]);
 
   const totalPages = useMemo(() => {
     return Math.ceil(filteredItems.length / ROWS_PER_PAGE);
@@ -91,7 +95,7 @@ export default function InventoryTable({
   };
 
   const handleBulkDeleteClick = () => {
-    const selectedItemsData = items.filter((item) =>
+    const selectedItemsData = sortedItems.filter((item) =>
       selectedItems.includes(item.id)
     );
     setItemsToDelete(selectedItemsData);
@@ -131,7 +135,7 @@ export default function InventoryTable({
     setSelectedItems([]);
   };
 
-  const allItemsCount = items.length;
+  const allItemsCount = sortedItems.length;
 
   return (
     <div className={inventoryTableStyles.wrapper}>
@@ -166,7 +170,7 @@ export default function InventoryTable({
       <CategoryTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        items={items}
+        items={sortedItems}
         lowQuantityCounts={lowQuantityCounts}
         allItemsCount={allItemsCount}
       />

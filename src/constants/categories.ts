@@ -1,4 +1,3 @@
-// constants/categories.ts
 import { Package, Home, Cpu, Sparkles } from "lucide-react";
 
 export const CATEGORIES = [

@@ -134,9 +134,26 @@ export default function DesktopTableView({
                 </TableCell>
 
                 <TableCell className={inventoryTableStyles.tableCell}>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-700/30 text-slate-300 border border-slate-600/30 truncate">
-                    {item.category ?? "-"}
-                  </span>
+                  {item.category === "Appliances" && (
+                    <span className={inventoryTableStyles.appliancesCategory}>
+                      {item.category}
+                    </span>
+                  )}
+                  {item.category === "Home & Living" && (
+                    <span className={inventoryTableStyles.homeLivingCategory}>
+                      {item.category}
+                    </span>
+                  )}
+                  {item.category === "Gadgets" && (
+                    <span className={inventoryTableStyles.gadgetsCategory}>
+                      {item.category}
+                    </span>
+                  )}
+                  {item.category === "Home Cleaning" && (
+                    <span className={inventoryTableStyles.homeCleaningCategory}>
+                      {item.category}
+                    </span>
+                  )}
                 </TableCell>
 
                 <TableCell className={inventoryTableStyles.tableCell}>
