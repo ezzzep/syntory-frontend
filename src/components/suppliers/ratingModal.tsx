@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -52,9 +53,22 @@ export default function RatingModal({
     communication: 0,
   });
 
+  const [inputErrors, setInputErrors] = useState({
+    overall: "",
+    quality: "",
+    delivery: "",
+    communication: "",
+  });
+
+  const [inputValues, setInputValues] = useState({
+    overall: "0",
+    quality: "0",
+    delivery: "0",
+    communication: "0",
+  });
+
   useEffect(() => {
     if (isOpen && supplier) {
-
       const overallRating = Number(supplier.rating) || 0;
       const qualityRating = Number(supplier.quality_rating) || 0;
       const deliveryRating = Number(supplier.delivery_rating) || 0;
@@ -67,13 +81,24 @@ export default function RatingModal({
           delivery: deliveryRating,
           communication: communicationRating,
         });
+        setInputValues({
+          overall: overallRating.toString(),
+          quality: qualityRating.toString(),
+          delivery: deliveryRating.toString(),
+          communication: communicationRating.toString(),
+        });
       } else {
-
         setInternalRating({
           overall: overallRating,
           quality: overallRating,
           delivery: overallRating,
           communication: overallRating,
+        });
+        setInputValues({
+          overall: overallRating.toString(),
+          quality: overallRating.toString(),
+          delivery: overallRating.toString(),
+          communication: overallRating.toString(),
         });
       }
 
@@ -82,6 +107,13 @@ export default function RatingModal({
         quality: 0,
         delivery: 0,
         communication: 0,
+      });
+
+      setInputErrors({
+        overall: "",
+        quality: "",
+        delivery: "",
+        communication: "",
       });
     }
   }, [isOpen, supplier]);
@@ -180,11 +212,86 @@ export default function RatingModal({
       ...prev,
       [category]: value,
     }));
+    setInputValues((prev) => ({
+      ...prev,
+      [category]: value.toString(),
+    }));
     onRatingChange(category, value);
+
+    // Clear any input error for this category
+    setInputErrors((prev) => ({
+      ...prev,
+      [category]: "",
+    }));
+  };
+
+  const handleInputChange = (category: RatingCategory, value: string) => {
+    // Update the input value immediately to allow backspace
+    setInputValues((prev) => ({
+      ...prev,
+      [category]: value,
+    }));
+
+    // Only validate if the input is not empty
+    if (value === "") {
+      setInputErrors((prev) => ({
+        ...prev,
+        [category]: "",
+      }));
+      return;
+    }
+
+    const numValue = parseFloat(value);
+
+    if (isNaN(numValue)) {
+      setInputErrors((prev) => ({
+        ...prev,
+        [category]: "Invalid number",
+      }));
+      return;
+    }
+
+    if (numValue < 0 || numValue > 5) {
+      setInputErrors((prev) => ({
+        ...prev,
+        [category]: "0-5 only",
+      }));
+      return;
+    }
+
+    // Clear any input error for this category
+    setInputErrors((prev) => ({
+      ...prev,
+      [category]: "",
+    }));
+
+    // Update rating
+    handleInternalRatingChange(category, numValue);
   };
 
   const handleSubmit = async () => {
     if (!supplier) return;
+
+    // Validate all ratings
+    let hasError = false;
+    const newInputErrors = {
+      overall: "",
+      quality: "",
+      delivery: "",
+      communication: "",
+    };
+
+    Object.entries(internalRating).forEach(([category, value]) => {
+      if (value < 0 || value > 5 || isNaN(value)) {
+        newInputErrors[category as RatingCategory] = "0-5 only";
+        hasError = true;
+      }
+    });
+
+    if (hasError) {
+      setInputErrors(newInputErrors);
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -222,6 +329,41 @@ export default function RatingModal({
     }
   };
 
+  const renderRatingInput = (category: RatingCategory, label: string) => {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-gray-300">{label}</label>
+        </div>
+        <div className="flex items-center space-x-3 pr-8">
+          <div className="flex-1">
+            {renderStars(category, internalRating[category], (value) =>
+              handleInternalRatingChange(category, value)
+            )}
+          </div>
+          <div className="w-28 relative">
+            <Input
+              type="number"
+              min="0"
+              max="5"
+              step="0.1"
+              value={inputValues[category]}
+              onChange={(e) => handleInputChange(category, e.target.value)}
+              className={`bg-slate-700/50 border ${
+                inputErrors[category] ? "border-red-500" : "border-slate-600/40"
+              } text-white text-center`}
+            />
+            {inputErrors[category] && (
+              <p className="text-xs text-red-400 mt-1 whitespace-nowrap">
+                {inputErrors[category]}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -256,51 +398,10 @@ export default function RatingModal({
             )}
 
             <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">
-                    Overall Service Rating
-                  </label>
-                </div>
-                {renderStars("overall", internalRating.overall, (value) =>
-                  handleInternalRatingChange("overall", value)
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">
-                    Quality of Products
-                  </label>
-                </div>
-                {renderStars("quality", internalRating.quality, (value) =>
-                  handleInternalRatingChange("quality", value)
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">
-                    Delivery Time
-                  </label>
-                </div>
-                {renderStars("delivery", internalRating.delivery, (value) =>
-                  handleInternalRatingChange("delivery", value)
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">
-                    Communication
-                  </label>
-                </div>
-                {renderStars(
-                  "communication",
-                  internalRating.communication,
-                  (value) => handleInternalRatingChange("communication", value)
-                )}
-              </div>
+              {renderRatingInput("overall", "Overall Service Rating")}
+              {renderRatingInput("quality", "Quality of Products")}
+              {renderRatingInput("delivery", "Delivery Time")}
+              {renderRatingInput("communication", "Communication")}
             </div>
 
             <div className="flex gap-3 mt-8">
