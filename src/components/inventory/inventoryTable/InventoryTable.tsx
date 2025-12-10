@@ -12,15 +12,7 @@ import {
   calculateLowQuantityCounts,
   filterItems,
 } from "@/utils/inventoryUtils";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import InventoryPagination from "./InventoryPagination";
 
 import SearchBar from "./SearchBar";
 import CategoryTabs from "./CategoryTabs";
@@ -218,84 +210,11 @@ export default function InventoryTable({
       />
 
       {!showAll && totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() =>
-                    currentPage > 1 && handlePageChange(currentPage - 1)
-                  }
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-
-              <PaginationItem>
-                <PaginationLink
-                  onClick={() => handlePageChange(1)}
-                  isActive={currentPage === 1}
-                  className="cursor-pointer bg-transparent hover:bg-slate-400"
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-
-              {currentPage > 3 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-
-              {currentPage !== 1 && currentPage !== totalPages && (
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => handlePageChange(currentPage)}
-                    isActive={true}
-                    className="cursor-pointer bg-transparent"
-                  >
-                    {currentPage}
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-
-              {currentPage < totalPages - 2 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-
-              {totalPages > 1 && (
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => handlePageChange(totalPages)}
-                    isActive={currentPage === totalPages}
-                    className="cursor-pointer bg-transparent hover:bg-slate-400"
-                  >
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    currentPage < totalPages &&
-                    handlePageChange(currentPage + 1)
-                  }
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+        <InventoryPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
 
       <DeleteItemModal
