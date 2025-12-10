@@ -10,6 +10,16 @@ import SearchAndActions from "./searchAndActions";
 import SupplierTable from "./supplierTable";
 import SupplierCard from "./supplierCard";
 import { Package } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SuppliersTableProps {
   suppliers: Supplier[];
@@ -17,6 +27,8 @@ interface SuppliersTableProps {
   onUpdate: (updatedSupplier: Supplier) => void;
   onAdd: (supplier: Supplier) => void;
 }
+
+const ROWS_PER_PAGE = 5;
 
 export default function SuppliersTable({
   suppliers,
@@ -27,6 +39,8 @@ export default function SuppliersTable({
   const [activeTab, setActiveTab] = useState<SupplierCategory | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(
@@ -46,7 +60,6 @@ export default function SuppliersTable({
     communication: 0,
   });
 
-  // Store individual ratings for each supplier
   const [supplierIndividualRatings, setSupplierIndividualRatings] = useState<
     Record<
       number,
@@ -59,7 +72,6 @@ export default function SuppliersTable({
     >
   >({});
 
-  // Track processed suppliers to prevent duplicates
   const processedSuppliers = useRef<Set<number>>(new Set());
 
   const filteredSuppliers = useMemo(() => {
@@ -77,15 +89,32 @@ export default function SuppliersTable({
     });
   }, [suppliers, activeTab, searchTerm]);
 
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredSuppliers.length / ROWS_PER_PAGE);
+  }, [filteredSuppliers.length]);
+
+  const paginatedSuppliers = useMemo(() => {
+    if (showAll) {
+      return filteredSuppliers;
+    }
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+    return filteredSuppliers.slice(startIndex, startIndex + ROWS_PER_PAGE);
+  }, [filteredSuppliers, currentPage, showAll]);
+
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm]);
+
   const handleSelectAll = useCallback(
     (checked: boolean) => {
       if (checked) {
-        setSelectedSuppliers(filteredSuppliers.map((supplier) => supplier.id));
+        setSelectedSuppliers(paginatedSuppliers.map((supplier) => supplier.id));
       } else {
         setSelectedSuppliers([]);
       }
     },
-    [filteredSuppliers]
+    [paginatedSuppliers]
   );
 
   const handleSelectSupplier = useCallback((id: number, checked: boolean) => {
@@ -137,15 +166,11 @@ export default function SuppliersTable({
     (supplier: Supplier) => {
       setSelectedSupplier(supplier);
       setIsRatingModalOpen(true);
-
-      // Get the individual ratings for this supplier, or use the overall rating as fallback
       const individualRatings = supplierIndividualRatings[supplier.id];
 
       if (individualRatings) {
         setRating(individualRatings);
       } else {
-        // If no individual ratings stored, use the overall rating for all categories
-        // Convert rating to number in case it's a string
         const ratingValue = parseFloat(String(supplier.rating)) || 0;
         setRating({
           overall: ratingValue,
@@ -172,45 +197,36 @@ export default function SuppliersTable({
 
   const submitRating = useCallback(
     (updatedSupplier: Supplier) => {
-      // Store the individual ratings for this supplier
       setSupplierIndividualRatings((prev) => ({
         ...prev,
         [updatedSupplier.id]: rating,
       }));
-
-      // Update the supplier with the new rating
       onUpdate(updatedSupplier);
       closeRatingModal();
     },
     [rating, onUpdate, closeRatingModal]
   );
 
-  // Prevent duplicate suppliers from being added
   const handleAddSupplier = useCallback(
     (supplier: Supplier) => {
       console.log("handleAddSupplier called with:", supplier);
 
-      // Check if we've already processed this supplier
       if (processedSuppliers.current.has(supplier.id)) {
         console.warn("Supplier already processed:", supplier.id);
         return;
       }
 
-      // Mark as processed
       processedSuppliers.current.add(supplier.id);
 
       console.log("Adding supplier to list:", supplier);
 
-      // Call the original onAdd function
       onAdd(supplier);
     },
     [onAdd]
   );
 
-  // Clean up processed suppliers when suppliers list changes
   useMemo(() => {
     const currentSupplierIds = new Set(suppliers.map((s) => s.id));
-    // Remove any processed suppliers that are no longer in the list
     processedSuppliers.current = new Set(
       Array.from(processedSuppliers.current).filter((id) =>
         currentSupplierIds.has(id)
@@ -219,11 +235,24 @@ export default function SuppliersTable({
   }, [suppliers]);
 
   const isAllSelected =
-    filteredSuppliers.length > 0 &&
-    selectedSuppliers.length === filteredSuppliers.length;
+    paginatedSuppliers.length > 0 &&
+    selectedSuppliers.length === paginatedSuppliers.length;
   const isIndeterminate =
     selectedSuppliers.length > 0 &&
-    selectedSuppliers.length < filteredSuppliers.length;
+    selectedSuppliers.length < paginatedSuppliers.length;
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    setSelectedSuppliers([]);
+  }, []);
+
+  const handleShowAllChange = useCallback((checked: boolean) => {
+    setShowAll(checked);
+    if (checked) {
+      setCurrentPage(1); 
+    }
+    setSelectedSuppliers([]);
+  }, []);
 
   return (
     <div className={`${suppliersTableStyles.wrapper} px-2 sm:px-0`}>
@@ -243,9 +272,25 @@ export default function SuppliersTable({
           suppliers={suppliers}
         />
 
+        <div className="flex justify-start mb-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-all"
+              checked={showAll}
+              onCheckedChange={handleShowAllChange}
+            />
+            <label
+              htmlFor="show-all"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Show All
+            </label>
+          </div>
+        </div>
+
         <div className={suppliersTableStyles.desktopWrapper}>
           <SupplierTable
-            suppliers={filteredSuppliers}
+            suppliers={paginatedSuppliers}
             selectedSuppliers={selectedSuppliers}
             onSelectAll={handleSelectAll}
             onSelectSupplier={handleSelectSupplier}
@@ -258,7 +303,7 @@ export default function SuppliersTable({
         </div>
 
         <div className={suppliersTableStyles.mobileWrapper}>
-          {filteredSuppliers.length === 0 ? (
+          {paginatedSuppliers.length === 0 ? (
             <div className={suppliersTableStyles.emptyState}>
               <Package className={suppliersTableStyles.emptyStateIcon} />
               <p className="text-base font-medium mb-2">
@@ -276,7 +321,7 @@ export default function SuppliersTable({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredSuppliers.map((supplier) => (
+              {paginatedSuppliers.map((supplier) => (
                 <SupplierCard
                   key={supplier.id}
                   supplier={supplier}
@@ -290,6 +335,87 @@ export default function SuppliersTable({
             </div>
           )}
         </div>
+
+        {!showAll && totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() =>
+                      currentPage > 1 && handlePageChange(currentPage - 1)
+                    }
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50 "
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={() => handlePageChange(1)}
+                    isActive={currentPage === 1}
+                    className="cursor-pointer bg-transparent hover:bg-slate-400"
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+
+                {currentPage > 3 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+
+                {currentPage !== 1 && currentPage !== totalPages && (
+                  <PaginationItem>
+                    <PaginationLink
+                      onClick={() => handlePageChange(currentPage)}
+                      isActive={true}
+                      className="cursor-pointer bg-slate-700"
+                    >
+                      {currentPage}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+
+                {currentPage < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+
+                {totalPages > 1 && (
+                  <PaginationItem>
+                    <PaginationLink
+                      onClick={() => handlePageChange(totalPages)}
+                      isActive={currentPage === totalPages}
+                      className="cursor-pointer bg-transparent hover:bg-slate-400"
+                    >
+                      {totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      currentPage < totalPages &&
+                      handlePageChange(currentPage + 1)
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       <DeleteSupplierModal

@@ -218,7 +218,6 @@ export default function RatingModal({
     }));
     onRatingChange(category, value);
 
-    // Clear any input error for this category
     setInputErrors((prev) => ({
       ...prev,
       [category]: "",
@@ -226,13 +225,10 @@ export default function RatingModal({
   };
 
   const handleInputChange = (category: RatingCategory, value: string) => {
-    // Update the input value immediately to allow backspace
     setInputValues((prev) => ({
       ...prev,
       [category]: value,
     }));
-
-    // Only validate if the input is not empty
     if (value === "") {
       setInputErrors((prev) => ({
         ...prev,
@@ -258,21 +254,16 @@ export default function RatingModal({
       }));
       return;
     }
-
-    // Clear any input error for this category
     setInputErrors((prev) => ({
       ...prev,
       [category]: "",
     }));
-
-    // Update rating
     handleInternalRatingChange(category, numValue);
   };
 
   const handleSubmit = async () => {
     if (!supplier) return;
 
-    // Validate all ratings
     let hasError = false;
     const newInputErrors = {
       overall: "",
