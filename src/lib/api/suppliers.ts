@@ -69,7 +69,6 @@ export async function createSupplier(data: CreateSupplier): Promise<Supplier> {
 
   return handleResponse<Supplier>(res);
 }
-
 export async function updateSupplier(id: number, data: Partial<Supplier>) {
   await fetchCsrf();
   const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";

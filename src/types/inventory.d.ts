@@ -5,6 +5,7 @@ export interface InventoryItem {
   quantity: number;
   description?: string | null;
   image_path: string;
+  supplier_id?: number | null; // <-- ADD THIS LINE
 }
 
 export interface CreateInventoryDto {
@@ -19,4 +20,5 @@ export interface UpdateInventoryDto {
   category?: string;
   quantity: number;
   description?: string;
+  supplier_id?: number; // <-- ADD THIS LINE
 }

@@ -6,8 +6,10 @@ import {
   updateInventoryItem,
   uploadItemImage,
 } from "@/lib/api/inventory";
+import { getSuppliers } from "@/lib/api/suppliers"; // Import the suppliers API
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
-import { Edit, Save, X, Camera, Tag, Package } from "lucide-react";
+import type { Supplier } from "@/types/supplier"; // Import the Supplier type
+import { Edit, Save, X, Camera, Tag, Package, Building } from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ type StockUpdate = {
 type DetailsUpdate = {
   category?: string;
   description?: string;
+  supplier_id?: number; // Add supplier_id to the DetailsUpdate type
 };
 
 type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
@@ -33,6 +36,7 @@ export default function InventoryItemDetails() {
   const router = useRouter();
   const pathname = usePathname();
   const [item, setItem] = useState<InventoryItem | null>(null);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]); // State for suppliers
   const [loading, setLoading] = useState(true);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateData>({});
@@ -82,7 +86,17 @@ export default function InventoryItemDetails() {
       }
     };
 
+    const fetchSuppliers = async () => {
+      try {
+        const suppliersData = await getSuppliers();
+        setSuppliers(suppliersData);
+      } catch (err) {
+        console.warn("Failed to fetch suppliers:", err);
+      }
+    };
+
     fetchItem();
+    fetchSuppliers();
   }, [params.id]);
 
   useEffect(() => {
@@ -167,6 +181,7 @@ export default function InventoryItemDetails() {
       setFormData({
         category: item.category || "",
         description: item.description || "",
+        supplier_id: item.supplier_id || 0, // Include supplier_id in the form data
       } as DetailsUpdate);
     } else if (section === "description") {
       setFormData({
@@ -408,6 +423,45 @@ export default function InventoryItemDetails() {
                           {item.category
                             ? formatCategory(item.category)
                             : "No category"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Add suppliers dropdown */}
+                  <div className="flex items-start">
+                    <Building className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-400">Supplier</p>
+                      {editSection === "details" ? (
+                        <select
+                          value={(formData as DetailsUpdate).supplier_id || 0}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "supplier_id",
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
+                        >
+                          <option value={0} className="bg-slate-800">
+                            No Supplier
+                          </option>
+                          {suppliers.map((supplier) => (
+                            <option
+                              key={supplier.id}
+                              value={supplier.id}
+                              className="bg-slate-800"
+                            >
+                              {supplier.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-white">
+                          {item.supplier_id
+                            ? suppliers.find((s) => s.id === item.supplier_id)
+                                ?.name || "Unknown Supplier"
+                            : "No supplier"}
                         </p>
                       )}
                     </div>

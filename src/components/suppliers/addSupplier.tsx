@@ -35,16 +35,16 @@ export default function AddSupplierDialog({ onAdd }: AddSupplierDialogProps) {
     location: "",
     category: "appliances",
     last_delivery: new Date().toISOString().split("T")[0],
-    image_path: "", // Added missing property
-    image_url: "", // Added missing property
+    image_path: "",
+    image_url: "", 
   });
 
-  const categories = [
-    { value: "appliances", label: "Appliances" },
-    { value: "home-living", label: "Home & Living" },
-    { value: "gadgets", label: "Gadgets" },
-    { value: "home-cleaning", label: "Home Cleaning" },
-  ];
+    const categories = [
+      { value: "appliances", label: "Appliances" },
+      { value: "home-living", label: "Home & Living" },
+      { value: "gadgets", label: "Gadgets" },
+      { value: "home-cleaning", label: "Home Cleaning" },
+    ];
 
   const handleSubmit = async () => {
     if (
