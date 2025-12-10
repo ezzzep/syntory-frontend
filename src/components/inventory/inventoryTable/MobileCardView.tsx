@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { inventoryTableStyles } from "@/styles/inventory/inventoryTable";
-import EditItemDialog from "../edit-item-dialog";
-import ItemDetails from "../item-details";
+import { useRouter } from "next/navigation";
 import type { InventoryItem } from "@/types/inventory";
 import EmptyState from "./EmptyState";
 
@@ -13,7 +12,7 @@ interface MobileCardViewProps {
   handleDeleteClick: (item: InventoryItem) => void;
   isDeleting: boolean;
   searchTerm: string;
-  onUpdate: (updatedItem: InventoryItem) => void; 
+  onUpdate: (updatedItem: InventoryItem) => void;
 }
 
 export default function MobileCardView({
@@ -23,12 +22,11 @@ export default function MobileCardView({
   handleDeleteClick,
   isDeleting,
   searchTerm,
-  onUpdate, 
 }: MobileCardViewProps) {
+  const router = useRouter();
   if (filteredItems.length === 0) {
     return <EmptyState searchTerm={searchTerm} />;
   }
-
   return (
     <div className="sm:hidden flex flex-col gap-4">
       {filteredItems.map((item) => (
@@ -38,6 +36,7 @@ export default function MobileCardView({
             selectedItems.includes(item.id) ? "ring-2 ring-blue-500/50" : ""
           }`}
         >
+          {/* Header with checkbox */}
           <div className="flex items-start gap-3 mb-4">
             <input
               type="checkbox"
@@ -49,54 +48,70 @@ export default function MobileCardView({
                   : ""
               }`}
             />
-            <div className="flex-1 min-w-0">
-              <ItemDetails item={item}>
-                <span className="font-medium text-white cursor-pointer hover:text-blue-300 transition-colors truncate block">
-                  {item.name}
-                </span>
-              </ItemDetails>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={inventoryTableStyles.quantityNumber}>
-                {item.quantity}
-              </span>
-              {item.quantity < 10 && (
-                <div
-                  className={inventoryTableStyles.quantityLowIndicator}
-                  title="Low quantity"
-                ></div>
-              )}
+            <div className="flex-1">
+              <div className="space-y-2">
+                <div>
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Name:{" "}
+                  </span>
+                  <span className={inventoryTableStyles.mobileValueSecondary}>
+                    {item.name ?? "-"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Quantity:{" "}
+                  </span>
+                  <span className={inventoryTableStyles.quantityNumber}>
+                    {item.quantity}
+                  </span>
+                  {item.quantity < 10 && (
+                    <div
+                      className={inventoryTableStyles.quantityLowIndicator}
+                      title="Low quantity"
+                    ></div>
+                  )}
+                </div>
+                <div>
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Category:{" "}
+                  </span>
+                  <span className={inventoryTableStyles.mobileValueSecondary}>
+                    {item.category ?? "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className={inventoryTableStyles.mobileLabel}>
+                    Description:{" "}
+                  </span>
+                  <div
+                    className={`${inventoryTableStyles.mobileValueSecondary} inline-block`}
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      wordBreak: "break-word",
+                      maxWidth: "100%",
+                    }}
+                  >
+                    {item.description ?? "-"}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="space-y-2 mb-4">
-            <div>
-              <span className={inventoryTableStyles.mobileLabel}>
-                Category:{" "}
-              </span>
-              <span className={inventoryTableStyles.mobileValueSecondary}>
-                {item.category ?? "-"}
-              </span>
-            </div>
-            <div>
-              <span className={inventoryTableStyles.mobileLabel}>
-                Description:{" "}
-              </span>
-              <span
-                className={inventoryTableStyles.mobileValueSecondary}
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                {item.description ?? "-"}
-              </span>
-            </div>
-          </div>
-
-          <div className={inventoryTableStyles.mobileActions}>
-            <EditItemDialog item={item} onUpdate={onUpdate} />
+          <div
+            className={`flex justify-end gap-2 ${inventoryTableStyles.mobileActions}`}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className={inventoryTableStyles.ediItem}
+              onClick={() => router.push(`/inventory/${item.id}`)}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
             <Button
               variant="outline"
               size="sm"

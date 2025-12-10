@@ -106,6 +106,10 @@ export const inventoryTableStyles = {
    w-full pl-12 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none  focus:border-transparent
   `,
 
+  ediItem:
+  `cursor-pointer bg-transparent hover:bg-blue-700 text-blue-400 border-blue-600 hover:border-blue-700 hover:text-blue-100
+  `,
+
   selectedItemsBar: `
     flex items-center gap-3 px-4 py-2 
     bg-gradient-to-r from-slate-700/40 to-slate-800/40 

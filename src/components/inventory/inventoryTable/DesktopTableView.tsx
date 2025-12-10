@@ -7,10 +7,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { inventoryTableStyles } from "@/styles/inventory/inventoryTable";
-import EditItemDialog from "../edit-item-dialog";
-import ItemDetails from "../item-details";
 import type { InventoryItem } from "@/types/inventory";
 import EmptyState from "./EmptyState";
 
@@ -22,7 +21,7 @@ interface DesktopTableViewProps {
   handleDeleteClick: (item: InventoryItem) => void;
   isDeleting: boolean;
   searchTerm: string;
-  onUpdate: (updatedItem: InventoryItem) => void; 
+  onUpdate: (updatedItem: InventoryItem) => void;
 }
 
 export default function DesktopTableView({
@@ -33,8 +32,9 @@ export default function DesktopTableView({
   handleDeleteClick,
   isDeleting,
   searchTerm,
-  onUpdate,
 }: DesktopTableViewProps) {
+  const router = useRouter();
+
   const isAllSelected =
     filteredItems.length > 0 && selectedItems.length === filteredItems.length;
   const isIndeterminate =
@@ -130,11 +130,7 @@ export default function DesktopTableView({
                   />
                 </TableCell>
                 <TableCell className={inventoryTableStyles.tableCellName}>
-                  <ItemDetails item={item}>
-                    <span className="cursor-pointer hover:text-blue-300 transition-colors truncate block">
-                      {item.name}
-                    </span>
-                  </ItemDetails>
+                  <span className="truncate block">{item.name}</span>
                 </TableCell>
 
                 <TableCell className={inventoryTableStyles.tableCell}>
@@ -165,7 +161,14 @@ export default function DesktopTableView({
                 </TableCell>
 
                 <TableCell className={inventoryTableStyles.actionCell}>
-                  <EditItemDialog item={item} onUpdate={onUpdate} />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={inventoryTableStyles.ediItem}
+                    onClick={() => router.push(`/inventory/${item.id}`)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

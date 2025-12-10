@@ -98,3 +98,35 @@ export async function deleteInventoryItem(
 
   return handleResponse<{ message: string }>(res);
 }
+
+export async function uploadItemImage(id:number, formData: FormData) {
+  await fetchCsrf ();
+  const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+
+  const res = await fetch (
+    `${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${id}/image`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+        
+      },
+      body: formData,
+    }
+  );
+
+  return handleResponse <{ image_url: string}>
+  (res);
+}
+
+export async function getItemById(id: number): Promise<InventoryItem> {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    cache: "no-store",
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+
+  return handleResponse<InventoryItem>(res);
+}

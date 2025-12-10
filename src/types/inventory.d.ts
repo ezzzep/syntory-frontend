@@ -4,6 +4,7 @@ export interface InventoryItem {
   category?: string | null;
   quantity: number;
   description?: string | null;
+  image_path: string;
 }
 
 export interface CreateInventoryDto {
