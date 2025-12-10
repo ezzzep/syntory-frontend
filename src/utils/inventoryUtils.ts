@@ -1,4 +1,3 @@
-// utils/inventoryUtils.ts
 import type { InventoryItem } from "@/types/inventory";
 
 export const calculateLowQuantityCounts = (
@@ -22,12 +21,14 @@ export const filterItems = (
   searchTerm: string
 ): InventoryItem[] => {
   return items.filter((item) => {
-    const matchesCategory = item.category === activeTab;
+    const matchesCategory = activeTab === "all" || item.category === activeTab;
+
     const matchesSearch =
       searchTerm === "" ||
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.description &&
         item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
     return matchesCategory && matchesSearch;
   });
 };

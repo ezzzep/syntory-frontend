@@ -1,12 +1,14 @@
 import { CATEGORIES } from "@/constants/categories";
 import { inventoryTableStyles } from "@/styles/inventory/inventoryTable";
 import type { InventoryItem } from "@/types/inventory";
+import { Grid3X3 } from "lucide-react";
 
 interface CategoryTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   items: InventoryItem[];
   lowQuantityCounts: Record<string, number>;
+  allItemsCount?: number;
 }
 
 export default function CategoryTabs({
@@ -14,16 +16,32 @@ export default function CategoryTabs({
   setActiveTab,
   items,
   lowQuantityCounts,
+  allItemsCount,
 }: CategoryTabsProps) {
+  const allCategory = {
+    name: "all",
+    icon: Grid3X3,
+    color: "from-blue-500 to-cyan-500",
+  };
+  const allCategories = [allCategory, ...CATEGORIES];
+
   return (
     <div className={inventoryTableStyles.tabsContainer}>
-      {CATEGORIES.map((category) => {
+      {allCategories.map((category) => {
         const Icon = category.icon;
         const isActive = activeTab === category.name;
-        const itemCount = items.filter(
-          (i) => i.category === category.name
-        ).length;
-        const lowItemCount = lowQuantityCounts[category.name] || 0;
+        const itemCount =
+          category.name === "all"
+            ? allItemsCount || items.length
+            : items.filter((i) => i.category === category.name).length;
+
+        const lowItemCount =
+          category.name === "all"
+            ? Object.values(lowQuantityCounts).reduce(
+                (sum, count) => sum + count,
+                0
+              )
+            : lowQuantityCounts[category.name] || 0;
 
         return (
           <button
@@ -39,11 +57,17 @@ export default function CategoryTabs({
               className={`${inventoryTableStyles.tabGradient} ${
                 isActive ? "opacity-100" : "opacity-0"
               }`}
+              style={{
+                background:
+                  isActive && category.color
+                    ? `linear-gradient(to right, ${category.color})`
+                    : "none",
+              }}
             ></div>
 
             <div className={inventoryTableStyles.tabContent}>
               <Icon className="w-4 h-4" />
-              <span>{category.name}</span>
+              <span>{category.name === "all" ? "All" : category.name}</span>
               <span
                 className={`${inventoryTableStyles.tabBadge} ${
                   isActive

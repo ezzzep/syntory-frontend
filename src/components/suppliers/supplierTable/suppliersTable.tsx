@@ -89,7 +89,6 @@ export default function SuppliersTable({
     });
   }, [suppliers, activeTab, searchTerm]);
 
-
   const totalPages = useMemo(() => {
     return Math.ceil(filteredSuppliers.length / ROWS_PER_PAGE);
   }, [filteredSuppliers.length]);
@@ -249,7 +248,7 @@ export default function SuppliersTable({
   const handleShowAllChange = useCallback((checked: boolean) => {
     setShowAll(checked);
     if (checked) {
-      setCurrentPage(1); 
+      setCurrentPage(1);
     }
     setSelectedSuppliers([]);
   }, []);
@@ -272,12 +271,13 @@ export default function SuppliersTable({
           suppliers={suppliers}
         />
 
-        <div className="flex justify-start mb-4">
+        <div className="flex justify-start mb-4 cursor-pointer">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-all"
               checked={showAll}
               onCheckedChange={handleShowAllChange}
+              className=" cursor-pointer"
             />
             <label
               htmlFor="show-all"
@@ -374,7 +374,7 @@ export default function SuppliersTable({
                     <PaginationLink
                       onClick={() => handlePageChange(currentPage)}
                       isActive={true}
-                      className="cursor-pointer bg-slate-700"
+                      className="cursor-pointer bg-transparent"
                     >
                       {currentPage}
                     </PaginationLink>

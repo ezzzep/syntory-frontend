@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import type { InventoryItem } from "@/types/inventory";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import AddItemDialog from "../add-item-dialog";
 import DeleteItemModal from "../delete-modal";
 import { inventoryTableStyles } from "@/styles/inventory/inventoryTable";
@@ -11,6 +12,15 @@ import {
   calculateLowQuantityCounts,
   filterItems,
 } from "@/utils/inventoryUtils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 import SearchBar from "./SearchBar";
 import CategoryTabs from "./CategoryTabs";
@@ -24,15 +34,19 @@ interface InventoryTableProps {
   onAdd: (item: InventoryItem) => void;
 }
 
+const ROWS_PER_PAGE = 5;
+
 export default function InventoryTable({
   items,
   onDelete,
   onUpdate,
   onAdd,
 }: InventoryTableProps) {
-  const [activeTab, setActiveTab] = useState(CATEGORIES[0].name);
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
@@ -47,9 +61,25 @@ export default function InventoryTable({
     return filterItems(items, activeTab, searchTerm);
   }, [items, activeTab, searchTerm]);
 
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredItems.length / ROWS_PER_PAGE);
+  }, [filteredItems.length]);
+
+  const paginatedItems = useMemo(() => {
+    if (showAll) {
+      return filteredItems;
+    }
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+    return filteredItems.slice(startIndex, startIndex + ROWS_PER_PAGE);
+  }, [filteredItems, currentPage, showAll]);
+
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm]);
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(filteredItems.map((item) => item.id));
+      setSelectedItems(paginatedItems.map((item) => item.id));
     } else {
       setSelectedItems([]);
     }
@@ -96,6 +126,21 @@ export default function InventoryTable({
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedItems([]);
+  };
+
+  const handleShowAllChange = (checked: boolean) => {
+    setShowAll(checked);
+    if (checked) {
+      setCurrentPage(1);
+    }
+    setSelectedItems([]);
+  };
+
+  const allItemsCount = items.length;
+
   return (
     <div className={inventoryTableStyles.wrapper}>
       <div className="flex flex-col gap-4 mb-6">
@@ -131,10 +176,28 @@ export default function InventoryTable({
         setActiveTab={setActiveTab}
         items={items}
         lowQuantityCounts={lowQuantityCounts}
+        allItemsCount={allItemsCount}
       />
 
+      <div className="flex justify-start mb-4  cursor-pointer">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="show-all-inventory"
+            checked={showAll}
+            onCheckedChange={handleShowAllChange}
+            className=" cursor-pointer"
+          />
+          <label
+            htmlFor="show-all-inventory"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            Show All
+          </label>
+        </div>
+      </div>
+
       <DesktopTableView
-        filteredItems={filteredItems}
+        filteredItems={paginatedItems}
         selectedItems={selectedItems}
         handleSelectAll={handleSelectAll}
         handleSelectItem={handleSelectItem}
@@ -145,7 +208,7 @@ export default function InventoryTable({
       />
 
       <MobileCardView
-        filteredItems={filteredItems}
+        filteredItems={paginatedItems}
         selectedItems={selectedItems}
         handleSelectItem={handleSelectItem}
         handleDeleteClick={handleDeleteClick}
@@ -153,6 +216,87 @@ export default function InventoryTable({
         searchTerm={searchTerm}
         onUpdate={onUpdate}
       />
+
+      {!showAll && totalPages > 1 && (
+        <div className="mt-6 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() =>
+                    currentPage > 1 && handlePageChange(currentPage - 1)
+                  }
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              <PaginationItem>
+                <PaginationLink
+                  onClick={() => handlePageChange(1)}
+                  isActive={currentPage === 1}
+                  className="cursor-pointer bg-transparent hover:bg-slate-400"
+                >
+                  1
+                </PaginationLink>
+              </PaginationItem>
+
+              {currentPage > 3 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+              {currentPage !== 1 && currentPage !== totalPages && (
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={() => handlePageChange(currentPage)}
+                    isActive={true}
+                    className="cursor-pointer bg-transparent"
+                  >
+                    {currentPage}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+
+              {currentPage < totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+              {totalPages > 1 && (
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={() => handlePageChange(totalPages)}
+                    isActive={currentPage === totalPages}
+                    className="cursor-pointer bg-transparent hover:bg-slate-400"
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    currentPage < totalPages &&
+                    handlePageChange(currentPage + 1)
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <DeleteItemModal
         isOpen={isDeleteModalOpen}
