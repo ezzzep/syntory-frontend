@@ -118,18 +118,17 @@ export async function logout() {
     const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
     await fetch(`${API_URL}/api/logout`, {
       method: "POST",
-      credentials: "include", 
+      credentials: "include",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
         "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
       },
     });
-
   } catch (err) {
     console.warn("Logout request failed (probably offline or 204)", err);
   } finally {
     Cookies.remove("XSRF-TOKEN");
-    notifyAuthChanged(); 
+    notifyAuthChanged();
   }
 }

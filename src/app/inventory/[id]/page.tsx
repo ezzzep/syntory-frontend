@@ -42,6 +42,13 @@ export default function InventoryItemDetails() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toasts = useToasts();
 
+  const categories = [
+    "Appliances",
+    "Home & Living",
+    "Gadgets",
+    "Home Cleaning",
+  ];
+
   const getFullImageUrl = (path: string | null | undefined) => {
     if (!path) return "";
 
@@ -95,7 +102,9 @@ export default function InventoryItemDetails() {
     if (!item) return;
 
     try {
-      const updatePayload = { image_path: url } as unknown as UpdateInventoryDto;
+      const updatePayload = {
+        image_path: url,
+      } as unknown as UpdateInventoryDto;
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
       setItem(updatedItem);
       return updatedItem;
@@ -157,6 +166,10 @@ export default function InventoryItemDetails() {
     } else if (section === "details") {
       setFormData({
         category: item.category || "",
+        description: item.description || "",
+      } as DetailsUpdate);
+    } else if (section === "description") {
+      setFormData({
         description: item.description || "",
       } as DetailsUpdate);
     }
@@ -330,6 +343,80 @@ export default function InventoryItemDetails() {
               <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-white flex items-center">
+                    <Tag className="mr-2 h-5 w-5 text-blue-400" />
+                    Item Details
+                  </h2>
+                  {editSection !== "details" ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditing("details")}
+                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={saveChanges}
+                        disabled={isSaving}
+                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={cancelEditing}
+                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Tag className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-400">Category</p>
+                      {editSection === "details" ? (
+                        <select
+                          value={(formData as DetailsUpdate).category || ""}
+                          onChange={(e) =>
+                            handleInputChange("category", e.target.value)
+                          }
+                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
+                        >
+                          <option value="" disabled className="bg-slate-800">
+                            Select Category
+                          </option>
+                          {categories.map((cat) => (
+                            <option
+                              key={cat}
+                              value={cat}
+                              className="bg-slate-800"
+                            >
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-white">
+                          {item.category
+                            ? formatCategory(item.category)
+                            : "No category"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-white flex items-center">
                     <Package className="mr-2 h-5 w-5 text-blue-400" />
                     Stock Information
                   </h2>
@@ -401,92 +488,64 @@ export default function InventoryItemDetails() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-white flex items-center">
-                    <Tag className="mr-2 h-5 w-5 text-blue-400" />
-                    Item Details
-                  </h2>
-                  {editSection !== "details" ? (
+            {/* Description section - now in its own full-width container */}
+            <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white flex items-center">
+                  <Package className="mr-2 h-5 w-5 text-blue-400" />
+                  Description
+                </h2>
+                {editSection !== "description" ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEditing("description")}
+                    className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => startEditing("details")}
-                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
+                      onClick={saveChanges}
+                      disabled={isSaving}
+                      className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Save className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={cancelEditing}
+                      className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-start">
+                <Package className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-400 mb-2">Description</p>
+                  {editSection === "description" ? (
+                    <textarea
+                      value={(formData as DetailsUpdate).description || ""}
+                      onChange={(e) =>
+                        handleInputChange("description", e.target.value)
+                      }
+                      className="w-full p-3 bg-slate-700/50 border border-slate-600/40 text-white rounded-lg min-h-[120px] text-base"
+                      placeholder="Enter item description..."
+                    />
                   ) : (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={saveChanges}
-                        disabled={isSaving}
-                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
-                      >
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={cancelEditing}
-                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <p className="text-white text-base whitespace-pre-wrap">
+                      {item.description || "No description available"}
+                    </p>
                   )}
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <Tag className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-400">Category</p>
-                      {editSection === "details" ? (
-                        <select
-                          value={(formData as DetailsUpdate).category || ""}
-                          onChange={(e) =>
-                            handleInputChange("category", e.target.value)
-                          }
-                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
-                        >
-                          <option value="electronics">Electronics</option>
-                          <option value="clothing">Clothing</option>
-                          <option value="food">Food</option>
-                          <option value="furniture">Furniture</option>
-                          <option value="toys">Toys</option>
-                        </select>
-                      ) : (
-                        <p className="text-white">
-                          {item.category
-                            ? formatCategory(item.category)
-                            : "No category"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <Package className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-400">Description</p>
-                      {editSection === "details" ? (
-                        <textarea
-                          value={(formData as DetailsUpdate).description || ""}
-                          onChange={(e) =>
-                            handleInputChange("description", e.target.value)
-                          }
-                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded"
-                          rows={3}
-                        />
-                      ) : (
-                        <p className="text-white">
-                          {item.description || "No description available"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

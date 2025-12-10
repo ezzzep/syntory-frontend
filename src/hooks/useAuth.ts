@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -25,7 +24,7 @@ export function useAuth() {
   useEffect(() => {
     fetchUser();
     const unsubscribe = subscribeToAuthChange(fetchUser);
-    return unsubscribe; 
+    return unsubscribe;
   }, []);
 
   return { user, loading, refetch: fetchUser };
