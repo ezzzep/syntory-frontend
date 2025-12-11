@@ -66,8 +66,13 @@ export default function SuppliersTable({
 
   const processedSuppliers = useRef<Set<number>>(new Set());
 
+  // Sort suppliers by ID in descending order so newest suppliers appear first
+  const sortedSuppliers = useMemo(() => {
+    return [...suppliers].sort((a, b) => b.id - a.id);
+  }, [suppliers]);
+
   const filteredSuppliers = useMemo(() => {
-    return suppliers.filter((supplier) => {
+    return sortedSuppliers.filter((supplier) => {
       const matchesCategory =
         activeTab === "all" || supplier.category === activeTab;
       const matchesSearch =
@@ -79,7 +84,7 @@ export default function SuppliersTable({
         supplier.email.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [suppliers, activeTab, searchTerm]);
+  }, [sortedSuppliers, activeTab, searchTerm]);
 
   const totalPages = useMemo(() => {
     return Math.ceil(filteredSuppliers.length / ROWS_PER_PAGE);
@@ -124,12 +129,12 @@ export default function SuppliersTable({
   }, []);
 
   const handleBulkDeleteClick = useCallback(() => {
-    const selectedSuppliersData = suppliers.filter((supplier) =>
+    const selectedSuppliersData = sortedSuppliers.filter((supplier) =>
       selectedSuppliers.includes(supplier.id)
     );
     setSuppliersToDelete(selectedSuppliersData);
     setIsDeleteModalOpen(true);
-  }, [suppliers, selectedSuppliers]);
+  }, [sortedSuppliers, selectedSuppliers]);
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -217,13 +222,13 @@ export default function SuppliersTable({
   );
 
   useMemo(() => {
-    const currentSupplierIds = new Set(suppliers.map((s) => s.id));
+    const currentSupplierIds = new Set(sortedSuppliers.map((s) => s.id));
     processedSuppliers.current = new Set(
       Array.from(processedSuppliers.current).filter((id) =>
         currentSupplierIds.has(id)
       )
     );
-  }, [suppliers]);
+  }, [sortedSuppliers]);
 
   const isAllSelected =
     paginatedSuppliers.length > 0 &&
@@ -260,7 +265,7 @@ export default function SuppliersTable({
         <CategoryTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          suppliers={suppliers}
+          suppliers={sortedSuppliers}
         />
 
         <div className="flex justify-start mb-4 cursor-pointer">
@@ -328,7 +333,7 @@ export default function SuppliersTable({
           )}
         </div>
 
-        {/* Use the new pagination component */}
+        {/* Use new pagination component */}
         {!showAll && totalPages > 1 && (
           <SuppliersPagination
             currentPage={currentPage}
