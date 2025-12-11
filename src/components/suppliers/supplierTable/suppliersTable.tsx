@@ -47,6 +47,7 @@ export default function SuppliersTable({
   );
   const [rating, setRating] = useState({
     overall: 0,
+    requirements: 0,
     quality: 0,
     delivery: 0,
     communication: 0,
@@ -57,6 +58,7 @@ export default function SuppliersTable({
       number,
       {
         overall: number;
+        requirements: number;
         quality: number;
         delivery: number;
         communication: number;
@@ -170,6 +172,7 @@ export default function SuppliersTable({
         const ratingValue = parseFloat(String(supplier.rating)) || 0;
         setRating({
           overall: ratingValue,
+          requirements: ratingValue,
           quality: ratingValue,
           delivery: ratingValue,
           communication: ratingValue,
@@ -185,7 +188,15 @@ export default function SuppliersTable({
   }, []);
 
   const handleRatingChange = useCallback(
-    (category: keyof typeof rating, value: number) => {
+    (
+      category:
+        | "overall"
+        | "requirements"
+        | "quality"
+        | "delivery"
+        | "communication",
+      value: number
+    ) => {
       setRating((prev) => ({ ...prev, [category]: value }));
     },
     []

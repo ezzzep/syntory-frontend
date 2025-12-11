@@ -60,11 +60,17 @@ export interface ShrinkageLossCardProps {
   colors: string[];
 }
 
+export interface SupplierReliabilityChartProps {
+  data: Array<{
+    name: string;
+    requirements: number;
+    quality: number;
+    delivery: number;
+    communication: number;
+  }>;
+}
+
 interface SupplierReliabilityData {
   name: string;
   value: number;
-}
-
-export interface SupplierReliabilityChartProps {
-  data: SupplierReliabilityData[];
 }

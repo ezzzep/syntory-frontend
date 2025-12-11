@@ -9,6 +9,16 @@ import MonthlyTargetCard from "@/components/analytics/monthlyTargetCard";
 import RecentOrdersTable from "@/components/analytics/recentOrdersTable";
 import RecentActivityFeed from "@/components/analytics/recentActivityFeed";
 import { BouncingDots } from "@/components/ui/bouncing-dots";
+import { Supplier } from "@/types/supplier";
+import { getSuppliers } from "@/lib/api/suppliers";
+
+interface SupplierChartData {
+  name: string;
+  requirements: number;
+  quality: number;
+  delivery: number;
+  communication: number;
+}
 
 type AnalyticsData = {
   seasonalDemand: {
@@ -18,7 +28,6 @@ type AnalyticsData = {
     summer: number;
     autumn: number;
   }[];
-  supplierReliability: { name: string; value: number }[];
   shrinkageAndLoss: {
     data: { name: string; value: number }[];
     colors: string[];
@@ -56,24 +65,108 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierChartData, setSupplierChartData] = useState<
+    SupplierChartData[]
+  >([]);
+  const [refreshChart] = useState(0);
+
   useEffect(() => {
-    fetch("/mockAnalyticsData.json")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch mock data");
+    const fetchData = async () => {
+      try {
+        const analyticsRes = await fetch("/mockAnalyticsData.json");
+        if (!analyticsRes.ok) {
+          throw new Error("Failed to fetch mock analytics data");
         }
-        return res.json();
-      })
-      .then((analyticsData: AnalyticsData) => {
+        const analyticsData: AnalyticsData = await analyticsRes.json();
         setData(analyticsData);
-        setLoading(false);
-      })
-      .catch((err) => {
+
+        const suppliersData = await getSuppliers();
+        setSuppliers(suppliersData);
+
+        const categoryAverages = {
+          requirements: 0,
+          quality: 0,
+          delivery: 0,
+          communication: 0,
+        };
+
+        let count = 0;
+
+        suppliersData.forEach((supplier: Supplier) => {
+          const requirements = Number(supplier.requirements_rating) || 0;
+          const quality = Number(supplier.quality_rating) || 0;
+          const delivery = Number(supplier.delivery_rating) || 0;
+          const communication = Number(supplier.communication_rating) || 0;
+
+          if (requirements || quality || delivery || communication) {
+            categoryAverages.requirements += requirements;
+            categoryAverages.quality += quality;
+            categoryAverages.delivery += delivery;
+            categoryAverages.communication += communication;
+            count++;
+          }
+        });
+
+        if (count > 0) {
+          categoryAverages.requirements = parseFloat(
+            (categoryAverages.requirements / count).toFixed(1)
+          );
+          categoryAverages.quality = parseFloat(
+            (categoryAverages.quality / count).toFixed(1)
+          );
+          categoryAverages.delivery = parseFloat(
+            (categoryAverages.delivery / count).toFixed(1)
+          );
+          categoryAverages.communication = parseFloat(
+            (categoryAverages.communication / count).toFixed(1)
+          );
+        }
+
+        const data: SupplierChartData[] = [
+          {
+            name: "Requirements",
+            requirements: categoryAverages.requirements,
+            quality: 0,
+            delivery: 0,
+            communication: 0,
+          },
+          {
+            name: "Quality",
+            requirements: 0,
+            quality: categoryAverages.quality,
+            delivery: 0,
+            communication: 0,
+          },
+          {
+            name: "Delivery",
+            requirements: 0,
+            quality: 0,
+            delivery: categoryAverages.delivery,
+            communication: 0,
+          },
+          {
+            name: "Communication",
+            requirements: 0,
+            quality: 0,
+            delivery: 0,
+            communication: categoryAverages.communication,
+          },
+        ];
+
+        setSupplierChartData(data);
+      } catch (err) {
         console.error(err);
-        setError(err.message);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchData();
+  }, [refreshChart]);
 
   if (loading)
     return (
@@ -107,11 +200,17 @@ export default function AnalyticsPage() {
       </div>
       <SeasonalDemandChart data={data.seasonalDemand} />
 
-      <SupplierReliabilityChart data={data.supplierReliability} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <MonthlyTargetCard data={data.monthlyTarget} />
+        <SupplierReliabilityChart data={supplierChartData} />
+        <div className="mb-6 lg:mb-0">
+          <MonthlyTargetCard data={data.monthlyTarget} />
+        </div>
+      </div>
+
+      <div className="mb-6">
         <RecentOrdersTable data={data.recentOrders} />
       </div>
+
       <RecentActivityFeed data={data.recentActivityFeed} />
     </div>
   );
