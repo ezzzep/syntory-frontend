@@ -2,7 +2,7 @@
 import { MapPin, Package, Building, Edit, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSupplierLogic } from "@/hooks/useSupplierLogic";
+import { useSupplierIdLogic } from "@/hooks/useSupplierIdLogic";
 
 interface BusinessInfoCardProps {
   supplier: any;
@@ -25,7 +25,7 @@ export const BusinessInfoCard: React.FC<BusinessInfoCardProps> = ({
   onCancelEditing,
   onInputChange,
 }) => {
-  const { formatCategory } = useSupplierLogic();
+  const { formatCategory } = useSupplierIdLogic();
 
   return (
     <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">

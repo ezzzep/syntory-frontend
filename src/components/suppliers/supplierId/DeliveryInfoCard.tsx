@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import { CalendarDays, Edit, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarPicker } from "./CalendarPicker";
-import { useSupplierLogic } from "@/hooks/useSupplierLogic";
+import { useSupplierIdLogic } from "@/hooks/useSupplierIdLogic";
 
 interface DeliveryInfoCardProps {
   supplier: any;
@@ -33,7 +33,7 @@ export const DeliveryInfoCard: React.FC<DeliveryInfoCardProps> = ({
   onCloseCalendar,
 }) => {
   const calendarRef = useRef<HTMLDivElement>(null);
-  const { formatDateDisplay } = useSupplierLogic();
+  const { formatDateDisplay } = useSupplierIdLogic();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

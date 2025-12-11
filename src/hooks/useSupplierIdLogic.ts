@@ -30,7 +30,7 @@ type DeliveryUpdate = {
 
 type UpdateData = NameUpdate | ContactUpdate | BusinessUpdate | DeliveryUpdate;
 
-export const useSupplierLogic = () => {
+export const useSupplierIdLogic = () => {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();

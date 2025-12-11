@@ -4,7 +4,7 @@ import { SupplierMainCard } from "@/components/suppliers/supplierId/SupplierMain
 import { ContactInfoCard } from "@/components/suppliers/supplierId/ContactInfoCard";
 import { BusinessInfoCard } from "@/components/suppliers/supplierId/BusinessInfoCard";
 import { DeliveryInfoCard } from "@/components/suppliers/supplierId/DeliveryInfoCard";
-import { useSupplierLogic } from "@/hooks/useSupplierLogic";
+import { useSupplierIdLogic } from "@/hooks/useSupplierIdLogic";
 
 export default function SupplierDetailPage() {
   const {
@@ -26,7 +26,7 @@ export default function SupplierDetailPage() {
     navigateToSuppliers,
     toggleCalendar,
     closeCalendar,
-  } = useSupplierLogic();
+  } = useSupplierIdLogic();
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
