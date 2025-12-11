@@ -13,7 +13,12 @@ import {
 import { Supplier } from "@/types/supplier";
 import { updateSupplier } from "@/lib/api/suppliers";
 
-type RatingCategory = "overall" | "quality" | "delivery" | "communication";
+type RatingCategory =
+  | "overall"
+  | "requirements"
+  | "quality"
+  | "delivery"
+  | "communication";
 
 interface RatingModalProps {
   isOpen: boolean;
@@ -22,6 +27,7 @@ interface RatingModalProps {
   supplier: Supplier | null;
   rating: {
     overall: number;
+    requirements: number;
     quality: number;
     delivery: number;
     communication: number;
@@ -41,6 +47,7 @@ export default function RatingModal({
   const [error, setError] = useState<string | null>(null);
   const [internalRating, setInternalRating] = useState({
     overall: 0,
+    requirements: 0,
     quality: 0,
     delivery: 0,
     communication: 0,
@@ -48,6 +55,7 @@ export default function RatingModal({
 
   const [hoveredRatings, setHoveredRatings] = useState({
     overall: 0,
+    requirements: 0,
     quality: 0,
     delivery: 0,
     communication: 0,
@@ -55,6 +63,7 @@ export default function RatingModal({
 
   const [inputErrors, setInputErrors] = useState({
     overall: "",
+    requirements: "",
     quality: "",
     delivery: "",
     communication: "",
@@ -62,6 +71,7 @@ export default function RatingModal({
 
   const [inputValues, setInputValues] = useState({
     overall: "0",
+    requirements: "0",
     quality: "0",
     delivery: "0",
     communication: "0",
@@ -70,6 +80,7 @@ export default function RatingModal({
   useEffect(() => {
     if (isOpen && supplier) {
       const overallRating = Number(supplier.rating) || 0;
+      const requirementsRating = Number(supplier.requirements_rating) || 0;
       const qualityRating = Number(supplier.quality_rating) || 0;
       const deliveryRating = Number(supplier.delivery_rating) || 0;
       const communicationRating = Number(supplier.communication_rating) || 0;
@@ -77,12 +88,14 @@ export default function RatingModal({
       if (qualityRating || deliveryRating || communicationRating) {
         setInternalRating({
           overall: overallRating,
+          requirements: requirementsRating,
           quality: qualityRating,
           delivery: deliveryRating,
           communication: communicationRating,
         });
         setInputValues({
           overall: overallRating.toString(),
+          requirements: requirementsRating.toString(),
           quality: qualityRating.toString(),
           delivery: deliveryRating.toString(),
           communication: communicationRating.toString(),
@@ -90,12 +103,14 @@ export default function RatingModal({
       } else {
         setInternalRating({
           overall: overallRating,
+          requirements: overallRating,
           quality: overallRating,
           delivery: overallRating,
           communication: overallRating,
         });
         setInputValues({
           overall: overallRating.toString(),
+          requirements: overallRating.toString(),
           quality: overallRating.toString(),
           delivery: overallRating.toString(),
           communication: overallRating.toString(),
@@ -104,6 +119,7 @@ export default function RatingModal({
 
       setHoveredRatings({
         overall: 0,
+        requirements: 0,
         quality: 0,
         delivery: 0,
         communication: 0,
@@ -111,6 +127,7 @@ export default function RatingModal({
 
       setInputErrors({
         overall: "",
+        requirements: "",
         quality: "",
         delivery: "",
         communication: "",
@@ -267,6 +284,7 @@ export default function RatingModal({
     let hasError = false;
     const newInputErrors = {
       overall: "",
+      requirements: "",
       quality: "",
       delivery: "",
       communication: "",
@@ -290,7 +308,7 @@ export default function RatingModal({
     try {
       const averageRating = parseFloat(
         (
-          (internalRating.overall +
+          (internalRating.requirements +
             internalRating.quality +
             internalRating.delivery +
             internalRating.communication) /
@@ -301,6 +319,7 @@ export default function RatingModal({
       const updatedSupplier = {
         ...supplier,
         rating: averageRating,
+        requirements_rating: internalRating.requirements,
         quality_rating: internalRating.quality,
         delivery_rating: internalRating.delivery,
         communication_rating: internalRating.communication,
@@ -389,7 +408,10 @@ export default function RatingModal({
             )}
 
             <div className="space-y-6">
-              {renderRatingInput("overall", "Overall Service Rating")}
+              {renderRatingInput(
+                "requirements",
+                "Compliance with Requirements"
+              )}
               {renderRatingInput("quality", "Quality of Products")}
               {renderRatingInput("delivery", "Delivery Time")}
               {renderRatingInput("communication", "Communication")}
