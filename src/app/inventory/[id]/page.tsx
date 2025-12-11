@@ -66,7 +66,6 @@ export default function InventoryItemDetails() {
     return `${cleanBaseUrl}/storage/${cleanPath}`;
   };
 
-  // Function to determine stock status based on quantity
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) {
       return { status: "Out of Stock", color: "text-red-500" };
@@ -85,7 +84,7 @@ export default function InventoryItemDetails() {
         if (params.id) {
           const id = Number(params.id);
           const data = await getItemById(id);
-          console.log("Fetched item data:", data); // Debug log to check if supplier_id is included
+          console.log("Fetched item data:", data);
           setItem(data);
 
           const fullImageUrl = getFullImageUrl(data.image_path);
@@ -132,7 +131,6 @@ export default function InventoryItemDetails() {
         image_path: url,
       } as unknown as UpdateInventoryDto;
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
-      // Preserve supplier information when updating
       setItem({
         ...updatedItem,
         supplier_name: item.supplier_name,
@@ -226,8 +224,6 @@ export default function InventoryItemDetails() {
 
       Object.assign(updatePayload, formData);
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
-
-      // Preserve supplier information when updating
       setItem({
         ...updatedItem,
         supplier_name: item.supplier_name,
@@ -531,7 +527,6 @@ export default function InventoryItemDetails() {
               </div>
             </div>
 
-            {/* Description section - now in its own full-width container */}
             <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-white flex items-center">

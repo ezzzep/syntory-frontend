@@ -1,8 +1,8 @@
 export type SupplierCategory =
-  | "appliances"
-  | "home-living"
-  | "gadgets"
-  | "home-cleaning";
+  | "Appliances"
+  | "Home & Living"
+  | "Gadgets"
+  | "Home Cleaning";
 
 export interface Supplier {
   image_url: string;

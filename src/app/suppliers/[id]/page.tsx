@@ -4,9 +4,15 @@ import { SupplierMainCard } from "@/components/suppliers/supplierId/SupplierMain
 import { ContactInfoCard } from "@/components/suppliers/supplierId/ContactInfoCard";
 import { BusinessInfoCard } from "@/components/suppliers/supplierId/BusinessInfoCard";
 import { DeliveryInfoCard } from "@/components/suppliers/supplierId/DeliveryInfoCard";
+import { SupplierItemsCard } from "@/components/suppliers/supplierId/SupplierItemsCard";
 import { useSupplierIdLogic } from "@/hooks/useSupplierIdLogic";
+import { useState, useEffect } from "react";
+import { getItemsBySupplier } from "@/lib/api/inventory";
+import type { InventoryItem } from "@/types/inventory";
+import { useRouter } from "next/navigation";
 
 export default function SupplierDetailPage() {
+  const router = useRouter();
   const {
     supplier,
     loading,
@@ -27,6 +33,49 @@ export default function SupplierDetailPage() {
     toggleCalendar,
     closeCalendar,
   } = useSupplierIdLogic();
+
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [itemsError, setItemsError] = useState<string | null>(null);
+
+  // Fetch items whenever supplier changes
+  useEffect(() => {
+    if (supplier?.name) {
+      fetchSupplierItems();
+    }
+  }, [supplier?.name]);
+
+  // Also add a refresh function that can be called manually
+  const fetchSupplierItems = async () => {
+    if (!supplier?.name) return;
+
+    try {
+      setItemsLoading(true);
+      setItemsError(null);
+      console.log("Fetching items for supplier name:", supplier.name);
+      const supplierItems = await getItemsBySupplier(supplier.name);
+      console.log("Fetched items:", supplierItems);
+      setItems(supplierItems);
+    } catch (error) {
+      console.error("Failed to fetch supplier items:", error);
+      setItemsError(
+        error instanceof Error ? error.message : "Failed to fetch items"
+      );
+    } finally {
+      setItemsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "itemAdded") {
+        fetchSupplierItems();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [supplier?.name]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
@@ -96,9 +145,16 @@ export default function SupplierDetailPage() {
               onCloseCalendar={closeCalendar}
             />
 
+            <div className="mb-6">
+              <SupplierItemsCard items={items} loading={itemsLoading} />
+            </div>
+
             <div className="flex justify-end gap-3">
               <Button
-                onClick={navigateToSuppliers}
+                onClick={() => {
+                  fetchSupplierItems(); 
+                  navigateToSuppliers();
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
               >
                 Done

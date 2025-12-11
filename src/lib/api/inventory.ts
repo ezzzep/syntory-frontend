@@ -34,7 +34,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 export async function getInventory(): Promise<InventoryItem[]> {
   const res = await fetch(BASE_URL, {
     cache: "no-store",
-    credentials: "include", // include cookies for auth
+    credentials: "include", 
     headers: { Accept: "application/json" },
   });
   return handleResponse<InventoryItem[]>(res);
@@ -99,11 +99,11 @@ export async function deleteInventoryItem(
   return handleResponse<{ message: string }>(res);
 }
 
-export async function uploadItemImage(id:number, formData: FormData) {
-  await fetchCsrf ();
+export async function uploadItemImage(id: number, formData: FormData) {
+  await fetchCsrf();
   const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
 
-  const res = await fetch (
+  const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${id}/image`,
     {
       method: "POST",
@@ -111,14 +111,12 @@ export async function uploadItemImage(id:number, formData: FormData) {
       headers: {
         Accept: "application/json",
         "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
-        
       },
       body: formData,
     }
   );
 
-  return handleResponse <{ image_url: string}>
-  (res);
+  return handleResponse<{ image_url: string }>(res);
 }
 
 export async function getItemById(id: number): Promise<InventoryItem> {
@@ -129,4 +127,22 @@ export async function getItemById(id: number): Promise<InventoryItem> {
   });
 
   return handleResponse<InventoryItem>(res);
+}
+
+export async function getItemsBySupplier(
+  supplierName: string
+): Promise<InventoryItem[]> {
+  try {
+    const allItems = await getInventory();
+    const filteredItems = allItems.filter((item) => {
+      console.log(`Item ${item.name} has supplier_name: ${item.supplier_name}`);
+      return item.supplier_name === supplierName;
+    });
+
+    console.log("Filtered items:", filteredItems);
+    return filteredItems;
+  } catch (error) {
+    console.error("Failed to get items by supplier:", error);
+    throw error;
+  }
 }

@@ -3,6 +3,8 @@ import { MapPin, Package, Building, Edit, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSupplierIdLogic } from "@/hooks/useSupplierIdLogic";
+import { useState, useEffect } from "react";
+import { getItemsBySupplier } from "@/lib/api/inventory";
 
 interface BusinessInfoCardProps {
   supplier: any;
@@ -26,6 +28,27 @@ export const BusinessInfoCard: React.FC<BusinessInfoCardProps> = ({
   onInputChange,
 }) => {
   const { formatCategory } = useSupplierIdLogic();
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const fetchTotalOrders = async () => {
+      if (!supplier?.name) return;
+
+      try {
+        setLoadingOrders(true);
+        const items = await getItemsBySupplier(supplier.name);
+        const total = items.reduce((sum, item) => sum + item.quantity, 0);
+        setTotalOrders(total);
+      } catch (error) {
+        console.error("Failed to fetch supplier items:", error);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    fetchTotalOrders();
+  }, [supplier?.name]);
 
   return (
     <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
@@ -91,10 +114,10 @@ export const BusinessInfoCard: React.FC<BusinessInfoCardProps> = ({
                 onChange={(e) => onInputChange("category", e.target.value)}
                 className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
               >
-                <option value="appliances">Appliances</option>
-                <option value="home-living">Home & Living</option>
-                <option value="gadgets">Gadgets</option>
-                <option value="home-cleaning">Home Cleaning</option>
+                <option value="Appliances">Appliances</option>
+                <option value="Home & Living">Home & Living</option>
+                <option value="Gadgets">Gadgets</option>
+                <option value="Home Cleaning">Home Cleaning</option>
               </select>
             ) : (
               <p className="text-white">{formatCategory(supplier.category)}</p>
@@ -105,7 +128,14 @@ export const BusinessInfoCard: React.FC<BusinessInfoCardProps> = ({
           <Package className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm text-gray-400">Total Orders</p>
-            <p className="text-white">{supplier.total_orders}</p>
+            {loadingOrders ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500 mr-2"></div>
+                <span className="text-white">Calculating...</span>
+              </div>
+            ) : (
+              <p className="text-white">{totalOrders}</p>
+            )}
           </div>
         </div>
       </div>

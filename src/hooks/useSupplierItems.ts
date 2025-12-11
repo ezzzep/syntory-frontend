@@ -81,20 +81,8 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
 
     try {
       setLoading(true);
-      let finalCategory = form.category;
-      if (form.supplier_name) {
-        const selectedSupplier = suppliers.find(
-          (s) => s.name === form.supplier_name
-        );
-        finalCategory = selectedSupplier?.category || form.category;
-      }
-
       const itemData = {
-        name: form.name,
-        category: finalCategory, 
-        quantity: form.quantity,
-        description: form.description,
-        supplier_name: form.supplier_name,
+        ...form,
       };
 
       console.log("Creating item with data:", itemData);
@@ -141,15 +129,6 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     }
   };
 
-  const handleSupplierChange = (supplierName: string) => {
-    const selectedSupplier = suppliers.find((s) => s.name === supplierName);
-    setForm((prev) => ({
-      ...prev,
-      supplier_name: supplierName,
-      category: selectedSupplier?.category || "",
-    }));
-  };
-
   return {
     loading,
     open,
@@ -162,6 +141,5 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     handleSubmit,
     handleInputChange,
     handleQuantityChange,
-    handleSupplierChange,
   };
 };

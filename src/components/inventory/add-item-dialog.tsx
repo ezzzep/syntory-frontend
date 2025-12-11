@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { InventoryItem } from "@/types/inventory";
-import { Plus, Package, Building, User, FileText } from "lucide-react";
+import { Plus, Package, Building, User, FileText, Info } from "lucide-react";
 import { SelectFive } from "@/components/ui/select";
 import { useAddItemDialog } from "@/hooks/useAddItemDialog";
 import { addItemDialogStyles } from "@/styles/inventory/addItemDialogStyles";
@@ -19,6 +19,11 @@ import { addItemDialogStyles } from "@/styles/inventory/addItemDialogStyles";
 interface AddItemDialogProps {
   onAdd: (item: InventoryItem) => void;
 }
+
+const capitalizeFirstLetter = (str: string | null | undefined) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   const {
@@ -28,12 +33,13 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
     suppliersLoading,
     errors,
     form,
-    categories,
     setOpen,
     handleSubmit,
     handleInputChange,
     handleQuantityChange,
+    handleSupplierChange,
   } = useAddItemDialog(onAdd);
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -84,7 +90,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               <Input
                 type="number"
                 placeholder="0"
-                value={form.quantity}
+                value={form.quantity === 0 ? "" : form.quantity}
                 onChange={(e) => handleQuantityChange(e.target.value)}
                 className={addItemDialogStyles.input}
               />
@@ -96,28 +102,12 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
 
           <div className={addItemDialogStyles.formField}>
             <label className={addItemDialogStyles.label}>
-              <Building className="w-4 h-4 mr-2" />
-              Category
-            </label>
-            <SelectFive
-              value={form.category}
-              onChange={(v) => handleInputChange("category", v)}
-              options={categories.map((c) => ({ label: c, value: c }))}
-              placeholder="Select Category"
-            />
-            {errors.category && (
-              <p className={addItemDialogStyles.error}>{errors.category}</p>
-            )}
-          </div>
-
-          <div className={addItemDialogStyles.formField}>
-            <label className={addItemDialogStyles.label}>
               <User className="w-4 h-4 mr-2" />
               Supplier
             </label>
             <SelectFive
               value={form.supplier_name || ""}
-              onChange={(v) => handleInputChange("supplier_name", v || "")}
+              onChange={(v) => handleSupplierChange(v || "")}
               options={suppliers.map((s) => ({
                 label: s.name,
                 value: s.name,
@@ -128,6 +118,50 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               disabled={suppliersLoading}
               searchable
             />
+            {form.supplier_name && (
+              <div className="mt-2 bg-blue-600/10 border border-blue-600/30 rounded-md p-2">
+                <span className="text-sm text-blue-300">
+                  Item will be added to {form.supplier_name}`s details
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className={addItemDialogStyles.formField}>
+            <label className={addItemDialogStyles.label}>
+              <Building className="w-4 h-4 mr-2" />
+              Category
+            </label>
+            <div className="relative">
+              <Input
+                value={capitalizeFirstLetter(form.category)}
+                readOnly
+                disabled
+                placeholder={
+                  form.supplier_name
+                    ? "Auto-set from supplier"
+                    : "Select a supplier first"
+                }
+                className={`${
+                  form.supplier_name
+                    ? "bg-slate-700/50 text-slate-300 w-full cursor-not-allowed placeholder:text-slate-400"
+                    : "bg-slate-700/50 text-slate-300 w-full cursor-not-allowed placeholder:text-slate-400"
+                }`}
+              />
+              {form.supplier_name && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <Info className="w-4 h-4 text-blue-400" />
+                </div>
+              )}
+            </div>
+            {form.supplier_name && (
+              <p className="text-xs text-blue-400 mt-1">
+                Category automatically set from supplier.
+              </p>
+            )}
+            {errors.category && (
+              <p className={addItemDialogStyles.error}>{errors.category}</p>
+            )}
           </div>
 
           <div className={addItemDialogStyles.formField}>
@@ -157,7 +191,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
           <Button
             className={addItemDialogStyles.saveButton}
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || !form.supplier_name}
           >
             {loading ? (
               <div className="flex items-center">
