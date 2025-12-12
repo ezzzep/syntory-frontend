@@ -8,6 +8,14 @@ export default function InventoryPage() {
   const { items, loading, handleDelete, handleAdd, handleUpdate } =
     useInventoryState();
 
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
+        <BouncingDots />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 md:mb-10 pb-5">
@@ -17,20 +25,14 @@ export default function InventoryPage() {
           </h1>
         </div>
       </div>
-      
+
       <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 hover:shadow-2xl transition-all duration-300">
-        {loading ? (
-          <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
-            <BouncingDots />
-          </div>
-        ) : (
-          <InventoryTable
-            items={items}
-            onDelete={handleDelete}
-            onUpdate={handleUpdate}
-            onAdd={handleAdd}
-          />
-        )}
+        <InventoryTable
+          items={items}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+          onAdd={handleAdd}
+        />
       </div>
     </div>
   );
