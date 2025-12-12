@@ -1,9 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// components/add-item-dialog.tsx
-
 "use client";
 
-import { useState, useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,113 +10,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { InventoryItem, CreateInventoryDto } from "@/types/inventory";
-import type { Supplier } from "@/types/supplier"; // Import the Supplier type
-import {
-  Plus,
-  Package,
-  Building,
-  User,
-  FileText,
-  Info,
-  AlertCircle,
-} from "lucide-react";
+import type { InventoryItem } from "@/types/inventory";
+import { Plus, Package, Building, User, FileText, Info } from "lucide-react";
+import { SelectFive } from "@/components/ui/select";
+import { useAddItemDialog } from "@/hooks/useAddItemDialog";
 import { addItemDialogStyles } from "@/styles/inventory/addItemDialogStyles";
-
-// Import your actual API functions
-import { createInventoryItem } from "@/lib/api/inventory";
-import { getSuppliers } from "@/lib/api/suppliers";
 
 interface AddItemDialogProps {
   onAdd: (item: InventoryItem) => void;
 }
 
+const capitalizeFirstLetter = (str: string | null | undefined) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [suppliersLoading, setSuppliersLoading] = useState(true);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]); // Initialize as empty array
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const [form, setForm] = useState<CreateInventoryDto>({
-    name: "",
-    quantity: 0,
-    supplier_name: "",
-    category: "",
-    description: "",
-  });
-
-  // Fetch suppliers when the component mounts
-  useEffect(() => {
-    const fetchSuppliersData = async () => {
-      setSuppliersLoading(true);
-      setFetchError(null);
-      try {
-        const suppliersData = await getSuppliers(); // Call the real API function
-        setSuppliers(suppliersData);
-      } catch (error: any) {
-        console.error("Failed to fetch suppliers:", error);
-        setFetchError(error.message || "Could not load suppliers.");
-      } finally {
-        setSuppliersLoading(false);
-      }
-    };
-    fetchSuppliersData();
-  }, []);
-
-  const handleInputChange = (
-    field: keyof CreateInventoryDto,
-    value: string | number
-  ) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
-  const handleSupplierChange = (supplierName: string) => {
-    const selectedSupplier = suppliers.find((s) => s.name === supplierName);
-    setForm((prev) => ({
-      ...prev,
-      supplier_name: supplierName,
-      category: selectedSupplier?.category || "",
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "Item name is required.";
-    if (form.quantity <= 0)
-      newErrors.quantity = "Quantity must be greater than 0.";
-    if (!form.supplier_name) newErrors.supplier_name = "Supplier is required.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      const newItem = await createInventoryItem(form); // Call the real API function
-      onAdd(newItem); // Pass the new item up to the parent
-      setOpen(false);
-      // Reset form
-      setForm({
-        name: "",
-        quantity: 0,
-        supplier_name: "",
-        category: "",
-        description: "",
-      });
-    } catch (error: any) {
-      console.error("Failed to create item:", error);
-      setErrors({ api: error.message || "An unknown error occurred." });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    loading,
+    open,
+    suppliers,
+    suppliersLoading,
+    errors,
+    form,
+    setOpen,
+    handleSubmit,
+    handleInputChange,
+    handleQuantityChange,
+    handleSupplierChange,
+  } = useAddItemDialog(onAdd);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -132,19 +50,18 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className={addItemDialogStyles.dialogContent}>
-        <DialogHeader>
-          <DialogTitle className={addItemDialogStyles.dialogTitle}>
-            Add Inventory Item
-          </DialogTitle>
-        </DialogHeader>
+      <DialogPrimitive.Title className="sr-only">
+        Add Inventory Item
+      </DialogPrimitive.Title>
 
-        {fetchError && (
-          <div className="bg-red-900/20 border border-red-500/50 text-red-400 p-3 rounded-md flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            <span>{fetchError}</span>
-          </div>
-        )}
+      <DialogContent className={addItemDialogStyles.dialogContent}>
+        <div className={addItemDialogStyles.dialogHeader}>
+          <DialogHeader>
+            <DialogTitle className={addItemDialogStyles.dialogTitle}>
+              Add Inventory Item
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
         <div className={addItemDialogStyles.formContainer}>
           <div className={addItemDialogStyles.formRow}>
@@ -173,9 +90,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
                 type="number"
                 placeholder="0"
                 value={form.quantity === 0 ? "" : form.quantity}
-                onChange={(e) =>
-                  handleInputChange("quantity", parseInt(e.target.value) || 0)
-                }
+                onChange={(e) => handleQuantityChange(e.target.value)}
                 className={addItemDialogStyles.input}
               />
               {errors.quantity && (
@@ -189,26 +104,25 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               <User className="w-4 h-4 mr-2" />
               Supplier
             </label>
-            {/* NOTE: Replace this with your actual Select component */}
-            <select
-              value={form.supplier_name}
-              onChange={(e) => handleSupplierChange(e.target.value)}
-              disabled={suppliersLoading || !!fetchError}
-              className="w-full bg-slate-700/50 text-slate-300 rounded-md px-3 py-2 placeholder:text-slate-400 disabled:opacity-50"
-            >
-              <option value="" disabled>
-                {suppliersLoading ? "Loading..." : "Select Supplier"}
-              </option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            {errors.supplier_name && (
-              <p className={addItemDialogStyles.error}>
-                {errors.supplier_name}
-              </p>
+            <SelectFive
+              value={form.supplier_name || ""}
+              onChange={(v) => handleSupplierChange(v || "")}
+              options={suppliers.map((s) => ({
+                label: s.name,
+                value: s.name,
+              }))}
+              placeholder={
+                suppliersLoading ? "Loading suppliers..." : "Select Supplier"
+              }
+              disabled={suppliersLoading}
+              searchable
+            />
+            {form.supplier_name && (
+              <div className="mt-2 bg-blue-600/10 border border-blue-600/30 rounded-md p-2">
+                <span className="text-sm text-blue-300">
+                  Item will be added to {form.supplier_name}`s details
+                </span>
+              </div>
             )}
           </div>
 
@@ -219,7 +133,7 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
             </label>
             <div className="relative">
               <Input
-                value={form.category}
+                value={capitalizeFirstLetter(form.category)}
                 readOnly
                 disabled
                 placeholder={
@@ -227,7 +141,11 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
                     ? "Auto-set from supplier"
                     : "Select a supplier first"
                 }
-                className={`bg-slate-700/50 text-slate-300 w-full cursor-not-allowed placeholder:text-slate-400`}
+                className={`${
+                  form.supplier_name
+                    ? "bg-slate-700/50 text-slate-300 w-full cursor-not-allowed placeholder:text-slate-400"
+                    : "bg-slate-700/50 text-slate-300 w-full cursor-not-allowed placeholder:text-slate-400"
+                }`}
               />
               {form.supplier_name && (
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -239,6 +157,9 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
               <p className="text-xs text-blue-400 mt-1">
                 Category automatically set from supplier.
               </p>
+            )}
+            {errors.category && (
+              <p className={addItemDialogStyles.error}>{errors.category}</p>
             )}
           </div>
 
@@ -256,10 +177,6 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
           </div>
         </div>
 
-        {errors.api && (
-          <p className="text-red-400 text-sm text-center">{errors.api}</p>
-        )}
-
         <div className={addItemDialogStyles.footer}>
           <Button
             variant="outline"
@@ -273,9 +190,38 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
           <Button
             className={addItemDialogStyles.saveButton}
             onClick={handleSubmit}
-            disabled={loading || !form.supplier_name || !!fetchError}
+            disabled={loading || !form.supplier_name}
           >
-            {loading ? "Saving..." : "Save Item"}
+            {loading ? (
+              <div className="flex items-center">
+                <svg
+                  className={addItemDialogStyles.loadingSpinner}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Saving...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <Plus className="w-4 h-4 mr-2" />
+                Save Item
+              </div>
+            )}
           </Button>
         </div>
       </DialogContent>
