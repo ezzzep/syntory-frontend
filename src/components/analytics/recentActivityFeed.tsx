@@ -2,9 +2,9 @@ import { RecentActivityFeedProps } from "@/types/analytics";
 
 export default function RecentActivityFeed({ data }: RecentActivityFeedProps) {
   return (
-    <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
-        <h2 className="text-xl sm:text-2xl font-semibold">
+    <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 h-full flex flex-col">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">
           Recent Activity Feed
         </h2>
         <div className="flex gap-2 flex-wrap">
@@ -19,7 +19,7 @@ export default function RecentActivityFeed({ data }: RecentActivityFeedProps) {
           </button>
         </div>
       </div>
-      <div className="space-y-3 sm:space-y-4">
+      <div className="flex-1 space-y-3 sm:space-y-4 overflow-y-auto">
         {data.map((activity) => (
           <div
             key={activity.id}

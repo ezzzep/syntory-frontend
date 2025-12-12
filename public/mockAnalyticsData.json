@@ -66,36 +66,6 @@
       "time": "1 hour ago",
       "color": "bg-yellow-500/20",
       "iconColor": "text-yellow-400"
-    },
-    {
-      "id": 4,
-      "type": "return",
-      "icon": "↩️",
-      "title": "Return Processed",
-      "description": "Return request #R-1123 for Office Chairs has been approved.",
-      "time": "3 hours ago",
-      "color": "bg-purple-500/20",
-      "iconColor": "text-purple-400"
-    },
-    {
-      "id": 5,
-      "type": "payment",
-      "icon": "💳",
-      "title": "Invoice Paid",
-      "description": "Payment of $12,100 received for order #PO-48292.",
-      "time": "5 hours ago",
-      "color": "bg-indigo-500/20",
-      "iconColor": "text-indigo-400"
-    },
-    {
-      "id": 6,
-      "type": "system",
-      "icon": "🔧",
-      "title": "System Update",
-      "description": "Inventory database synchronized successfully.",
-      "time": "Yesterday",
-      "color": "bg-gray-500/20",
-      "iconColor": "text-gray-400"
     }
   ]
 }

@@ -1,3 +1,5 @@
+// pages/analytics.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,13 +43,6 @@ type AnalyticsData = {
     revenue: { value: string; trend: string };
     todayValue: { value: string; trend: string };
   };
-  recentOrders: {
-    product: string;
-    category: string;
-    country: string;
-    cr: string;
-    value: string;
-  }[];
   recentActivityFeed: {
     id: number;
     type: string;
@@ -202,16 +197,17 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <SupplierReliabilityChart data={supplierChartData} />
-        <div className="mb-6 lg:mb-0">
-          <MonthlyTargetCard data={data.monthlyTarget} />
+        <MonthlyTargetCard data={data.monthlyTarget} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
+        <div className="lg:col-span-5">
+          <RecentOrdersTable  />
+        </div>
+        <div className="lg:col-span-3">
+          <RecentActivityFeed data={data.recentActivityFeed} />
         </div>
       </div>
-
-      <div className="mb-6">
-        <RecentOrdersTable data={data.recentOrders} />
-      </div>
-
-      <RecentActivityFeed data={data.recentActivityFeed} />
     </div>
   );
 }

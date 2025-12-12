@@ -34,9 +34,8 @@ export interface RecentActivityFeedProps {
 interface OrderData {
   product: string;
   category: string;
-  country: string;
-  cr: string;
-  value: string;
+  value: string; 
+  valuePercentage: number;
 }
 
 export interface RecentOrdersTableProps {

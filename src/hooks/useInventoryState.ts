@@ -6,7 +6,6 @@ export function useInventoryState() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Track IDs of items currently being deleted to disable their buttons
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
