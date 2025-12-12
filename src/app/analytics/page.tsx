@@ -1,5 +1,3 @@
-// pages/analytics.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,6 +11,10 @@ import RecentActivityFeed from "@/components/analytics/recentActivityFeed";
 import { BouncingDots } from "@/components/ui/bouncing-dots";
 import { Supplier } from "@/types/supplier";
 import { getSuppliers } from "@/lib/api/suppliers";
+import { getInventory } from "@/lib/api/inventory";
+import { getActivityLogs } from "@/lib/api/activity";
+import type { InventoryItem } from "@/types/inventory";
+import type { ActivityData } from "@/types/analytics";
 
 interface SupplierChartData {
   name: string;
@@ -43,16 +45,6 @@ type AnalyticsData = {
     revenue: { value: string; trend: string };
     todayValue: { value: string; trend: string };
   };
-  recentActivityFeed: {
-    id: number;
-    type: string;
-    icon: string;
-    title: string;
-    description: string;
-    time: string;
-    color: string;
-    iconColor: string;
-  }[];
 };
 
 export default function AnalyticsPage() {
@@ -64,15 +56,15 @@ export default function AnalyticsPage() {
   const [supplierChartData, setSupplierChartData] = useState<
     SupplierChartData[]
   >([]);
-  const [refreshChart] = useState(0);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const analyticsRes = await fetch("/mockAnalyticsData.json");
-        if (!analyticsRes.ok) {
+        if (!analyticsRes.ok)
           throw new Error("Failed to fetch mock analytics data");
-        }
         const analyticsData: AnalyticsData = await analyticsRes.json();
         setData(analyticsData);
 
@@ -85,7 +77,6 @@ export default function AnalyticsPage() {
           delivery: 0,
           communication: 0,
         };
-
         let count = 0;
 
         suppliersData.forEach((supplier: Supplier) => {
@@ -118,7 +109,7 @@ export default function AnalyticsPage() {
           );
         }
 
-        const data: SupplierChartData[] = [
+        const chartData: SupplierChartData[] = [
           {
             name: "Requirements",
             requirements: categoryAverages.requirements,
@@ -148,8 +139,32 @@ export default function AnalyticsPage() {
             communication: categoryAverages.communication,
           },
         ];
+        setSupplierChartData(chartData);
+        const inventoryData = await getInventory();
+        setInventory(inventoryData);
+        const logsFromDb = await getActivityLogs();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mappedLogs: ActivityData[] = logsFromDb.map((log: any) => ({
+          id: log.id,
+          type: log.action || "general", 
+          title: log.action || "Activity",
+          description: log.item_name
+            ? `${log.action || "Activity"} - ${log.item_name}`
+            : log.action || "Activity",
+          time: log.created_at
+            ? new Date(log.created_at).toLocaleString()
+            : new Date().toLocaleString(),
+          icon: "🛈",
+          color: "bg-blue-500",
+          iconColor: "text-white",
+          action: log.action,
+          item_name: log.item_name,
+          item_id: log.item_id,
+          item_category: log.item_category,
+          changes: log.changes,
+        }));
 
-        setSupplierChartData(data);
+        setActivityLogs(mappedLogs);
       } catch (err) {
         console.error(err);
         setError(
@@ -161,7 +176,7 @@ export default function AnalyticsPage() {
     };
 
     fetchData();
-  }, [refreshChart]);
+  }, []);
 
   if (loading)
     return (
@@ -170,13 +185,12 @@ export default function AnalyticsPage() {
       </div>
     );
 
-  if (error || !data) {
+  if (error || !data)
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <p>Error loading data: {error}</p>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
@@ -193,6 +207,7 @@ export default function AnalyticsPage() {
           colors={data.shrinkageAndLoss.colors}
         />
       </div>
+
       <SeasonalDemandChart data={data.seasonalDemand} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -202,10 +217,10 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
         <div className="lg:col-span-5">
-          <RecentOrdersTable  />
+          <RecentOrdersTable />
         </div>
         <div className="lg:col-span-3">
-          <RecentActivityFeed data={data.recentActivityFeed} />
+          <RecentActivityFeed data={activityLogs} />
         </div>
       </div>
     </div>

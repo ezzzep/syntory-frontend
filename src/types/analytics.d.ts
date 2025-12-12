@@ -25,8 +25,14 @@ interface ActivityData {
   time: string;
   color: string;
   iconColor: string;
+  action?: string;
+  item_name?: string;
+  item_id?: number;
+  item_category?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  changes?: Record<string, any> | any[];
+  
 }
-
 export interface RecentActivityFeedProps {
   data: ActivityData[];
 }

@@ -5,6 +5,7 @@ import type { InventoryItem, CreateInventoryDto } from "@/types/inventory";
 import type { Supplier } from "@/types/supplier";
 import { createInventoryItem } from "@/lib/api/inventory";
 import { getSuppliers } from "@/lib/api/suppliers";
+import { createActivityLog } from "@/lib/api/activity";
 
 const inventorySchema = z.object({
   name: z.string().min(1, "Item name is required"),
@@ -75,9 +76,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
@@ -91,7 +90,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
 
       const itemData = {
         name: form.name,
-        category: finalCategory, 
+        category: finalCategory,
         quantity: form.quantity,
         description: form.description,
         supplier_name: form.supplier_name,
@@ -100,6 +99,17 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
       console.log("Creating item with data:", itemData);
       const newItem = await createInventoryItem(itemData);
       console.log("Created item:", newItem);
+      await createActivityLog({
+        action: "Created Inventory Item",
+        item_name: newItem.name,
+        item_id: newItem.id,
+        item_category: newItem.category,
+        changes: {
+          quantity: newItem.quantity,
+          description: newItem.description,
+          supplier_name: newItem.supplier_name,
+        },
+      });
 
       onAdd(newItem);
 
@@ -116,7 +126,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         description: "",
         supplier_name: "",
       });
-
+      
       setErrors({});
       setOpen(false);
     } catch (error) {
