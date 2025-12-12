@@ -126,3 +126,21 @@ export async function uploadSupplierImage(id: number, formData: FormData) {
   return handleResponse<{ image_url: string }>(res);
 }
 
+export type ChartSupplier = Supplier & {
+  requirements: number;
+  quality: number;
+  delivery: number;
+  communication: number;
+};
+
+export const getSuppliersForChart = async (): Promise<ChartSupplier[]> => {
+  const suppliers = await getSuppliers();
+  return suppliers.map((s) => ({
+    ...s,
+    requirements: Number(s.requirements_rating) || 0,
+    quality: Number(s.quality_rating) || 0,
+    delivery: Number(s.delivery_rating) || 0,
+    communication: Number(s.communication_rating) || 0,
+  }));
+};
+
