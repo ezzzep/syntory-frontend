@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
       <SeasonalDemandChart data={data.seasonalDemand} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <SupplierReliabilityChart data={supplierChartData} />
+        <SupplierReliabilityChart />
         <MonthlyTargetCard data={data.monthlyTarget} />
       </div>
 
