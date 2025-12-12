@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Star, Award, Zap } from "lucide-react";
 import type { ChartSupplier } from "@/lib/api/suppliers";
 import { getSuppliersForChart } from "@/lib/api/suppliers";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const StarRating = ({ rating, max = 5 }: { rating: number; max?: number }) => (
   <div className="flex gap-1.5">
@@ -102,8 +103,30 @@ export default function SupplierReliabilityChart() {
     fetchData();
   }, []);
 
-  if (loading) return <p>Loading suppliers...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
+
+  if (loading)
+    return (
+      <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-slate-700/50 h-full flex flex-col overflow-hidden">
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-6 w-1/3 mb-2" />
+          <Skeleton className="h-4 w-1/2 mb-4" /> 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {categories.map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-2xl" />
+            ))}
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-between">
+            <Skeleton className="h-4 w-1/4" />
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-3 w-3 rounded-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
 
   const categoryAverages = categories.map((cat) => ({
     category: cat,

@@ -8,6 +8,7 @@ import type { InventoryItem } from "@/types/inventory";
 import type { OrderData } from "@/types/analytics";
 import { getInventory } from "@/lib/api/inventory";
 import InventoryPagination from "@/components/inventory/inventoryTable/InventoryPagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EnhancedOrderData extends OrderData {
   valuePercentage: number;
@@ -74,7 +75,7 @@ export default function RecentOrdersTable() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const ITEMS_PER_PAGE = 4; 
+  const ITEMS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,7 +85,7 @@ export default function RecentOrdersTable() {
         const inventoryItems = await getInventory();
         const transformedData = getRecentOrdersData(inventoryItems);
         setAllItems(transformedData);
-        setCurrentPage(1); 
+        setCurrentPage(1);
       } catch (err: any) {
         setError("Failed to load recent orders.");
         console.error(err);
@@ -112,6 +113,12 @@ export default function RecentOrdersTable() {
     }
   };
 
+  const renderSkeletons = () => {
+    return Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
+      <Skeleton key={idx} className="h-20 w-full rounded-xl mb-4" />
+    ));
+  };
+
   return (
     <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 h-full flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
@@ -129,14 +136,9 @@ export default function RecentOrdersTable() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-12 space-y-4"
+              className="flex flex-col space-y-4"
             >
-              <motion.div
-                className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
-              <p className="text-slate-400 text-sm">Loading recent orders...</p>
+              {renderSkeletons()}
             </motion.div>
           )}
 
