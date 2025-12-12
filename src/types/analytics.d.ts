@@ -41,6 +41,7 @@ interface OrderData {
 
 export interface RecentOrdersTableProps {
   data: OrderData[];
+  loading?: boolean; 
 }
 
 interface SeasonalDemandData {

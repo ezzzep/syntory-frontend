@@ -36,64 +36,6 @@
     "revenue": { "value": "$28K", "trend": "↑" },
     "todayValue": { "value": "$4.5K", "trend": "↑" }
   },
-  "recentOrders": [
-    {
-      "product": "Bulk Toner Cartridges",
-      "category": "Supplies",
-      "country": "🇺🇸",
-      "cr": "PO-48291",
-      "value": "$8,250"
-    },
-    {
-      "product": "Ergonomic Office Chairs",
-      "category": "Furniture",
-      "country": "🇨🇦",
-      "cr": "PO-48292",
-      "value": "$12,100"
-    },
-    {
-      "product": "Warehouse Safety Gloves",
-      "category": "Safety",
-      "country": "🇩🇪",
-      "cr": "PO-48293",
-      "value": "$1,850"
-    },
-    {
-      "product": "Industrial Shelving Unit",
-      "category": "Furniture",
-      "country": "🇬🇧",
-      "cr": "PO-48294",
-      "value": "$4,521"
-    },
-    {
-      "product": "LED Warehouse Lights",
-      "category": "Electronics",
-      "country": "🇫🇷",
-      "cr": "PO-48295",
-      "value": "$7,523"
-    },
-        {
-      "product": "LED Warehouse Lights",
-      "category": "Electronics",
-      "country": "🇫🇷",
-      "cr": "PO-48295",
-      "value": "$7,523"
-    },
-        {
-      "product": "LED Warehouse Lights",
-      "category": "Electronics",
-      "country": "🇫🇷",
-      "cr": "PO-48295",
-      "value": "$7,523"
-    },
-        {
-      "product": "LED Warehouse Lights",
-      "category": "Electronics",
-      "country": "🇫🇷",
-      "cr": "PO-48295",
-      "value": "$7,523"
-    }
-  ],
   "recentActivityFeed": [
     {
       "id": 1,
