@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mappedLogs: ActivityData[] = logsFromDb.map((log: any) => ({
           id: log.id,
-          type: log.action || "general", 
+          type: log.action || "general",
           title: log.action || "Activity",
           description: log.description,
           time: log.created_at
@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
           <RecentOrdersTable />
         </div>
         <div className="lg:col-span-3">
-          <RecentActivityFeed data={activityLogs} />
+          <RecentActivityFeed  />
         </div>
       </div>
     </div>

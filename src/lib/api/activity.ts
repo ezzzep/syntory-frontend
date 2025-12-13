@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import type { ActivityData } from "@/types/analytics";
+import type { RawActivityLog } from "@/types/analytics";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/activity`;
 
@@ -28,14 +28,14 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-export async function getActivityLogs(): Promise<ActivityData[]> {
+export async function getActivityLogs(): Promise<RawActivityLog[]> {
   const res = await fetch(BASE_URL, {
     cache: "no-store",
     credentials: "include",
     headers: { Accept: "application/json" },
   });
 
-  const result = await handleResponse<{ data: ActivityData[] }>(res);
+  const result = await handleResponse<{ data: RawActivityLog[] }>(res);
   return Array.isArray(result.data) ? result.data : [];
 }
 

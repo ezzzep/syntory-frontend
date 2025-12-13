@@ -44,7 +44,7 @@ export default function RegisterForm() {
       });
 
       notifyAuthChanged();
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Registration failed. Please try again.");

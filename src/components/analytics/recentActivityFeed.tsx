@@ -1,206 +1,224 @@
-import { useState } from "react";
-import { RecentActivityFeedProps } from "@/types/analytics";
+"use client";
 
-export default function RecentActivityFeed({ data }: RecentActivityFeedProps) {
+import { useState, useMemo, useRef, useEffect } from "react";
+import { useActivityLogs } from "@/hooks/useActivityLogs";
+
+export default function RecentActivityFeed() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [showScrollArrow, setShowScrollArrow] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const filterOptions = ["Orders", "Alerts", "Entries"];
-  const activityArray = Array.isArray(data) ? data : [];
-
-  const filteredActivities = selectedFilter
-    ? activityArray.filter(
-        (activity) => activity.type === selectedFilter.toLowerCase()
-      )
-    : activityArray;
-
-  const formatDateTime = (dateTimeString: string) => {
-    if (!dateTimeString) return { date: "", time: "" };
-
-    const parts = dateTimeString.split(",");
-    if (parts.length >= 2) {
-      return {
-        date: parts[0].trim(),
-        time: parts[1].trim(),
-      };
-    }
-
-    try {
-      const date = new Date(dateTimeString);
-      return {
-        date: date.toLocaleDateString(),
-        time: date.toLocaleTimeString(),
-      };
-    } catch {
-      return { date: dateTimeString, time: "" };
-    }
+  const categoryColors: Record<string, string> = {
+    Appliances: "bg-blue-500/20",
+    "Home & Living": "bg-green-500/20",
+    Gadgets: "bg-purple-500/20",
+    "Home Cleaning": "bg-orange-500/20",
   };
 
+  const categoryIcons: Record<string, string> = {
+    Appliances: "📺",
+    "Home & Living": "🏠",
+    Gadgets: "📱",
+    "Home Cleaning": "🧹",
+  };
+
+  const { logs, loading, error } = useActivityLogs(
+    categoryColors,
+    categoryIcons
+  );
+
+  const uniqueCategories = useMemo(() => {
+    return [
+      ...new Set(logs.map((l) => l.category).filter((c): c is string => !!c)),
+    ].sort();
+  }, [logs]);
+
+  const filteredLogs = selectedFilter
+    ? logs.filter((l) => l.category === selectedFilter)
+    : logs;
+
+  const formatDateTime = (iso: string) => {
+    const date = new Date(iso);
+    return {
+      date: date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      setShowScrollArrow(el.scrollTop === 0);
+    };
+
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [filteredLogs]);
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-400">
+        Loading activity...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center text-red-400">
+        {error}
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-700/50 h-full flex flex-col">
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-          Recent Activity Feed
-        </h2>
-        <div className="flex gap-2 flex-wrap items-center justify-between">
-          <div className="flex gap-2 flex-wrap items-center">
+    <>
+      <style jsx>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+
+      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700 flex flex-col h-full relative">
+        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+
+        <div className="flex justify-between mb-4 flex-wrap gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
-              className={`px-3 sm:px-4 py-2 rounded-xl transition-colors text-xs sm:text-sm ${
-                !selectedFilter ? "bg-slate-700/50" : "bg-slate-700/30"
-              } hover:bg-slate-600/50`}
+              className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${
+                selectedFilter === null
+                  ? "bg-slate-700/40 text-white"
+                  : "bg-slate-700/40 text-gray-300"
+              }`}
               onClick={() => setSelectedFilter(null)}
             >
               All
             </button>
 
             {selectedFilter && (
-              <div className="px-3 sm:px-4 py-2 rounded-xl bg-slate-700/50 text-xs sm:text-sm flex items-center gap-2">
-                <span>{selectedFilter}</span>
+              <div className="inline-flex items-center bg-slate-700/40 text-white text-sm px-3 py-1 rounded-lg">
+                {selectedFilter}
                 <button
-                  className="hover:bg-slate-600/50 rounded-full p-0.5 transition-colors"
+                  className="ml-2 opacity-80 hover:opacity-100 cursor-pointer"
                   onClick={() => setSelectedFilter(null)}
-                  aria-label="Clear filter"
                 >
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  ×
                 </button>
               </div>
             )}
           </div>
 
-          <div className="relative">
-            <button
-              className="px-3 sm:px-4 py-2 rounded-xl bg-slate-700/30 hover:bg-slate-600/50 transition-colors text-xs sm:text-sm flex items-center gap-1"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <span>Filter</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {uniqueCategories.length > 0 && (
+            <div className="relative">
+              <button
+                className="px-4 py-1 rounded-lg bg-slate-700/40 text-sm font-medium cursor-pointer"
+                onClick={() => setIsDropdownOpen((p) => !p)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
+                Filter
+              </button>
 
-            {isDropdownOpen && (
-              <div className="absolute top-full right-0 mt-1 bg-slate-700 rounded-lg shadow-lg z-10 min-w-full">
-                {filterOptions.map((option) => (
-                  <button
-                    key={option}
-                    className="block w-full text-left px-3 py-2 text-sm hover:bg-slate-600 transition-colors flex items-center justify-between"
-                    onClick={() => {
-                      setSelectedFilter(option);
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    <span>{option}</span>
-                    {selectedFilter === option && (
-                      <svg
-                        className="w-4 h-4 text-green-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="flex-1 overflow-y-auto"
-        style={{
-          maxHeight: "380px",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        <style jsx>{`
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
-        <div className="space-y-3 sm:space-y-4">
-          {filteredActivities.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center mt-4">
-              No recent activity.
-            </p>
-          ) : (
-            filteredActivities.map((activity) => {
-              const { date, time } = formatDateTime(activity.time);
-              return (
-                <div key={activity.id}>
-                  <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-slate-700/30 transition-colors">
-                    <div
-                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 ${activity.color} ${activity.iconColor}`}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 bg-slate-800 rounded-lg overflow-hidden z-10 shadow-lg">
+                  {uniqueCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      className={`block w-full px-4 py-2 text-left hover:bg-slate-700 text-sm cursor-pointer ${
+                        selectedFilter === cat
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-300"
+                      }`}
+                      onClick={() => {
+                        setSelectedFilter(cat);
+                        setIsDropdownOpen(false);
+                      }}
                     >
-                      <span className="text-lg sm:text-xl">
-                        {activity.icon}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-2">
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-blue-300 text-sm sm:text-base truncate">
-                            {activity.title}
-                          </h3>
-                          {activity.item_name && (
-                            <p className="text-gray-400 text-xs sm:text-sm mt-1 line-clamp-1 sm:line-clamp-none">
-                              {activity.item_name}
-                            </p>
-                          )}
-                          {activity.item_category && (
-                            <span className="inline-block mt-1 px-2 py-1 text-xs bg-slate-700/50 text-slate-300 rounded-md">
-                              {activity.item_category}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs text-gray-500 block">
-                            {date}
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto space-y-3 hide-scrollbar"
+          style={{ maxHeight: "calc(4 * 95px + 3 * 12px)" }}
+        >
+          {filteredLogs.length === 0 ? (
+            <p className="text-center text-gray-400">No activity found.</p>
+          ) : (
+            filteredLogs.map((log) => {
+              const { date, time } = formatDateTime(log.time);
+
+              return (
+                <div
+                  key={log.id}
+                  className="flex gap-4 p-3 rounded-xl hover:bg-slate-700/30"
+                >
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      log.title.startsWith("Added")
+                        ? "bg-blue-500/50"
+                        : log.title.startsWith("Updated")
+                        ? "bg-yellow-500/50"
+                        : log.title.startsWith("Deleted")
+                        ? "bg-red-500/50"
+                        : log.color
+                    } ${log.iconColor}`}
+                  >
+                    <span className="text-xl">{log.icon}</span>
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <div>
+                        <h3 className="font-semibold text-white">
+                          {log.title}
+                        </h3>
+                        {log.name && (
+                          <p className="text-sm text-gray-300">{log.name}</p>
+                        )}
+                        {log.category && (
+                          <span className="inline-block mt-1 px-2 py-1 text-xs bg-slate-700 text-gray-300 rounded-md">
+                            {log.category}
                           </span>
-                          <span className="text-xs text-gray-500 block">
-                            {time}
-                          </span>
-                        </div>
+                        )}
+                      </div>
+
+                      <div className="text-xs text-gray-500 text-right">
+                        <div>{date}</div>
+                        <div>{time}</div>
                       </div>
                     </div>
                   </div>
-                  <div className="mx-3 sm:mx-4 h-px bg-slate-700/50"></div>
                 </div>
               );
             })
           )}
+
+          {showScrollArrow && filteredLogs.length > 4 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 bg-slate-700/60 rounded-full flex items-center justify-center animate-bounce">
+              ↓
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

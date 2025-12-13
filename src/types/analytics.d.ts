@@ -1,4 +1,28 @@
-interface MonthlyTargetData {
+export interface RawActivityLog {
+  id: number;
+  action: string;
+  name: string | null;
+  subject_type: "supplier" | "inventory";
+  subject_id: number;
+  category: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  changes: Record<string, any> | null;
+  created_at: string; 
+  updated_at: string;
+}
+
+export interface ActivityData {
+  id: number;
+  title: string;
+  name?: string;
+  category?: string;
+  time: string; 
+  icon: string;
+  color: string; 
+  iconColor: string;
+}
+
+export interface MonthlyTargetData {
   progress: number;
   change: string;
   earningsToday: string;
@@ -16,40 +40,19 @@ export interface OverstockRiskCardProps {
   riskPercentage?: number;
 }
 
-interface ActivityData {
-  id: number;
-  type: string;
-  icon: string;
-  title: string;
-  description: string;
-  time: string;
-  color: string;
-  iconColor: string;
-  action?: string;
-  item_name?: string;
-  item_id?: number;
-  item_category?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  changes?: Record<string, any> | any[];
-  
-}
-export interface RecentActivityFeedProps {
-  data: ActivityData[];
-}
-
-interface OrderData {
+export interface OrderData {
   product: string;
   category: string;
-  value: string; 
+  value: string;
   valuePercentage: number;
 }
 
 export interface RecentOrdersTableProps {
   data: OrderData[];
-  loading?: boolean; 
+  loading?: boolean;
 }
 
-interface SeasonalDemandData {
+export interface SeasonalDemandData {
   month: string;
   winter: number;
   spring: number;
@@ -61,8 +64,13 @@ export interface SeasonalDemandChartProps {
   data: SeasonalDemandData[];
 }
 
+export interface PieDataPoint {
+  name: string;
+  value: number;
+}
+
 export interface ShrinkageLossCardProps {
-  data: PieProps["data"];
+  data: PieDataPoint[];
   colors: string[];
 }
 
@@ -74,9 +82,4 @@ export interface SupplierReliabilityChartProps {
     delivery: number;
     communication: number;
   }>;
-}
-
-interface SupplierReliabilityData {
-  name: string;
-  value: number;
 }
