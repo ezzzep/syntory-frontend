@@ -148,9 +148,7 @@ export default function AnalyticsPage() {
           id: log.id,
           type: log.action || "general", 
           title: log.action || "Activity",
-          description: log.item_name
-            ? `${log.action || "Activity"} - ${log.item_name}`
-            : log.action || "Activity",
+          description: log.description,
           time: log.created_at
             ? new Date(log.created_at).toLocaleString()
             : new Date().toLocaleString(),

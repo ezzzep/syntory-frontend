@@ -100,7 +100,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
       const newItem = await createInventoryItem(itemData);
       console.log("Created item:", newItem);
       await createActivityLog({
-        action: "Created Inventory Item",
+        action: "Added New Item",
         item_name: newItem.name,
         item_id: newItem.id,
         item_category: newItem.category,
@@ -126,7 +126,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         description: "",
         supplier_name: "",
       });
-      
+
       setErrors({});
       setOpen(false);
     } catch (error) {
