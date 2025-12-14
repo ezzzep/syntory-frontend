@@ -1,7 +1,15 @@
 import Cookies from "js-cookie";
 import { notifyAuthChanged } from "@/lib/authEvents";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Determine API URL dynamically based on environment
+const API_URL = (() => {
+  if (typeof window !== "undefined") {
+    // Running in browser
+    return process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+  }
+  // Server-side fallback
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+})();
 
 type RegisterData = {
   name: string;
@@ -24,6 +32,7 @@ export type User = {
   updated_at?: string;
 };
 
+// Fetch CSRF cookie for Sanctum
 async function fetchCsrfToken() {
   const res = await fetch(`${API_URL}/sanctum/csrf-cookie`, {
     credentials: "include",
@@ -35,9 +44,9 @@ async function fetchCsrfToken() {
   if (!res.ok) throw new Error("Failed to get CSRF cookie");
 }
 
+// Helper to handle fetch responses
 async function handleResponse<T>(res: Response): Promise<T> {
   const text = await res.text();
-
   let data: unknown;
   try {
     data = text ? JSON.parse(text) : {};
@@ -59,6 +68,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
+// Register a new user
 export async function register(data: RegisterData) {
   await fetchCsrfToken();
 
@@ -78,6 +88,7 @@ export async function register(data: RegisterData) {
   return handleResponse<User>(res);
 }
 
+// Login existing user
 export async function login(data: LoginData) {
   await fetchCsrfToken();
 
@@ -97,6 +108,7 @@ export async function login(data: LoginData) {
   return handleResponse<User>(res);
 }
 
+// Get currently authenticated user
 export async function getUser(): Promise<User> {
   const res = await fetch(`${API_URL}/api/user`, {
     method: "GET",
@@ -111,6 +123,7 @@ export async function getUser(): Promise<User> {
   return handleResponse<User>(res);
 }
 
+// Logout user
 export async function logout() {
   try {
     await fetchCsrfToken();
