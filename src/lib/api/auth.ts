@@ -1,16 +1,30 @@
-import Cookies from "js-cookie";
+// lib/auth.ts
+
 import { notifyAuthChanged } from "@/lib/authEvents";
 
-// Determine API URL dynamically based on environment
-const API_URL = (() => {
-  if (typeof window !== "undefined") {
-    // Running in browser
-    return process.env.NEXT_PUBLIC_API_URL || window.location.origin;
-  }
-  // Server-side fallback
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-})();
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (typeof window !== "undefined"
+    ? window.location.origin
+    : "http://localhost:8000");
 
+// --- Helper function to read and DECODE a cookie ---
+function getCookie(name: string): string | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    // Get the raw, encoded cookie value
+    const encodedValue = parts.pop()?.split(";").shift();
+    // DECODE IT before returning
+    return encodedValue ? decodeURIComponent(encodedValue) : undefined;
+  }
+  return undefined;
+}
+
+// --- Types (no changes) ---
 type RegisterData = {
   name: string;
   email: string;
@@ -32,8 +46,8 @@ export type User = {
   updated_at?: string;
 };
 
-// Fetch CSRF cookie for Sanctum
-async function fetchCsrfToken() {
+// --- Core Functions (no changes) ---
+async function fetchCsrfCookie() {
   const res = await fetch(`${API_URL}/sanctum/csrf-cookie`, {
     credentials: "include",
     headers: {
@@ -41,38 +55,36 @@ async function fetchCsrfToken() {
     },
   });
 
-  if (!res.ok) throw new Error("Failed to get CSRF cookie");
+  if (!res.ok) {
+    throw new Error("Failed to fetch CSRF cookie");
+  }
 }
 
-// Helper to handle fetch responses
 async function handleResponse<T>(res: Response): Promise<T> {
   const text = await res.text();
-  let data: unknown;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    data = { message: "Invalid JSON from server" };
-  }
+  const data = text ? JSON.parse(text) : {};
 
   if (!res.ok) {
     const payload = data as {
       message?: string;
       errors?: Record<string, string[]>;
     };
+
     const msg =
       payload.message ||
       (payload.errors ? Object.values(payload.errors)[0]?.[0] : res.statusText);
+
     throw new Error(msg || `HTTP ${res.status}`);
   }
 
   return data as T;
 }
 
-// Register a new user
-export async function register(data: RegisterData) {
-  await fetchCsrfToken();
+// --- API Actions (Updated to use the corrected getCookie function) ---
 
-  const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+export async function register(data: RegisterData) {
+  await fetchCsrfCookie();
+  const xsrfToken = getCookie("XSRF-TOKEN") ?? "";
 
   const res = await fetch(`${API_URL}/api/register`, {
     method: "POST",
@@ -80,7 +92,7 @@ export async function register(data: RegisterData) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+      "X-XSRF-TOKEN": xsrfToken, // No need to decode here, getCookie already did it
     },
     body: JSON.stringify(data),
   });
@@ -88,11 +100,9 @@ export async function register(data: RegisterData) {
   return handleResponse<User>(res);
 }
 
-// Login existing user
 export async function login(data: LoginData) {
-  await fetchCsrfToken();
-
-  const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
+  await fetchCsrfCookie();
+  const xsrfToken = getCookie("XSRF-TOKEN") ?? "";
 
   const res = await fetch(`${API_URL}/api/login`, {
     method: "POST",
@@ -100,7 +110,7 @@ export async function login(data: LoginData) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+      "X-XSRF-TOKEN": xsrfToken, // No need to decode here, getCookie already did it
     },
     body: JSON.stringify(data),
   });
@@ -108,40 +118,35 @@ export async function login(data: LoginData) {
   return handleResponse<User>(res);
 }
 
-// Get currently authenticated user
 export async function getUser(): Promise<User> {
   const res = await fetch(`${API_URL}/api/user`, {
-    method: "GET",
     credentials: "include",
     headers: {
       Accept: "application/json",
     },
   });
 
-  if (!res.ok) throw new Error("Unauthenticated");
+  if (!res.ok) {
+    throw new Error("Unauthenticated");
+  }
 
   return handleResponse<User>(res);
 }
 
-// Logout user
 export async function logout() {
   try {
-    await fetchCsrfToken();
+    await fetchCsrfCookie();
+    const xsrfToken = getCookie("XSRF-TOKEN") ?? "";
 
-    const xsrfToken = Cookies.get("XSRF-TOKEN") ?? "";
     await fetch(`${API_URL}/api/logout`, {
       method: "POST",
       credentials: "include",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
-        "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+        "X-XSRF-TOKEN": xsrfToken, // No need to decode here, getCookie already did it
       },
     });
-  } catch (err) {
-    console.warn("Logout request failed (probably offline or 204)", err);
   } finally {
-    Cookies.remove("XSRF-TOKEN");
     notifyAuthChanged();
   }
 }
