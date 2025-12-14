@@ -13,13 +13,16 @@ export interface RawActivityLog {
 
 export interface ActivityData {
   id: number;
+  action: string;
   title: string;
   name?: string;
   category?: string;
-  time: string; 
+  time: string;
   icon: string;
-  color: string; 
+  color: string;
   iconColor: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  changes: Record<string, any> | null;
 }
 
 export interface MonthlyTargetData {

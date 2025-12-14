@@ -88,9 +88,11 @@ export function useActivityLogs(
           icon,
           color,
           iconColor,
+          action: log.action,
           name: log.name || undefined,
           category: log.category || undefined,
           time: log.created_at,
+          changes: log.changes || null,
         };
       });
 

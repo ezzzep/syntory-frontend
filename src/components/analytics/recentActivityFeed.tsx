@@ -1,7 +1,103 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
+
+const ChangesDisplay = ({
+  changes,
+}: {
+  changes: Record<string, any> | null;
+}) => {
+  if (!changes || Object.keys(changes).length === 0) return null;
+
+  const formatSingleValue = (value: any) => {
+    if (value === null || value === undefined) return "null";
+    if (typeof value === "boolean") return value ? "true" : "false";
+    if (typeof value === "number") return value.toString();
+    if (typeof value === "string")
+      return value.length > 50 ? value.slice(0, 50) + "..." : value;
+    return String(value);
+  };
+
+  const getFieldLabel = (key: string) => {
+    const labels: Record<string, string> = {
+      name: "Name",
+      email: "Email",
+      phone: "Phone",
+      price: "Price",
+      quantity: "Quantity",
+      status: "Status",
+      description: "Description",
+      category_id: "Category",
+      supplier_id: "Supplier",
+    };
+    return (
+      labels[key] ||
+      key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+    );
+  };
+
+  const renderValue = (value: any) => {
+    if (typeof value === "object" && value !== null) {
+      if ("old" in value && "new" in value) {
+        return (
+          <span className="flex items-center gap-2">
+            <span className="text-red-400 line-through">
+              {formatSingleValue(value.old)}
+            </span>
+            <span className="text-gray-500">→</span>
+            <span className="text-green-400">
+              {formatSingleValue(value.new)}
+            </span>
+          </span>
+        );
+      }
+      if ("from" in value && "to" in value) {
+        return (
+          <span className="flex items-center gap-2 ">
+            <span className="text-red-400 line-through">
+              {formatSingleValue(value.from)}
+            </span>
+            <span className="text-gray-500">→</span>
+            <span className="text-green-400">
+              {formatSingleValue(value.to)}
+            </span>
+          </span>
+        );
+      }
+      return null;
+    }
+    return <span className="text-green-400">{formatSingleValue(value)}</span>;
+  };
+
+  const isRenderable = (value: any) => {
+    if (typeof value === "object" && value !== null) {
+      return (
+        ("old" in value && "new" in value) || ("from" in value && "to" in value)
+      );
+    }
+    return true;
+  };
+
+  return (
+    <div className="mt-1">
+      {Object.entries(changes)
+        .filter(([_, value]) => isRenderable(value))
+        .map(([key, value]) => (
+          <div key={key} className="flex gap-2 text-sm">
+            <span className="text-yellow-400 mt-0.5">↻</span>
+            <div>
+              <span className="text-gray-400 font-medium ">
+                {getFieldLabel(key)}:
+              </span>{" "}
+              {renderValue(value)}
+            </div>
+          </div>
+        ))}
+    </div>
+  );
+};
 
 export default function RecentActivityFeed() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -56,30 +152,31 @@ export default function RecentActivityFeed() {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
-    const onScroll = () => {
-      setShowScrollArrow(el.scrollTop === 0);
-    };
-
+    const onScroll = () => setShowScrollArrow(el.scrollTop === 0);
     el.addEventListener("scroll", onScroll);
     return () => el.removeEventListener("scroll", onScroll);
   }, [filteredLogs]);
 
-  if (loading) {
+  if (loading)
     return (
       <div className="h-full flex items-center justify-center text-gray-400">
         Loading activity...
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="h-full flex items-center justify-center text-red-400">
         {error}
       </div>
     );
-  }
+
+  const getIconBg = (title: string) => {
+    if (title.startsWith("Added")) return "bg-blue-500/50";
+    if (title.startsWith("Updated")) return "bg-yellow-500/50";
+    if (title.startsWith("Deleted")) return "bg-red-500/50";
+    return "bg-gray-500/50";
+  };
 
   return (
     <>
@@ -108,7 +205,6 @@ export default function RecentActivityFeed() {
             >
               All
             </button>
-
             {selectedFilter && (
               <div className="inline-flex items-center bg-slate-700/40 text-white text-sm px-3 py-1 rounded-lg">
                 {selectedFilter}
@@ -130,7 +226,6 @@ export default function RecentActivityFeed() {
               >
                 Filter
               </button>
-
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 bg-slate-800 rounded-lg overflow-hidden z-10 shadow-lg">
                   {uniqueCategories.map((cat) => (
@@ -154,7 +249,6 @@ export default function RecentActivityFeed() {
             </div>
           )}
         </div>
-
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto space-y-3 hide-scrollbar"
@@ -165,6 +259,7 @@ export default function RecentActivityFeed() {
           ) : (
             filteredLogs.map((log) => {
               const { date, time } = formatDateTime(log.time);
+              const isUpdated = log.title.startsWith("Updated");
 
               return (
                 <div
@@ -172,36 +267,32 @@ export default function RecentActivityFeed() {
                   className="flex gap-4 p-3 rounded-xl hover:bg-slate-700/30"
                 >
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      log.title.startsWith("Added")
-                        ? "bg-blue-500/50"
-                        : log.title.startsWith("Updated")
-                        ? "bg-yellow-500/50"
-                        : log.title.startsWith("Deleted")
-                        ? "bg-red-500/50"
-                        : log.color
-                    } ${log.iconColor}`}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconBg(
+                      log.title
+                    )} ${log.iconColor}`}
                   >
                     <span className="text-xl">{log.icon}</span>
                   </div>
 
                   <div className="flex-1">
                     <div className="flex justify-between">
-                      <div>
+                      <div className="w-50">
                         <h3 className="font-semibold text-white">
                           {log.title}
                         </h3>
                         {log.name && (
-                          <p className="text-sm text-gray-300">{log.name}</p>
+                          <p className="text-sm w-50 text-gray-300">
+                            {log.name}
+                          </p>
                         )}
+                        {isUpdated && <ChangesDisplay changes={log.changes} />}
+                      </div>
+                      <div className="text-xs text-gray-500 text-right flex flex-col items-end gap-1">
                         {log.category && (
-                          <span className="inline-block mt-1 px-2 py-1 text-xs bg-slate-700 text-gray-300 rounded-md">
+                          <span className="mt-1 px-2 py-1 text-xs text-blue-100 bg-slate-700/80 rounded-md">
                             {log.category}
                           </span>
                         )}
-                      </div>
-
-                      <div className="text-xs text-gray-500 text-right">
                         <div>{date}</div>
                         <div>{time}</div>
                       </div>
