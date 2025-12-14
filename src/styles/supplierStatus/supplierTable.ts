@@ -69,19 +69,21 @@ export const suppliersTableStyles = {
     md:hidden
   `,
   table: `
-    w-full border-collapse
+   min-w-full       
+    w-full 
+    border-collapse
   `,
   tableHeader: `
     bg-slate-800/30 border-b border-slate-700
   `,
   tableHeadCell: `
-    px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider
+    px-4 sm:px-2 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider
   `,
   tableRowHover: `
     hover:bg-slate-800/30 transition-colors
   `,
-  tableCell: `
-    px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-300
+  tableCell: ` 
+    px-4 sm:px-2 py-3 sm:py-4 text-sm text-gray-300 truncate
   `,
   tableCellName: `
     px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-white

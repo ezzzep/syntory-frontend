@@ -11,15 +11,6 @@ const ChangesDisplay = ({
 }) => {
   if (!changes || Object.keys(changes).length === 0) return null;
 
-  const formatSingleValue = (value: any) => {
-    if (value === null || value === undefined) return "null";
-    if (typeof value === "boolean") return value ? "true" : "false";
-    if (typeof value === "number") return value.toString();
-    if (typeof value === "string")
-      return value.length > 50 ? value.slice(0, 50) + "..." : value;
-    return String(value);
-  };
-
   const getFieldLabel = (key: string) => {
     const labels: Record<string, string> = {
       name: "Name",
@@ -38,63 +29,75 @@ const ChangesDisplay = ({
     );
   };
 
-  const renderValue = (value: any) => {
-    if (typeof value === "object" && value !== null) {
-      if ("old" in value && "new" in value) {
-        return (
-          <span className="flex items-center gap-2">
-            <span className="text-red-400 line-through">
-              {formatSingleValue(value.old)}
-            </span>
-            <span className="text-gray-500">→</span>
-            <span className="text-green-400">
-              {formatSingleValue(value.new)}
-            </span>
-          </span>
-        );
+  const renderChange = (oldValue: any, newValue: any) => {
+    const format = (val: any) => {
+      if (val === null || val === undefined)
+        return <span className="text-gray-500">empty</span>;
+      if (typeof val === "string") {
+        return val;
       }
-      if ("from" in value && "to" in value) {
-        return (
-          <span className="flex items-center gap-2 ">
-            <span className="text-red-400 line-through">
-              {formatSingleValue(value.from)}
-            </span>
-            <span className="text-gray-500">→</span>
-            <span className="text-green-400">
-              {formatSingleValue(value.to)}
-            </span>
-          </span>
-        );
-      }
-      return null;
-    }
-    return <span className="text-green-400">{formatSingleValue(value)}</span>;
+      return String(val);
+    };
+
+    return (
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-red-400 line-through break-all">
+          {format(oldValue)}
+        </span>
+        <span className="text-gray-500 flex-shrink-0">→</span>
+        <span className="text-green-400 break-all">{format(newValue)}</span>
+      </div>
+    );
   };
 
-  const isRenderable = (value: any) => {
-    if (typeof value === "object" && value !== null) {
-      return (
-        ("old" in value && "new" in value) || ("from" in value && "to" in value)
-      );
-    }
-    return true;
+  const renderSingleChange = (value: any) => {
+    return <span className="text-green-400 break-all">{String(value)}</span>;
   };
 
   return (
-    <div className="mt-1">
-      {Object.entries(changes)
-        .filter(([_, value]) => isRenderable(value))
-        .map(([key, value]) => (
+    <div className="mt-2 space-y-1.5">
+      {Object.entries(changes).map(([key, value]) => {
+        if (typeof value === "object" && value !== null) {
+          if ("old" in value && "new" in value) {
+            return (
+              <div key={key} className="flex gap-2 text-sm">
+                <span className="text-yellow-400 mt-0.5 flex-shrink-0">↻</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-gray-400 font-medium">
+                    {getFieldLabel(key)}:
+                  </span>{" "}
+                  {renderChange(value.old, value.new)}
+                </div>
+              </div>
+            );
+          }
+          if ("from" in value && "to" in value) {
+            return (
+              <div key={key} className="flex gap-2 text-sm">
+                <span className="text-yellow-400 mt-0.5 flex-shrink-0">↻</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-gray-400 font-medium">
+                    {getFieldLabel(key)}:
+                  </span>{" "}
+                  {renderChange(value.from, value.to)}
+                </div>
+              </div>
+            );
+          }
+        }
+  
+        return (
           <div key={key} className="flex gap-2 text-sm">
-            <span className="text-yellow-400 mt-0.5">↻</span>
-            <div>
-              <span className="text-gray-400 font-medium ">
+            <span className="text-yellow-400 mt-0.5 flex-shrink-0">↻</span>
+            <div className="min-w-0 flex-1">
+              <span className="text-gray-400 font-medium">
                 {getFieldLabel(key)}:
               </span>{" "}
-              {renderValue(value)}
+              {renderSingleChange(value)}
             </div>
           </div>
-        ))}
+        );
+      })}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,40 +18,46 @@ export default function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
 
-    if (!name || !email || !password || !confirmPassword) {
-      setError("All fields are required");
-      setLoading(false);
-      return;
-    }
+      if (!name || !email || !password || !confirmPassword) {
+        setError("All fields are required");
+        setLoading(false);
+        return;
+      }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
 
-    try {
-      await register({
-        name,
-        email,
-        password,
-        password_confirmation: confirmPassword,
-      });
+      try {
+        await register({
+          name,
+          email,
+          password,
+          password_confirmation: confirmPassword,
+        });
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
 
-      notifyAuthChanged();
-      router.push("/");
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+        notifyAuthChanged();
+        router.push("/");
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError("Registration failed. Please try again.");
+        setLoading(false);
+      }
+    },
+    [name, email, password, confirmPassword, router]
+  );
 
   return (
     <form

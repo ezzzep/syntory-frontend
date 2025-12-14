@@ -11,42 +11,10 @@ import Link from "next/link";
 export default function LoginForm() {
   const router = useRouter();
 
-  const [email, setEmail] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("loginEmail") || "";
-    }
-    return "";
-  });
-
-  const [password, setPassword] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("loginPassword") || "";
-    }
-    return "";
-  });
-
-  const [error, setError] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("loginError") || "";
-    }
-    return "";
-  });
-
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("loginLoading") === "true";
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("loginEmail", email);
-      localStorage.setItem("loginPassword", password);
-      localStorage.setItem("loginError", error);
-      localStorage.setItem("loginLoading", loading.toString());
-    }
-  }, [email, password, error, loading]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -62,12 +30,8 @@ export default function LoginForm() {
 
       try {
         await login({ email, password });
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("loginEmail");
-          localStorage.removeItem("loginPassword");
-          localStorage.removeItem("loginError");
-          localStorage.removeItem("loginLoading");
-        }
+        setEmail("");
+        setPassword("");
         notifyAuthChanged();
         router.push("/dashboard");
       } catch (err: unknown) {
@@ -78,12 +42,6 @@ export default function LoginForm() {
     },
     [email, password, router]
   );
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && loading) {
-      console.log("Login was interrupted. Please try again.");
-    }
-  }, [loading]);
 
   return (
     <form
