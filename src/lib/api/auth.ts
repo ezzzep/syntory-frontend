@@ -2,14 +2,14 @@ import Cookies from "js-cookie";
 import { notifyAuthChanged } from "@/lib/authEvents";
 
 // Determine API URL dynamically based on environment
-const getApiUrl = () => {
-  console.warn("!!! USING HARDCODED API URL FOR TESTING !!!");
-  return "https://syntory.onrender.com";
-};
-// --- END TEMPORARY HARDCODE ---
-
-const API_URL = getApiUrl();
-console.log("API_URL configured as:", API_URL);
+const API_URL = (() => {
+  if (typeof window !== "undefined") {
+    // Running in browser
+    return process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+  }
+  // Server-side fallback
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+})();
 
 type RegisterData = {
   name: string;
