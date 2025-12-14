@@ -10,7 +10,7 @@ const API_URL = (() => {
   // Server-side fallback
   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 })();
-
+console.log("API_URL:", API_URL); 
 type RegisterData = {
   name: string;
   email: string;
