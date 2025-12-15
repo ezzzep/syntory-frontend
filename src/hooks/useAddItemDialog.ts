@@ -12,7 +12,7 @@ const inventorySchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
   description: z.string().optional(),
   supplier_name: z.string().optional(),
-  price: z.number().min(0, "Price must be at least 1").optional(),
+  price: z.number().min(0, "Price must be at least 0").optional(),
 });
 
 export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
@@ -24,7 +24,6 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [priceInput, setPriceInput] = useState("");
   const [form, setForm] = useState<
-  
     CreateInventoryDto & { supplier_name?: string }
   >({
     name: "",
@@ -33,6 +32,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     description: "",
     supplier_name: "",
     price: 0,
+    total_quantity_value: 0,
   });
 
   const categories = [
@@ -77,6 +77,12 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     }
   };
 
+  const calculateTotalQuantityValue = () => {
+    const price = parseFloat(priceInput.replace(/,/g, "")) || 0;
+    const quantity = form.quantity || 0;
+    return price * quantity;
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -97,6 +103,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         description: form.description,
         supplier_name: form.supplier_name,
         price: form.price,
+        total_quantity_value: calculateTotalQuantityValue(),
       };
 
       console.log("Creating item with data:", itemData);
@@ -118,8 +125,10 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         description: "",
         supplier_name: "",
         price: 0,
+        total_quantity_value: 0,
       });
 
+      setPriceInput("");
       setErrors({});
       setOpen(false);
     } catch (error) {
@@ -151,14 +160,14 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     });
 
   const handlePriceBlur = () => {
-  if (form.price > 0) {
-    setPriceInput(formatPrice(form.price));
-  }
-};
+    if (form.price > 0) {
+      setPriceInput(formatPrice(form.price));
+    }
+  };
 
   const handlePriceChange = (value: string) => {
     const raw = value.replace(/,/g, "");
-    if (!/^\d*\.?\d*$/.test(raw)) return
+    if (!/^\d*\.?\d*$/.test(raw)) return;
     const numeric = raw === "" ? 0 : parseFloat(raw);
     setForm((prev) => ({
       ...prev,
@@ -176,7 +185,6 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
       setPriceInput(formatted);
     }
   };
-
 
   const handleSupplierChange = (supplierName: string) => {
     const selectedSupplier = suppliers.find((s) => s.name === supplierName);
@@ -196,6 +204,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     form,
     priceInput,
     categories,
+    calculateTotalQuantityValue,
     setOpen,
     handleSubmit,
     handleInputChange,
@@ -203,5 +212,6 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     handleSupplierChange,
     handlePriceChange,
     handlePriceBlur,
+    formatPrice,
   };
 };
