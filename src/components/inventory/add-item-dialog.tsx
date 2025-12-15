@@ -33,7 +33,6 @@ const capitalizeFirstLetter = (str: string | null | undefined) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-
 export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
   const {
     loading,
@@ -44,7 +43,6 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
     form,
     priceInput,
     setOpen,
-    calculateTotalQuantityValue,
     handleSubmit,
     handleInputChange,
     handleQuantityChange,
@@ -114,10 +112,10 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
                   className={`${addItemDialogStyles.input} pl-8`}
                 />
               </div>
-              
+
               {priceInput && form.quantity > 0 && (
                 <div className="mt-1 text-xs text-gray-400">
-                  Total value: ₱{formatPrice(calculateTotalQuantityValue())}
+                  Total value: ₱{formatPrice(form.total_quantity_value || 0)}
                 </div>
               )}
 

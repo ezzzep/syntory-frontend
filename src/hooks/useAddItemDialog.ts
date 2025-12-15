@@ -13,6 +13,7 @@ const inventorySchema = z.object({
   description: z.string().optional(),
   supplier_name: z.string().optional(),
   price: z.number().min(0, "Price must be at least 0").optional(),
+  total_quantity_value: z.number().optional(),
 });
 
 export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
@@ -24,7 +25,10 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [priceInput, setPriceInput] = useState("");
   const [form, setForm] = useState<
-    CreateInventoryDto & { supplier_name?: string }
+    CreateInventoryDto & {
+      supplier_name?: string;
+      total_quantity_value?: number;
+    }
   >({
     name: "",
     category: "",
@@ -77,10 +81,10 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     }
   };
 
-  const calculateTotalQuantityValue = () => {
-    const price = parseFloat(priceInput.replace(/,/g, "")) || 0;
-    const quantity = form.quantity || 0;
-    return price * quantity;
+  const calculateTotalQuantityValue = (price?: number, quantity?: number) => {
+    const itemPrice = price !== undefined ? price : form.price;
+    const itemQuantity = quantity !== undefined ? quantity : form.quantity;
+    return itemPrice * itemQuantity;
   };
 
   const handleSubmit = async () => {
@@ -96,6 +100,9 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         finalCategory = selectedSupplier?.category || form.category;
       }
 
+      // Ensure we have the latest total value
+      const totalValue = calculateTotalQuantityValue();
+
       const itemData = {
         name: form.name,
         category: finalCategory,
@@ -103,7 +110,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         description: form.description,
         supplier_name: form.supplier_name,
         price: form.price,
-        total_quantity_value: calculateTotalQuantityValue(),
+        total_quantity_value: totalValue,
       };
 
       console.log("Creating item with data:", itemData);
@@ -145,11 +152,23 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
 
   const handleQuantityChange = (value: string) => {
     if (value === "") {
-      setForm((prev) => ({ ...prev, quantity: 0 }));
+      setForm((prev) => ({
+        ...prev,
+        quantity: 0,
+        total_quantity_value: 0,
+      }));
       return;
     }
     if (/^\d+$/.test(value)) {
-      setForm((prev) => ({ ...prev, quantity: Number(value) }));
+      const newQuantity = Number(value);
+      const price = parseFloat(priceInput.replace(/,/g, "")) || 0;
+      const totalValue = price * newQuantity;
+
+      setForm((prev) => ({
+        ...prev,
+        quantity: newQuantity,
+        total_quantity_value: totalValue,
+      }));
     }
   };
 
@@ -169,13 +188,14 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     const raw = value.replace(/,/g, "");
     if (!/^\d*\.?\d*$/.test(raw)) return;
     const numeric = raw === "" ? 0 : parseFloat(raw);
-    setForm((prev) => ({
-      ...prev,
-      price: isNaN(numeric) ? 0 : numeric,
-    }));
 
     if (raw === "") {
       setPriceInput("");
+      setForm((prev) => ({
+        ...prev,
+        price: 0,
+        total_quantity_value: 0,
+      }));
     } else {
       const parts = raw.split(".");
       const formatted =
@@ -183,6 +203,13 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         (parts[1] !== undefined ? "." + parts[1] : "");
 
       setPriceInput(formatted);
+
+      const totalValue = numeric * form.quantity;
+      setForm((prev) => ({
+        ...prev,
+        price: isNaN(numeric) ? 0 : numeric,
+        total_quantity_value: totalValue,
+      }));
     }
   };
 
