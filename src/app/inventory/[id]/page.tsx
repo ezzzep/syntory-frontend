@@ -18,6 +18,7 @@ import {
   Package,
   Building,
   PhilippinePeso,
+  CircleCheckBig,
 } from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -30,12 +31,14 @@ type NameUpdate = {
 
 type StockUpdate = {
   quantity?: number;
+  total_quantity_value?: number;
 };
 
 type DetailsUpdate = {
   category?: string;
   description?: string;
   price?: number;
+  total_quantity_value?: number;
 };
 
 type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
@@ -54,6 +57,7 @@ export default function InventoryItemDetails() {
   const [imagePath, setImagePath] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [priceInput, setPriceInput] = useState("");
+  const [additionalQuantity, setAdditionalQuantity] = useState("");
   const toasts = useToasts();
 
   const categories = [
@@ -69,6 +73,10 @@ export default function InventoryItemDetails() {
       maximumFractionDigits: 2,
     });
 
+  const calculateTotalValue = (price: number, quantity: number) => {
+    return price * quantity;
+  };
+
   const handlePriceChange = (value: string) => {
     const raw = value.replace(/,/g, "");
     if (!/^\d*\.?\d*$/.test(raw)) return;
@@ -79,6 +87,18 @@ export default function InventoryItemDetails() {
       ...prev,
       price: isNaN(numeric) ? 0 : numeric,
     }));
+
+    if (item) {
+      const currentQuantity =
+        editSection === "stock"
+          ? item.quantity + (parseInt(additionalQuantity) || 0)
+          : item.quantity;
+      const totalValue = calculateTotalValue(numeric, currentQuantity);
+      setFormData((prev) => ({
+        ...prev,
+        total_quantity_value: totalValue,
+      }));
+    }
 
     if (raw === "") {
       setPriceInput("");
@@ -239,7 +259,11 @@ export default function InventoryItemDetails() {
     } else if (section === "stock") {
       setFormData({
         quantity: item.quantity,
+        total_quantity_value:
+          item.total_quantity_value ||
+          calculateTotalValue(item.price, item.quantity),
       } as StockUpdate);
+      setAdditionalQuantity("");
     } else if (section === "details") {
       setFormData({
         category: item.category || "",
@@ -259,6 +283,7 @@ export default function InventoryItemDetails() {
   const cancelEditing = () => {
     setEditSection(null);
     setFormData({});
+    setAdditionalQuantity("");
     if (item) {
       const dbImagePath = getFullImageUrl(item.image_path);
       setImagePath(dbImagePath);
@@ -275,6 +300,17 @@ export default function InventoryItemDetails() {
       const updatePayload: any = {};
 
       Object.assign(updatePayload, formData);
+
+      // If editing stock, add the additional quantity to the current quantity
+      if (editSection === "stock" && additionalQuantity) {
+        const newQuantity = item.quantity + parseInt(additionalQuantity);
+        updatePayload.quantity = newQuantity;
+        updatePayload.total_quantity_value = calculateTotalValue(
+          item.price,
+          newQuantity
+        );
+      }
+
       const updatedItem = await updateInventoryItem(item.id, updatePayload);
       setItem({
         ...updatedItem,
@@ -288,6 +324,7 @@ export default function InventoryItemDetails() {
 
       setEditSection(null);
       setFormData({});
+      setAdditionalQuantity("");
       toasts.success("Item information updated successfully");
     } catch (err) {
       console.error("Failed to update item:", err);
@@ -299,6 +336,23 @@ export default function InventoryItemDetails() {
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const handleAdditionalQuantityChange = (value: string) => {
+    setAdditionalQuantity(value);
+
+    if (item) {
+      const currentPrice =
+        editSection === "details"
+          ? (formData as DetailsUpdate).price || item.price
+          : item.price;
+      const newQuantity = item.quantity + (parseInt(value) || 0);
+      const totalValue = calculateTotalValue(currentPrice, newQuantity);
+      setFormData((prev) => ({
+        ...prev,
+        total_quantity_value: totalValue,
+      }));
+    }
   };
 
   const navigateToInventory = () => {
@@ -529,6 +583,30 @@ export default function InventoryItemDetails() {
                       )}
                     </div>
                   </div>
+
+                  <div className="flex items-center">
+                    <CircleCheckBig className="h-5 w-5 text-blue-400 mr-3" />
+                    <div className="flex-1">
+                      <p className="text-sm text-white/60 ">Total Value</p>
+                      <p className="text-white">
+                        ₱{" "}
+                        {formatPrice(
+                          editSection === "details" || editSection === "stock"
+                            ? (formData as DetailsUpdate | StockUpdate)
+                                .total_quantity_value ||
+                                calculateTotalValue(
+                                  item.price,
+                                  editSection === "stock"
+                                    ? item.quantity +
+                                        (parseInt(additionalQuantity) || 0)
+                                    : item.quantity
+                                )
+                            : item.total_quantity_value ||
+                                calculateTotalValue(item.price, item.quantity)
+                        )}
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex items-start">
                     <Building className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
                     <div className="flex-1">
@@ -584,18 +662,13 @@ export default function InventoryItemDetails() {
                   <div className="flex items-center">
                     <Package className="h-5 w-5 text-blue-400 mr-3" />
                     <div className="flex-1">
-                      <p className="text-sm text-white/60">Quantity</p>
+                      <p className="text-sm text-white/60">Current Quantity</p>
                       {editSection === "stock" ? (
                         <Input
                           type="number"
-                          value={(formData as StockUpdate).quantity ?? ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "quantity",
-                              parseInt(e.target.value) || 0
-                            )
-                          }
-                          className="mt-1 bg-slate-700/50 border border-slate-600/40 text-white"
+                          value={item.quantity}
+                          disabled
+                          className="mt-1 bg-slate-700/30 border border-slate-600/40 text-white/70 cursor-not-allowed"
                           min="0"
                         />
                       ) : (
@@ -603,6 +676,25 @@ export default function InventoryItemDetails() {
                       )}
                     </div>
                   </div>
+
+                  {editSection === "stock" && (
+                    <div className="flex items-center">
+                      <Package className="h-5 w-5 text-blue-400 mr-3" />
+                      <div className="flex-1">
+                        <p className="text-sm text-white/60">Add Quantity</p>
+                        <Input
+                          type="number"
+                          value={additionalQuantity}
+                          onChange={(e) =>
+                            handleAdditionalQuantityChange(e.target.value)
+                          }
+                          className="mt-1 bg-slate-700/50 border border-slate-600/40 text-white"
+                          min="0"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="h-5 w-5 mr-3 mt-0.5"></div>
