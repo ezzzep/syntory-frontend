@@ -12,6 +12,7 @@ const inventorySchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
   description: z.string().optional(),
   supplier_name: z.string().optional(),
+  price: z.number().min(0, "Price must be at least 1").optional(),
 });
 
 export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
@@ -21,8 +22,9 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [suppliersLoading, setSuppliersLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const [priceInput, setPriceInput] = useState("");
   const [form, setForm] = useState<
+  
     CreateInventoryDto & { supplier_name?: string }
   >({
     name: "",
@@ -30,6 +32,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     quantity: 0,
     description: "",
     supplier_name: "",
+    price: 0,
   });
 
   const categories = [
@@ -93,6 +96,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         quantity: form.quantity,
         description: form.description,
         supplier_name: form.supplier_name,
+        price: form.price,
       };
 
       console.log("Creating item with data:", itemData);
@@ -113,6 +117,7 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         quantity: 0,
         description: "",
         supplier_name: "",
+        price: 0,
       });
 
       setErrors({});
@@ -139,6 +144,40 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     }
   };
 
+  const formatPrice = (value: number) =>
+    value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  const handlePriceBlur = () => {
+  if (form.price > 0) {
+    setPriceInput(formatPrice(form.price));
+  }
+};
+
+  const handlePriceChange = (value: string) => {
+    const raw = value.replace(/,/g, "");
+    if (!/^\d*\.?\d*$/.test(raw)) return
+    const numeric = raw === "" ? 0 : parseFloat(raw);
+    setForm((prev) => ({
+      ...prev,
+      price: isNaN(numeric) ? 0 : numeric,
+    }));
+
+    if (raw === "") {
+      setPriceInput("");
+    } else {
+      const parts = raw.split(".");
+      const formatted =
+        Number(parts[0]).toLocaleString("en-US") +
+        (parts[1] !== undefined ? "." + parts[1] : "");
+
+      setPriceInput(formatted);
+    }
+  };
+
+
   const handleSupplierChange = (supplierName: string) => {
     const selectedSupplier = suppliers.find((s) => s.name === supplierName);
     setForm((prev) => ({
@@ -155,11 +194,14 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
     suppliersLoading,
     errors,
     form,
+    priceInput,
     categories,
     setOpen,
     handleSubmit,
     handleInputChange,
     handleQuantityChange,
     handleSupplierChange,
+    handlePriceChange,
+    handlePriceBlur,
   };
 };

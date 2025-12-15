@@ -33,11 +33,14 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
     suppliersLoading,
     errors,
     form,
+    priceInput,
     setOpen,
     handleSubmit,
     handleInputChange,
     handleQuantityChange,
     handleSupplierChange,
+    handlePriceChange,
+    handlePriceBlur,
   } = useAddItemDialog(onAdd);
 
   return (
@@ -64,20 +67,40 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
         </div>
 
         <div className={addItemDialogStyles.formContainer}>
+          <div className={addItemDialogStyles.formField}>
+            <label className={addItemDialogStyles.label}>
+              <Package className="w-4 h-4 mr-2" />
+              Item Name
+            </label>
+            <Input
+              placeholder="Enter item name"
+              value={form.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className={addItemDialogStyles.input}
+            />
+            {errors.name && (
+              <p className={addItemDialogStyles.error}>{errors.name}</p>
+            )}
+          </div>
+
           <div className={addItemDialogStyles.formRow}>
             <div className={addItemDialogStyles.formField}>
               <label className={addItemDialogStyles.label}>
                 <Package className="w-4 h-4 mr-2" />
-                Item Name
+                Price
               </label>
               <Input
-                placeholder="Enter item name"
-                value={form.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
+                type="text"
+                placeholder="0.00"
+                value={priceInput}
+                onChange={(e) => handlePriceChange(e.target.value)}
+                onBlur={handlePriceBlur}
+                inputMode="decimal"
                 className={addItemDialogStyles.input}
               />
-              {errors.name && (
-                <p className={addItemDialogStyles.error}>{errors.name}</p>
+
+              {errors.price && (
+                <p className={addItemDialogStyles.error}>{errors.price}</p>
               )}
             </div>
 
