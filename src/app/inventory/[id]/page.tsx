@@ -1,63 +1,30 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
-import {
-  getItemById,
-  updateInventoryItem,
-  uploadItemImage,
-} from "@/lib/api/inventory";
-import { getSuppliers } from "@/lib/api/suppliers";
-import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
-import type { Supplier } from "@/types/supplier";
-import {
-  Edit,
-  Save,
-  X,
-  Camera,
-  Tag,
-  Package,
-  Building,
-  PhilippinePeso,
-  CircleCheckBig,
-} from "lucide-react";
+
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { updateInventoryItem } from "@/lib/api/inventory";
+import type {
+  UpdateData,
+  NameUpdate,
+  StockUpdate,
+  DetailsUpdate,
+} from "@/types/inventory";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-type NameUpdate = {
-  name?: string;
-  image_path?: string;
-};
-
-type StockUpdate = {
-  quantity?: number;
-  total_quantity_value?: number;
-};
-
-type DetailsUpdate = {
-  category?: string;
-  description?: string;
-  price?: number;
-  total_quantity_value?: number;
-};
-
-type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
+import { useInventoryItem } from "@/hooks/useInventoryItem";
+import {
+  formatPrice,
+  calculateTotalValue,
+  getFullImageUrl,
+} from "@/utils/inventoryUtils";
+import { ItemDetailsHeader } from "@/components/inventory/inventoryItem/itemDetailsHeader";
+import { ItemDetailsSection } from "@/components/inventory/inventoryItem/itemDetailsSection";
+import { StockInfoSection } from "@/components/inventory/inventoryItem/stockInfoSection";
+import { DescriptionSection } from "@/components/inventory/inventoryItem/descriptionSection";
 
 export default function InventoryItemDetails() {
-  const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [item, setItem] = useState<InventoryItem | null>(null);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editSection, setEditSection] = useState<string | null>(null);
-  const [formData, setFormData] = useState<UpdateData>({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [imagePath, setImagePath] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [priceInput, setPriceInput] = useState("");
-  const [additionalQuantity, setAdditionalQuantity] = useState("");
   const toasts = useToasts();
 
   const categories = [
@@ -67,15 +34,21 @@ export default function InventoryItemDetails() {
     "Home Cleaning",
   ];
 
-  const formatPrice = (value: number) =>
-    value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  const {
+    item,
+    loading,
+    imagePath,
+    setImagePath,
+    priceInput,
+    setPriceInput,
+    setItem,
+  } = useInventoryItem();
 
-  const calculateTotalValue = (price: number, quantity: number) => {
-    return price * quantity;
-  };
+  const [editSection, setEditSection] = useState<string | null>(null);
+  const [formData, setFormData] = useState<UpdateData>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [additionalQuantity, setAdditionalQuantity] = useState("");
 
   const handlePriceChange = (value: string) => {
     const raw = value.replace(/,/g, "");
@@ -116,136 +89,6 @@ export default function InventoryItemDetails() {
     if (price !== undefined) {
       setPriceInput(formatPrice(price));
     }
-  };
-
-  const getFullImageUrl = (path: string | null | undefined) => {
-    if (!path) return "";
-
-    if (path.startsWith("http")) {
-      return path;
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
-    const cleanPath = path.replace(/^\//, "");
-
-    return `${cleanBaseUrl}/storage/${cleanPath}`;
-  };
-
-  const getStockStatus = (quantity: number) => {
-    if (quantity === 0) {
-      return { status: "Out of Stock", color: "text-red-500" };
-    } else if (quantity < 10) {
-      return { status: "Very Low Stock", color: "text-red-400" };
-    } else if (quantity <= 20) {
-      return { status: "Low Stock", color: "text-yellow-400" };
-    } else {
-      return { status: "High Stock", color: "text-green-400" };
-    }
-  };
-
-  useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        if (params.id) {
-          const id = Number(params.id);
-          const data = await getItemById(id);
-          console.log("Fetched item data:", data);
-          setItem(data);
-
-          const fullImageUrl = getFullImageUrl(data.image_path);
-          setImagePath(fullImageUrl);
-          if (data.price !== undefined) {
-            setPriceInput(formatPrice(data.price));
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to fetch inventory item:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchSuppliers = async () => {
-      try {
-        const suppliersData = await getSuppliers();
-        setSuppliers(suppliersData);
-      } catch (err) {
-        console.warn("Failed to fetch suppliers:", err);
-      }
-    };
-
-    fetchItem();
-    fetchSuppliers();
-  }, [params.id]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("activeNav", "inventory");
-    }
-  }, [pathname]);
-
-  const formatCategory = (category: string) => {
-    return category
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  const saveImagePathToDatabase = async (url: string) => {
-    if (!item) return;
-
-    try {
-      const updatePayload = {
-        image_path: url,
-      } as unknown as UpdateInventoryDto;
-      const updatedItem = await updateInventoryItem(item.id, updatePayload);
-      setItem({
-        ...updatedItem,
-        supplier_name: item.supplier_name,
-      });
-      return updatedItem;
-    } catch (error) {
-      console.error("Failed to save image path:", error);
-      throw error;
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !item) return;
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const result = await uploadItemImage(item.id, formData);
-
-      if (result && result.image_url) {
-        const pathOnly = result.image_url.replace(/.*\/storage\//, "");
-        const fullImageUrl = getFullImageUrl(pathOnly);
-        setImagePath(fullImageUrl);
-        await saveImagePathToDatabase(pathOnly);
-
-        toasts.success("Image uploaded and saved successfully");
-      } else {
-        console.error("Invalid response from server:", result);
-        throw new Error("Invalid response from server");
-      }
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      toasts.error(
-        `Failed to upload image: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
   };
 
   const startEditing = (section: string) => {
@@ -301,7 +144,6 @@ export default function InventoryItemDetails() {
 
       Object.assign(updatePayload, formData);
 
-      // If editing stock, add the additional quantity to the current quantity
       if (editSection === "stock" && additionalQuantity) {
         const newQuantity = item.quantity + parseInt(additionalQuantity);
         updatePayload.quantity = newQuantity;
@@ -317,7 +159,6 @@ export default function InventoryItemDetails() {
         supplier_name: item.supplier_name,
       });
 
-      // Update priceInput after saving
       if (updatedItem.price !== undefined) {
         setPriceInput(formatPrice(updatedItem.price));
       }
@@ -359,6 +200,12 @@ export default function InventoryItemDetails() {
     router.push("/inventory");
   };
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeNav", "inventory");
+    }
+  }, [pathname]);
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
       <div className="container mx-auto px-4 py-8">
@@ -371,402 +218,62 @@ export default function InventoryItemDetails() {
           </div>
         ) : item ? (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-5 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="relative h-20 w-20 rounded-lg overflow-hidden mr-6">
-                    {imagePath ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={imagePath}
-                        alt={item.name}
-                        className="h-full w-full object-cover cursor-pointer"
-                        onError={(e) => {
-                          console.error("Image failed to load:", imagePath);
-                          console.error(
-                            "Item image_path from DB:",
-                            item.image_path
-                          );
-                          if (
-                            item.image_path &&
-                            item.image_path !== imagePath
-                          ) {
-                            const fallbackUrl = getFullImageUrl(
-                              item.image_path
-                            );
-                            console.log("Trying fallback URL:", fallbackUrl);
-                            setImagePath(fallbackUrl);
-                          }
-                        }}
-                        onLoad={() => {
-                          console.log("Image loaded successfully:", imagePath);
-                        }}
-                      />
-                    ) : null}
-                    {!imagePath && (
-                      <div className="h-full w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl cursor-pointer">
-                        {item.name.charAt(0)}
-                      </div>
-                    )}
-                    {editSection === "name" && (
-                      <button
-                        onClick={triggerFileInput}
-                        disabled={isUploading}
-                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        {isUploading ? (
-                          <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
-                        ) : (
-                          <Camera className="h-6 w-6 text-white" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <div>
-                    {editSection === "name" ? (
-                      <Input
-                        value={(formData as NameUpdate).name || ""}
-                        onChange={(e) =>
-                          handleInputChange("name", e.target.value)
-                        }
-                        className="text-3xl font-bold text-white bg-slate-700/50 border border-slate-600/40 mb-2"
-                      />
-                    ) : (
-                      <h1 className="text-3xl font-bold text-white mb-2">
-                        {item.name}
-                      </h1>
-                    )}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-300 mr-2">ID:</span>
-                      <span className="text-sm text-gray-300">{item.id}</span>
-                    </div>
-                  </div>
-                </div>
-                {editSection !== "name" ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEditing("name")}
-                    className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={saveChanges}
-                      disabled={isSaving || isUploading}
-                      className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Save className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={cancelEditing}
-                      className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <ItemDetailsHeader
+              item={item}
+              editSection={editSection}
+              formData={formData as NameUpdate}
+              isSaving={isSaving}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading} // Added this line
+              imagePath={imagePath}
+              startEditing={startEditing}
+              cancelEditing={cancelEditing}
+              saveChanges={saveChanges}
+              handleInputChange={handleInputChange}
+              setImagePath={setImagePath}
+              setItem={setItem}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-white flex items-center">
-                    <Tag className="mr-2 h-5 w-5 text-blue-400" />
-                    Item Details
-                  </h2>
-                  {editSection !== "details" ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => startEditing("details")}
-                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={saveChanges}
-                        disabled={isSaving}
-                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
-                      >
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={cancelEditing}
-                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <Tag className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60">Category</p>
-                      {editSection === "details" ? (
-                        <select
-                          value={(formData as DetailsUpdate).category || ""}
-                          onChange={(e) =>
-                            handleInputChange("category", e.target.value)
-                          }
-                          className="w-full p-2 bg-slate-700/50 border border-slate-600/40 text-white rounded cursor-pointer"
-                        >
-                          <option value="" disabled className="bg-slate-800">
-                            Select Category
-                          </option>
-                          {categories.map((cat) => (
-                            <option
-                              key={cat}
-                              value={cat}
-                              className="bg-slate-800"
-                            >
-                              {cat}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="text-white">
-                          {item.category
-                            ? formatCategory(item.category)
-                            : "No category"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <PhilippinePeso className="h-5 w-5 text-blue-400 mr-3" />
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60">Price</p>
-                      {editSection === "details" ? (
-                        <div className="relative mt-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                            ₱
-                          </span>
-                          <Input
-                            type="text"
-                            value={priceInput}
-                            onChange={(e) => handlePriceChange(e.target.value)}
-                            onBlur={handlePriceBlur}
-                            className="pl-10 bg-slate-700/50 border border-slate-600/40 text-white"
-                            placeholder="0.00"
-                          />
-                        </div>
-                      ) : (
-                        <p className="text-white">
-                          ₱{" "}
-                          {item.price !== undefined
-                            ? formatPrice(item.price)
-                            : "0.00"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+              <ItemDetailsSection
+                item={item}
+                editSection={editSection}
+                formData={formData as DetailsUpdate}
+                isSaving={isSaving}
+                categories={categories}
+                priceInput={priceInput}
+                additionalQuantity={additionalQuantity}
+                startEditing={startEditing}
+                cancelEditing={cancelEditing}
+                saveChanges={saveChanges}
+                handleInputChange={handleInputChange}
+                handlePriceChange={handlePriceChange}
+                handlePriceBlur={handlePriceBlur}
+              />
 
-                  <div className="flex items-center">
-                    <CircleCheckBig className="h-5 w-5 text-blue-400 mr-3" />
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60 ">Total Value</p>
-                      <p className="text-white">
-                        ₱{" "}
-                        {formatPrice(
-                          editSection === "details" || editSection === "stock"
-                            ? (formData as DetailsUpdate | StockUpdate)
-                                .total_quantity_value ||
-                                calculateTotalValue(
-                                  item.price,
-                                  editSection === "stock"
-                                    ? item.quantity +
-                                        (parseInt(additionalQuantity) || 0)
-                                    : item.quantity
-                                )
-                            : item.total_quantity_value ||
-                                calculateTotalValue(item.price, item.quantity)
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <Building className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60">Supplier Name</p>
-                      <p className="text-white">
-                        {item.supplier_name
-                          ? item.supplier_name
-                          : "No supplier"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-white flex items-center">
-                    <Package className="mr-2 h-5 w-5 text-blue-400" />
-                    Stock Information
-                  </h2>
-                  {editSection !== "stock" ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => startEditing("stock")}
-                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={saveChanges}
-                        disabled={isSaving}
-                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50"
-                      >
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={cancelEditing}
-                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-5">
-                  <div className="flex items-center">
-                    <Package className="h-5 w-5 text-blue-400 mr-3" />
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60">Current Quantity</p>
-                      {editSection === "stock" ? (
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          disabled
-                          className="mt-1 bg-slate-700/30 border border-slate-600/40 text-white/70 cursor-not-allowed"
-                          min="0"
-                        />
-                      ) : (
-                        <p className="text-white">{item.quantity}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {editSection === "stock" && (
-                    <div className="flex items-center">
-                      <Package className="h-5 w-5 text-blue-400 mr-3" />
-                      <div className="flex-1">
-                        <p className="text-sm text-white/60">Add Quantity</p>
-                        <Input
-                          type="number"
-                          value={additionalQuantity}
-                          onChange={(e) =>
-                            handleAdditionalQuantityChange(e.target.value)
-                          }
-                          className="mt-1 bg-slate-700/50 border border-slate-600/40 text-white"
-                          min="0"
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-start">
-                    <div className="h-5 w-5 mr-3 mt-0.5"></div>
-                    <div className="flex-1">
-                      <p className="text-sm text-white/60">Status</p>
-                      <p className={getStockStatus(item.quantity).color}>
-                        {getStockStatus(item.quantity).status}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <StockInfoSection
+                item={item}
+                editSection={editSection}
+                formData={formData as StockUpdate}
+                isSaving={isSaving}
+                additionalQuantity={additionalQuantity}
+                startEditing={startEditing}
+                cancelEditing={cancelEditing}
+                saveChanges={saveChanges}
+                handleAdditionalQuantityChange={handleAdditionalQuantityChange}
+              />
             </div>
 
-            <div className="bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-6 mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-white flex items-center">
-                  <Package className="mr-2 h-5 w-5 text-blue-400" />
-                  Description
-                </h2>
-                {editSection !== "description" ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEditing("description")}
-                    className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={saveChanges}
-                      disabled={isSaving}
-                      className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
-                    >
-                      <Save className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={cancelEditing}
-                      className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className="flex items-start">
-                <Package className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm text-white/60 mb-2">Description</p>
-                  {editSection === "description" ? (
-                    <textarea
-                      value={(formData as DetailsUpdate).description || ""}
-                      onChange={(e) =>
-                        handleInputChange("description", e.target.value)
-                      }
-                      className="w-full p-3 bg-slate-700/50 border border-slate-600/40 text-white rounded-lg min-h-[120px] text-base"
-                      placeholder="Enter item description..."
-                    />
-                  ) : (
-                    <p className="text-white text-base whitespace-pre-wrap">
-                      {item.description || "No description available"}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            <DescriptionSection
+              item={item}
+              editSection={editSection}
+              formData={formData as DetailsUpdate}
+              isSaving={isSaving}
+              startEditing={startEditing}
+              cancelEditing={cancelEditing}
+              saveChanges={saveChanges}
+              handleInputChange={handleInputChange}
+            />
 
             <div className="flex justify-end gap-3">
               <Button

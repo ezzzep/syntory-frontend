@@ -20,11 +20,37 @@ export interface CreateInventoryDto {
   total_quantity_value: number;
 }
 
+
 export interface UpdateInventoryDto {
-  name: string;
+  name?: string;
   category?: string;
-  quantity: number;
+  quantity?: number;
   description?: string;
   supplier_name?: string;
-  price: number;
+  price?: number;
+  image_path?: string; 
 }
+
+export interface Supplier {
+  id: number;
+  name: string;
+}
+
+export type NameUpdate = {
+  name?: string;
+  image_path?: string;
+};
+
+export type StockUpdate = {
+  quantity?: number;
+  total_quantity_value?: number;
+};
+
+export type DetailsUpdate = {
+  category?: string;
+  description?: string;
+  price?: number;
+  total_quantity_value?: number;
+};
+
+export type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
