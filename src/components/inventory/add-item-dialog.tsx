@@ -11,7 +11,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { InventoryItem } from "@/types/inventory";
-import { Plus, Package, Building, User, FileText, Info } from "lucide-react";
+import {
+  Plus,
+  Package,
+  Building,
+  User,
+  FileText,
+  Info,
+  PhilippinePeso,
+} from "lucide-react";
 import { SelectFive } from "@/components/ui/select";
 import { useAddItemDialog } from "@/hooks/useAddItemDialog";
 import { addItemDialogStyles } from "@/styles/inventory/addItemDialogStyles";
@@ -86,18 +94,23 @@ export default function AddItemDialog({ onAdd }: AddItemDialogProps) {
           <div className={addItemDialogStyles.formRow}>
             <div className={addItemDialogStyles.formField}>
               <label className={addItemDialogStyles.label}>
-                <Package className="w-4 h-4 mr-2" />
+                <PhilippinePeso className="w-4 h-4 mr-2" />
                 Price
               </label>
-              <Input
-                type="text"
-                placeholder="0.00"
-                value={priceInput}
-                onChange={(e) => handlePriceChange(e.target.value)}
-                onBlur={handlePriceBlur}
-                inputMode="decimal"
-                className={addItemDialogStyles.input}
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  ₱
+                </span>
+                <Input
+                  type="text"
+                  placeholder="0.00"
+                  value={priceInput}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  onBlur={handlePriceBlur}
+                  inputMode="decimal"
+                  className={`${addItemDialogStyles.input} pl-8`}
+                />
+              </div>
 
               {errors.price && (
                 <p className={addItemDialogStyles.error}>{errors.price}</p>

@@ -9,7 +9,16 @@ import {
 import { getSuppliers } from "@/lib/api/suppliers";
 import type { InventoryItem, UpdateInventoryDto } from "@/types/inventory";
 import type { Supplier } from "@/types/supplier";
-import { Edit, Save, X, Camera, Tag, Package, Building } from "lucide-react";
+import {
+  Edit,
+  Save,
+  X,
+  Camera,
+  Tag,
+  Package,
+  Building,
+  PhilippinePeso,
+} from "lucide-react";
 import { useToasts } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +35,7 @@ type StockUpdate = {
 type DetailsUpdate = {
   category?: string;
   description?: string;
+  price?: number;
 };
 
 type UpdateData = NameUpdate | StockUpdate | DetailsUpdate;
@@ -43,6 +53,7 @@ export default function InventoryItemDetails() {
   const [isUploading, setIsUploading] = useState(false);
   const [imagePath, setImagePath] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [priceInput, setPriceInput] = useState("");
   const toasts = useToasts();
 
   const categories = [
@@ -51,6 +62,41 @@ export default function InventoryItemDetails() {
     "Gadgets",
     "Home Cleaning",
   ];
+
+  const formatPrice = (value: number) =>
+    value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  const handlePriceChange = (value: string) => {
+    const raw = value.replace(/,/g, "");
+    if (!/^\d*\.?\d*$/.test(raw)) return;
+
+    const numeric = raw === "" ? 0 : parseFloat(raw);
+
+    setFormData((prev) => ({
+      ...prev,
+      price: isNaN(numeric) ? 0 : numeric,
+    }));
+
+    if (raw === "") {
+      setPriceInput("");
+    } else {
+      const [int, dec] = raw.split(".");
+      const formatted =
+        Number(int).toLocaleString("en-US") +
+        (dec !== undefined ? "." + dec : "");
+      setPriceInput(formatted);
+    }
+  };
+
+  const handlePriceBlur = () => {
+    const price = (formData as DetailsUpdate).price;
+    if (price !== undefined) {
+      setPriceInput(formatPrice(price));
+    }
+  };
 
   const getFullImageUrl = (path: string | null | undefined) => {
     if (!path) return "";
@@ -89,6 +135,9 @@ export default function InventoryItemDetails() {
 
           const fullImageUrl = getFullImageUrl(data.image_path);
           setImagePath(fullImageUrl);
+          if (data.price !== undefined) {
+            setPriceInput(formatPrice(data.price));
+          }
         }
       } catch (err) {
         console.warn("Failed to fetch inventory item:", err);
@@ -195,7 +244,9 @@ export default function InventoryItemDetails() {
       setFormData({
         category: item.category || "",
         description: item.description || "",
+        price: item.price,
       } as DetailsUpdate);
+      setPriceInput(formatPrice(item.price));
     } else if (section === "description") {
       setFormData({
         description: item.description || "",
@@ -211,6 +262,7 @@ export default function InventoryItemDetails() {
     if (item) {
       const dbImagePath = getFullImageUrl(item.image_path);
       setImagePath(dbImagePath);
+      setPriceInput(formatPrice(item.price));
     }
   };
 
@@ -228,6 +280,11 @@ export default function InventoryItemDetails() {
         ...updatedItem,
         supplier_name: item.supplier_name,
       });
+
+      // Update priceInput after saving
+      if (updatedItem.price !== undefined) {
+        setPriceInput(formatPrice(updatedItem.price));
+      }
 
       setEditSection(null);
       setFormData({});
@@ -333,7 +390,7 @@ export default function InventoryItemDetails() {
                       </h1>
                     )}
                     <div className="flex items-center">
-                      <span className="text-sm text-gray-400 mr-2">ID:</span>
+                      <span className="text-sm text-gray-300 mr-2">ID:</span>
                       <span className="text-sm text-gray-300">{item.id}</span>
                     </div>
                   </div>
@@ -411,9 +468,9 @@ export default function InventoryItemDetails() {
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <Tag className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <Tag className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400">Category</p>
+                      <p className="text-sm text-white/60">Category</p>
                       {editSection === "details" ? (
                         <select
                           value={(formData as DetailsUpdate).category || ""}
@@ -444,12 +501,42 @@ export default function InventoryItemDetails() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <Building className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                  <div className="flex items-center">
+                    <PhilippinePeso className="h-5 w-5 text-blue-400 mr-3" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400">Supplier Name</p>
+                      <p className="text-sm text-white/60">Price</p>
+                      {editSection === "details" ? (
+                        <div className="relative mt-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                            ₱
+                          </span>
+                          <Input
+                            type="text"
+                            value={priceInput}
+                            onChange={(e) => handlePriceChange(e.target.value)}
+                            onBlur={handlePriceBlur}
+                            className="pl-10 bg-slate-700/50 border border-slate-600/40 text-white"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-white">
+                          ₱{" "}
+                          {item.price !== undefined
+                            ? formatPrice(item.price)
+                            : "0.00"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Building className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm text-white/60">Supplier Name</p>
                       <p className="text-white">
-                        {item.supplier_name ? item.supplier_name : "No supplier"}
+                        {item.supplier_name
+                          ? item.supplier_name
+                          : "No supplier"}
                       </p>
                     </div>
                   </div>
@@ -466,7 +553,7 @@ export default function InventoryItemDetails() {
                       variant="ghost"
                       size="sm"
                       onClick={() => startEditing("stock")}
-                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 cursor-pointer"
+                      className="text-blue-400 hover:text-blue-300 hover:bg-slate-700/50"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -477,7 +564,7 @@ export default function InventoryItemDetails() {
                         size="sm"
                         onClick={saveChanges}
                         disabled={isSaving}
-                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50 cursor-pointer"
+                        className="text-green-400 hover:text-green-300 hover:bg-slate-700/50"
                       >
                         <Save className="h-4 w-4" />
                       </Button>
@@ -485,39 +572,42 @@ export default function InventoryItemDetails() {
                         variant="ghost"
                         size="sm"
                         onClick={cancelEditing}
-                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50 cursor-pointer"
+                        className="text-red-400 hover:text-red-300 hover:bg-slate-700/50"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <Package className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+
+                <div className="space-y-5">
+                  <div className="flex items-center">
+                    <Package className="h-5 w-5 text-blue-400 mr-3" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400">Quantity</p>
+                      <p className="text-sm text-white/60">Quantity</p>
                       {editSection === "stock" ? (
                         <Input
                           type="number"
-                          value={(formData as StockUpdate).quantity || ""}
+                          value={(formData as StockUpdate).quantity ?? ""}
                           onChange={(e) =>
                             handleInputChange(
                               "quantity",
-                              parseInt(e.target.value)
+                              parseInt(e.target.value) || 0
                             )
                           }
-                          className="bg-slate-700/50 border border-slate-600/40 text-white"
+                          className="mt-1 bg-slate-700/50 border border-slate-600/40 text-white"
+                          min="0"
                         />
                       ) : (
                         <p className="text-white">{item.quantity}</p>
                       )}
                     </div>
                   </div>
+
                   <div className="flex items-start">
                     <div className="h-5 w-5 mr-3 mt-0.5"></div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400">Status</p>
+                      <p className="text-sm text-white/60">Status</p>
                       <p className={getStockStatus(item.quantity).color}>
                         {getStockStatus(item.quantity).status}
                       </p>
@@ -565,9 +655,9 @@ export default function InventoryItemDetails() {
                 )}
               </div>
               <div className="flex items-start">
-                <Package className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                <Package className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-400 mb-2">Description</p>
+                  <p className="text-sm text-white/60 mb-2">Description</p>
                   {editSection === "description" ? (
                     <textarea
                       value={(formData as DetailsUpdate).description || ""}
