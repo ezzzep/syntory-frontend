@@ -38,14 +38,12 @@ export default function SupplierDetailPage() {
   const [itemsLoading, setItemsLoading] = useState(false);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // Fetch items whenever supplier changes
   useEffect(() => {
     if (supplier?.name) {
       fetchSupplierItems();
     }
   }, [supplier?.name]);
 
-  // Also add a refresh function that can be called manually
   const fetchSupplierItems = async () => {
     if (!supplier?.name) return;
 

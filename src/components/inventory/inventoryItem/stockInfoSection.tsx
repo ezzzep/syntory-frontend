@@ -29,7 +29,6 @@ export const StockInfoSection = ({
 }: StockInfoSectionProps) => {
   const [quantityMode, setQuantityMode] = useState<"add" | "subtract">("add");
 
-  // ✅ Keep empty string if user clears input
   const displayValue =
     additionalQuantity === ""
       ? ""
@@ -47,13 +46,11 @@ export const StockInfoSection = ({
   };
 
   const handleInputChange = (value: string) => {
-    // ✅ allow backspace to empty
     if (value === "") {
       handleAdditionalQuantityChange("");
       return;
     }
 
-    // Only numbers
     if (!/^\d+$/.test(value)) return;
 
     const numValue = parseInt(value);

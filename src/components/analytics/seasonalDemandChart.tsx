@@ -43,7 +43,7 @@ export default function SeasonalDemandChart({
                 backgroundColor: "#1e293b",
                 border: "1px solid #475569",
                 borderRadius: "8px",
-                color: "#ffffff", // White text
+                color: "#ffffff",
               }}
               labelStyle={{ color: "#ffffff" }}
               itemStyle={{ color: "#ffffff" }}
@@ -52,7 +52,7 @@ export default function SeasonalDemandChart({
             <Line
               type="monotone"
               dataKey="winter"
-              stroke="#a78bfa" // Purple
+              stroke="#a78bfa"
               strokeWidth={2}
               dot={{ fill: "#a78bfa", r: 4 }}
               activeDot={{ r: 6 }}
@@ -60,7 +60,7 @@ export default function SeasonalDemandChart({
             <Line
               type="monotone"
               dataKey="spring"
-              stroke="#34d399" // Green
+              stroke="#34d399"
               strokeWidth={2}
               dot={{ fill: "#34d399", r: 4 }}
               activeDot={{ r: 6 }}
@@ -68,7 +68,7 @@ export default function SeasonalDemandChart({
             <Line
               type="monotone"
               dataKey="summer"
-              stroke="#fbbf24" // Yellow
+              stroke="#fbbf24"
               strokeWidth={2}
               dot={{ fill: "#fbbf24", r: 4 }}
               activeDot={{ r: 6 }}
@@ -76,7 +76,7 @@ export default function SeasonalDemandChart({
             <Line
               type="monotone"
               dataKey="autumn"
-              stroke="#fb923c" // Orange
+              stroke="#fb923c" 
               strokeWidth={2}
               dot={{ fill: "#fb923c", r: 4 }}
               activeDot={{ r: 6 }}

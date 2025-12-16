@@ -41,21 +41,17 @@ export default function DeleteSupplierModal({
 
     try {
       if (isBulkDelete) {
-        // Delete multiple suppliers
         await Promise.all(suppliers.map((s) => deleteSupplier(s.id)));
         toasts.success(`Successfully deleted ${suppliers.length} suppliers`);
       } else if (targetSupplier) {
-        // Delete single supplier
         await deleteSupplier(targetSupplier.id);
         toasts.itemDeleted(` ${targetSupplier.name} Successfully`);
       }
 
-      // Call the parent's onConfirm if provided
       if (onConfirm) {
         onConfirm();
       }
 
-      // Close the modal
       onClose();
     } catch (err) {
       const errorMessage =
@@ -67,7 +63,6 @@ export default function DeleteSupplierModal({
     }
   };
 
-  // Function to render star rating
   const renderRating = (rating: number) => {
     return (
       <div className="flex items-center">

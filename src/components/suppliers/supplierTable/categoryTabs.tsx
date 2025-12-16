@@ -7,7 +7,6 @@ import { suppliersTableStyles } from "@/styles/supplierStatus/supplierTable";
 interface CategoryTabsProps {
   activeTab: SupplierCategory | "all";
   setActiveTab: (tab: SupplierCategory | "all") => void;
-  // Corrected: Use the specific Supplier[] type instead of any[]
   suppliers: Supplier[];
 }
 

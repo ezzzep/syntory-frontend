@@ -33,7 +33,6 @@ export function SelectFive({
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Reset search term when dropdown closes
   useEffect(() => {
     if (!searchTerm) return;
 
@@ -56,7 +55,6 @@ export function SelectFive({
         if (!open) {
           setSearchTerm("");
         } else if (searchable && searchInputRef.current) {
-          // Focus the search input when dropdown opens
           setTimeout(() => searchInputRef.current?.focus(), 0);
         }
       }}
@@ -91,7 +89,6 @@ export function SelectFive({
                   onKeyDown={(e) => {
                     e.stopPropagation();
 
-                    // Only prevent default for specific keys we want to handle
                     if (
                       e.key === "ArrowDown" ||
                       e.key === "ArrowUp" ||
@@ -100,7 +97,6 @@ export function SelectFive({
                       e.preventDefault();
                     }
 
-                    // Allow arrow keys to navigate through options
                     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
                       const items = document.querySelectorAll(
                         "[data-radix-select-item]"
@@ -127,7 +123,6 @@ export function SelectFive({
                       }
                     }
 
-                    // Allow Enter to select the focused item
                     if (
                       e.key === "Enter" &&
                       document.activeElement?.getAttribute(
@@ -157,7 +152,6 @@ export function SelectFive({
                   value={String(opt.value)}
                   className="flex items-center p-2 rounded-md cursor-pointer hover:bg-slate-700/40 focus:bg-slate-700/40 outline-none"
                   onKeyDown={(e) => {
-                    // Prevent the default behavior that jumps to the first matching option
                     if (e.key.length === 1 && searchable) {
                       e.preventDefault();
                       searchInputRef.current?.focus();

@@ -100,7 +100,6 @@ export const useAddItemDialog = (onAdd: (item: InventoryItem) => void) => {
         finalCategory = selectedSupplier?.category || form.category;
       }
 
-      // Ensure we have the latest total value
       const totalValue = calculateTotalQuantityValue();
 
       const itemData = {

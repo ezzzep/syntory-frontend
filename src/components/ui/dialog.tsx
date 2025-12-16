@@ -9,7 +9,7 @@ export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 
 interface DialogContentProps {
-  title?: string; // optional
+  title?: string; 
   children: React.ReactNode;
   className?: string;
 }

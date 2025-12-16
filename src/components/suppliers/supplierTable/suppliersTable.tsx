@@ -67,8 +67,7 @@ export default function SuppliersTable({
   >({});
 
   const processedSuppliers = useRef<Set<number>>(new Set());
-
-  // Sort suppliers by ID in descending order so newest suppliers appear first
+  
   const sortedSuppliers = useMemo(() => {
     return [...suppliers].sort((a, b) => b.id - a.id);
   }, [suppliers]);

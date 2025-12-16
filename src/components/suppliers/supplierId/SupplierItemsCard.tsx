@@ -1,4 +1,3 @@
-// src/components/suppliers/supplierId/SupplierItemsCard.tsx
 "use client";
 
 import { Package } from "lucide-react";
