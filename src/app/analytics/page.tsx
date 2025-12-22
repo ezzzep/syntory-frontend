@@ -208,6 +208,7 @@ export default function AnalyticsPage() {
         />
       </div>
 
+
       <MarketInsightsCard />
 
       <SeasonalDemandChart data={data.seasonalDemand} />
