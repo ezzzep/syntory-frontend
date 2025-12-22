@@ -6,7 +6,7 @@ import SalesChart from "../../components/dashboard/salesChart";
 import TopListsCards from "../../components/dashboard/topListCards";
 import type { InventoryItem } from "@/types/inventory";
 import { getInventory } from "@/lib/api/inventory";
-import { BouncingDots } from "@/components/ui/bouncing-dots";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -35,8 +35,31 @@ export default function DashboardPage() {
 
   if (loading)
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
-        <BouncingDots />
+      <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
+
+        <div className="mb-6 sm:mb-8 md:mb-10 relative">
+          <Skeleton className="h-10 sm:h-12 md:h-14 w-32 bg-slate-800" />
+        </div>
+
+        <div className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Skeleton className="h-32 bg-slate-800 rounded-lg" />
+            <Skeleton className="h-32 bg-slate-800 rounded-lg" />
+            <Skeleton className="h-32 bg-slate-800 rounded-lg" />
+            <Skeleton className="h-32 bg-slate-800 rounded-lg" />
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <Skeleton className="h-80 w-full bg-slate-800 rounded-lg" />
+        </div>
+
+        <div className="mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-96 bg-slate-800 rounded-lg" />
+            <Skeleton className="h-96 bg-slate-800 rounded-lg" />
+          </div>
+        </div>
       </div>
     );
 

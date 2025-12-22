@@ -9,7 +9,7 @@ import MonthlyTargetCard from "@/components/analytics/monthlyTargetCard";
 import RecentOrdersTable from "@/components/analytics/recentOrdersTable";
 import RecentActivityFeed from "@/components/analytics/recentActivityFeed";
 import MarketInsightsCard from "@/components/analytics/marketInsightsCard";
-import { BouncingDots } from "@/components/ui/bouncing-dots";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Supplier } from "@/types/supplier";
 import { getSuppliers } from "@/lib/api/suppliers";
 import { getInventory } from "@/lib/api/inventory";
@@ -179,8 +179,35 @@ export default function AnalyticsPage() {
 
   if (loading)
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
-        <BouncingDots />
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
+        <div className="mb-6 sm:mb-8 md:mb-10 relative">
+          <Skeleton className="h-10 sm:h-12 md:h-14 w-64 bg-slate-800" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+          <Skeleton className="h-64 bg-slate-800 rounded-lg" />
+          <Skeleton className="h-64 bg-slate-800 rounded-lg" />
+        </div>
+
+        <Skeleton className="h-80 w-full mb-8 bg-slate-800 rounded-lg" />
+
+        <div className="mb-8">
+          <Skeleton className="h-96 w-full bg-slate-800 rounded-lg" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Skeleton className="h-80 bg-slate-800 rounded-lg" />
+          <Skeleton className="h-80 bg-slate-800 rounded-lg" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
+          <div className="lg:col-span-5">
+            <Skeleton className="h-96 w-full bg-slate-800 rounded-lg" />
+          </div>
+          <div className="lg:col-span-3">
+            <Skeleton className="h-96 w-full bg-slate-800 rounded-lg" />
+          </div>
+        </div>
       </div>
     );
 

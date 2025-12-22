@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ChangesDisplay = ({
   changes,
@@ -85,7 +86,7 @@ const ChangesDisplay = ({
             );
           }
         }
-  
+
         return (
           <div key={key} className="flex gap-2 text-sm">
             <span className="text-yellow-400 mt-0.5 flex-shrink-0">↻</span>
@@ -162,8 +163,40 @@ export default function RecentActivityFeed() {
 
   if (loading)
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
-        Loading activity...
+      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700 flex flex-col h-full relative">
+        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+
+        <div className="flex justify-between mb-4 flex-wrap gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Skeleton className="h-8 w-12 rounded-lg" />
+            <Skeleton className="h-8 w-16 rounded-lg" />
+            <Skeleton className="h-8 w-16 rounded-lg" />
+          </div>
+          <Skeleton className="h-8 w-16 rounded-lg" />
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-3 hide-scrollbar">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex gap-4 p-3 rounded-xl">
+              <Skeleton className="w-10 h-10 rounded-lg" />
+              <div className="flex-1">
+                <div className="flex justify-between">
+                  <div className="w-50">
+                    <Skeleton className="h-5 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                  <div className="text-right">
+                    <Skeleton className="h-5 w-16 mb-1" />
+                    <Skeleton className="h-4 w-20 mb-1" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
 

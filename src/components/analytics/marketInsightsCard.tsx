@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 type MarketRecommendation = {
   id: number;
   keyword: string;
@@ -260,12 +259,57 @@ export default function MarketInsightsCard() {
 
   if (loading) {
     return (
-      <div className="p-6 rounded-xl bg-slate-900 text-white">
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-sm">Loading market insights...</p>
+      <div className="p-6 rounded-xl bg-slate-800/30 text-white">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold">Market Insights</h3>
+          <div className="flex items-center space-x-2 text-sm text-slate-400">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            <span>Live Market Data</span>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+            <div key={index} className="p-4 rounded-lg border border-slate-700">
+              <div className="flex justify-between items-start mb-3">
+                <Skeleton className="h-6 w-32" />
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 rounded-full bg-slate-600"></div>
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+                <Skeleton className="h-4 w-24 mt-1 ml-auto" />
+              </div>
+
+              <div className="flex justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-4 w-8" />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-4 w-16" />
+                  <div className="flex space-x-1">
+                    <Skeleton className="w-1 h-4 rounded" />
+                    <Skeleton className="w-1 h-4 rounded" />
+                    <Skeleton className="w-1 h-4 rounded" />
+                  </div>
+                  <Skeleton className="h-4 w-8" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

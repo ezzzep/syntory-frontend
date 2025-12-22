@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SupplierMainCard } from "@/components/suppliers/supplierId/SupplierMainCard";
 import { ContactInfoCard } from "@/components/suppliers/supplierId/ContactInfoCard";
 import { BusinessInfoCard } from "@/components/suppliers/supplierId/BusinessInfoCard";
@@ -79,12 +80,112 @@ export default function SupplierDetailPage() {
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
       <div className="container mx-auto px-4 py-8">
         {loading ? (
-          <div className="flex justify-center items-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-              <p className="mt-4 text-white text-xl">
-                Loading supplier details...
-              </p>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6 mb-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                <Skeleton className="h-48 w-48 rounded-lg" />
+                <div className="flex-1 space-y-4">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-4 mt-4">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-10 w-24" />
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="border-b border-slate-700/50 pb-3"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <Skeleton className="h-12 w-12 rounded" />
+                      <div className="flex-1">
+                        <Skeleton className="h-5 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                      <Skeleton className="h-5 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Skeleton className="h-10 w-24" />
             </div>
           </div>
         ) : supplier ? (
@@ -150,7 +251,7 @@ export default function SupplierDetailPage() {
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => {
-                  fetchSupplierItems(); 
+                  fetchSupplierItems();
                   navigateToSuppliers();
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
