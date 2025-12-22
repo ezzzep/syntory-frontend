@@ -8,6 +8,7 @@ import SupplierReliabilityChart from "@/components/analytics/supplierReliability
 import MonthlyTargetCard from "@/components/analytics/monthlyTargetCard";
 import RecentOrdersTable from "@/components/analytics/recentOrdersTable";
 import RecentActivityFeed from "@/components/analytics/recentActivityFeed";
+import MarketInsightsCard from "@/components/analytics/marketInsightsCard";
 import { BouncingDots } from "@/components/ui/bouncing-dots";
 import { Supplier } from "@/types/supplier";
 import { getSuppliers } from "@/lib/api/suppliers";
@@ -15,8 +16,6 @@ import { getInventory } from "@/lib/api/inventory";
 import { getActivityLogs } from "@/lib/api/activity";
 import type { InventoryItem } from "@/types/inventory";
 import type { ActivityData } from "@/types/analytics";
-import MarketInsightsCard from "@/components/analytics/marketInsightsCard";
-
 
 interface SupplierChartData {
   name: string;
@@ -208,10 +207,13 @@ export default function AnalyticsPage() {
         />
       </div>
 
-
-      <MarketInsightsCard />
-
+      {/* Switched positions: SeasonalDemandChart now comes before MarketInsightsCard */}
       <SeasonalDemandChart data={data.seasonalDemand} />
+
+      {/* Added mb-8 for additional space at the bottom */}
+      <div className="mb-8">
+        <MarketInsightsCard />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <SupplierReliabilityChart />

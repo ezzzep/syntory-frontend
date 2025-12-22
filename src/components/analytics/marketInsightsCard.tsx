@@ -1,7 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getMarketRecommendations } from "@/lib/api/analyticsMarket";
+import InventoryPagination from "@/components/inventory/inventoryTable/InventoryPagination";
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  BarChart3,
+  AlertCircle,
+} from "lucide-react";
 
 type MarketRecommendation = {
   id: number;
@@ -16,13 +25,46 @@ type MarketRecommendation = {
 export default function MarketInsightsCard() {
   const [data, setData] = useState<MarketRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 4; 
 
   useEffect(() => {
-    getMarketRecommendations()
-      .then(setData)
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const recommendations = await getMarketRecommendations();
+        setData(recommendations);
+        setCurrentPage(1);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        setError("Failed to load market insights.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  // Calculate paginated data
+  const { paginatedData, totalPages } = useMemo(() => {
+    const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedData = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    return { paginatedData, totalPages };
+  }, [data, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setSelectedKeyword(null); 
+    }
+  };
 
   const calculatePriceDeviation = (current: number, market: number): number => {
     if (market === 0 || current === 0) return 0;
@@ -38,50 +80,11 @@ export default function MarketInsightsCard() {
   const getPriceStatusIcon = (trend: string) => {
     switch (trend) {
       case "Up":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-green-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
+        return <TrendingUp className="h-5 w-5 text-green-400" />;
       case "Down":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-red-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
+        return <TrendingDown className="h-5 w-5 text-red-400" />;
       default:
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
+        return <Minus className="h-5 w-5 text-yellow-400" />;
     }
   };
 
@@ -114,6 +117,110 @@ export default function MarketInsightsCard() {
     }
   };
 
+  const MarketInsightCard = ({
+    item,
+    index,
+  }: {
+    item: MarketRecommendation;
+    index: number;
+  }) => {
+    const priceDeviation = calculatePriceDeviation(
+      item.current_price,
+      item.market_avg_price
+    );
+    const priceDifferencePercentage =
+      ((item.current_price - item.market_avg_price) / item.market_avg_price) *
+      100;
+    const isSelected = selectedKeyword === item.keyword;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        whileHover={{ scale: 1.02, transition: { duration: 0.1 } }}
+        className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
+          isSelected
+            ? "border-blue-500 bg-blue-950/30 shadow-lg"
+            : "border-slate-700 hover:border-slate-600 hover:bg-slate-800/50"
+        }`}
+        onClick={() => setSelectedKeyword(isSelected ? null : item.keyword)}
+      >
+        <div className="flex justify-between items-start mb-3">
+          <h4 className="font-semibold text-lg">{item.keyword}</h4>
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            <span className="text-xs opacity-70">
+              Deviation: {priceDeviation.toFixed(2)}%
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm text-slate-400">Your Price</span>
+            <span className="font-medium">₱{item.current_price}</span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-slate-400">Market Avg</span>
+            <span className="font-medium">₱{item.market_avg_price}</span>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2">
+            <motion.div
+              className={`h-2 rounded-full ${
+                priceDifferencePercentage > 0 ? "bg-red-500" : "bg-green-500"
+              }`}
+              initial={{ width: 0 }}
+              animate={{
+                width: `${Math.min(100, Math.abs(priceDifferencePercentage))}%`,
+              }}
+              transition={{ duration: 0.5, delay: index * 0.05 + 0.2 }}
+            />
+          </div>
+          <div
+            className={`text-right text-sm mt-1 ${getPriceStatusColor(
+              priceDifferencePercentage
+            )}`}
+          >
+            {priceDifferencePercentage > 0 ? "+" : ""}
+            {priceDifferencePercentage.toFixed(2)}% vs market
+          </div>
+        </div>
+
+        <div className="flex justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-slate-400">Price Trend:</span>
+            <div className="flex items-center space-x-1">
+              {getPriceStatusIcon(item.price_trend)}
+              <span className="text-sm">{item.price_trend}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-slate-400">Demand:</span>
+            {getDemandTrendIcon(item.demand_trend)}
+            <span className="text-sm">{item.demand_trend}</span>
+          </div>
+        </div>
+
+        {isSelected && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-3 pt-3 border-t border-slate-700"
+          >
+            <div className="flex items-start space-x-2">
+              <BarChart3 className="h-5 w-5 text-blue-400 mt-0.5" />
+              <p className="text-sm text-blue-300 italic">
+                {item.recommendation}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="p-6 rounded-xl bg-slate-900 text-white">
@@ -128,155 +235,69 @@ export default function MarketInsightsCard() {
   }
 
   return (
-    <div className="p-6 rounded-xl bg-slate-900 text-white">
+    <div className="p-6 rounded-xl bg-slate-800/30  text-white">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold">Market Insights</h3>
         <div className="flex items-center space-x-2 text-sm text-slate-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
           <span>Live Market Data</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((item) => {
-
-          const priceDeviation = calculatePriceDeviation(
-            item.current_price,
-            item.market_avg_price
-          );
-          const priceDifferencePercentage =
-            ((item.current_price - item.market_avg_price) /
-              item.market_avg_price) *
-            100;
-
-          const isSelected = selectedKeyword === item.keyword;
-
-          return (
-            <div
-              key={item.id}
-              className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
-                isSelected
-                  ? "border-blue-500 bg-blue-950/30 shadow-lg"
-                  : "border-slate-700 hover:border-slate-600 hover:bg-slate-800/50"
-              }`}
-              onClick={() =>
-                setSelectedKeyword(isSelected ? null : item.keyword)
-              }
+      <div className="flex-1 min-h-[300px]">
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-12 space-y-4 text-red-400"
             >
-              <div className="flex justify-between items-start mb-3">
-                <h4 className="font-semibold text-lg">{item.keyword}</h4>
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                  {/* --- UPDATED LABEL AND VALUE --- */}
-                  <span className="text-xs opacity-70">
-                    Deviation: {priceDeviation.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
+              <AlertCircle className="w-8 h-8" />
+              <p className="text-sm">{error}</p>
+            </motion.div>
+          )}
 
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-slate-400">Your Price</span>
-                  <span className="font-medium">₱{item.current_price}</span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-slate-400">Market Avg</span>
-                  <span className="font-medium">₱{item.market_avg_price}</span>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full ${
-                      priceDifferencePercentage > 0
-                        ? "bg-red-500"
-                        : "bg-green-500"
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.abs(priceDifferencePercentage)
-                      )}%`,
-                    }}
-                  ></div>
-                </div>
-                <div
-                  className={`text-right text-sm mt-1 ${getPriceStatusColor(
-                    priceDifferencePercentage
-                  )}`}
-                >
-                  {priceDifferencePercentage > 0 ? "+" : ""}
-                  {priceDifferencePercentage.toFixed(2)}% vs market
-                </div>
-              </div>
+          {!loading && !error && paginatedData.length === 0 && (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-12 space-y-4 text-slate-400"
+            >
+              <BarChart3 className="w-8 h-8" />
+              <p className="text-sm">
+                No market insights available at the moment.
+              </p>
+            </motion.div>
+          )}
 
-              <div className="flex justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-slate-400">Price Trend:</span>
-                  <div className="flex items-center space-x-1">
-                    {getPriceStatusIcon(item.price_trend)}
-                    <span className="text-sm">{item.price_trend}</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-slate-400">Demand:</span>
-                  {getDemandTrendIcon(item.demand_trend)}
-                  <span className="text-sm">{item.demand_trend}</span>
-                </div>
-              </div>
-
-              {isSelected && (
-                <div className="mt-3 pt-3 border-t border-slate-700">
-                  <div className="flex items-start space-x-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-blue-400 mt-0.5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <p className="text-sm text-blue-300 italic">
-                      {item.recommendation}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+          {!loading && !error && paginatedData.length > 0 && (
+            <motion.div
+              key={currentPage}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {paginatedData.map((item, index) => (
+                <MarketInsightCard key={item.id} item={item} index={index} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {data.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-          <p>No market insights available at the moment.</p>
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center">
+          <InventoryPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
     </div>
