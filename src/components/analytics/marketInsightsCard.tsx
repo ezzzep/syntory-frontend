@@ -11,6 +11,8 @@ import {
   BarChart3,
   AlertCircle,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 type MarketRecommendation = {
   id: number;
@@ -19,7 +21,6 @@ type MarketRecommendation = {
   market_avg_price: number;
   price_trend: string;
   demand_trend: string;
-  recommendation: string;
 };
 
 export default function MarketInsightsCard() {
@@ -29,7 +30,7 @@ export default function MarketInsightsCard() {
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const ITEMS_PER_PAGE = 4; 
+  const ITEMS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +52,6 @@ export default function MarketInsightsCard() {
     fetchData();
   }, []);
 
-  // Calculate paginated data
   const { paginatedData, totalPages } = useMemo(() => {
     const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -62,13 +62,47 @@ export default function MarketInsightsCard() {
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      setSelectedKeyword(null); 
+      setSelectedKeyword(null);
     }
   };
 
   const calculatePriceDeviation = (current: number, market: number): number => {
     if (market === 0 || current === 0) return 0;
     return Math.abs(((current - market) / market) * 100);
+  };
+
+  const calculateRecommendation = (
+    currentPrice: number,
+    marketAvgPrice: number,
+    priceTrend: string,
+    demandTrend: string
+  ): string => {
+    const priceGapPercent =
+      ((currentPrice - marketAvgPrice) / marketAvgPrice) * 100;
+
+    if (priceGapPercent > 20) {
+      return "Your average price is significantly above market. Consider lowering prices.";
+    }
+
+    if (priceGapPercent < -15) {
+      return demandTrend === "Rising"
+        ? "Strong demand detected and you are underpriced. Consider increasing prices."
+        : "Your average price is significantly below market. You may be losing profit.";
+    }
+
+    if (priceTrend === "Down" && demandTrend === "Falling") {
+      return "Market is cooling. Avoid overstocking.";
+    }
+
+    if (priceGapPercent < -5) {
+      return "Your price is slightly below market average.";
+    }
+
+    if (priceGapPercent > 5) {
+      return "Your price is slightly above market average.";
+    }
+
+    return "Pricing is aligned with current market conditions.";
   };
 
   const getPriceStatusColor = (percentage: number) => {
@@ -133,9 +167,16 @@ export default function MarketInsightsCard() {
       100;
     const isSelected = selectedKeyword === item.keyword;
 
+    // Calculate recommendation on the frontend
+    const recommendation = calculateRecommendation(
+      item.current_price,
+      item.market_avg_price,
+      item.price_trend,
+      item.demand_trend
+    );
+
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
         whileHover={{ scale: 1.02, transition: { duration: 0.1 } }}
@@ -170,11 +211,11 @@ export default function MarketInsightsCard() {
               className={`h-2 rounded-full ${
                 priceDifferencePercentage > 0 ? "bg-red-500" : "bg-green-500"
               }`}
-              initial={{ width: 0 }}
               animate={{
                 width: `${Math.min(100, Math.abs(priceDifferencePercentage))}%`,
               }}
-              transition={{ duration: 0.5, delay: index * 0.05 + 0.2 }}
+              transition={{ duration: 0.5 }}
+              initial={false}
             />
           </div>
           <div
@@ -204,16 +245,12 @@ export default function MarketInsightsCard() {
 
         {isSelected && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
             className="mt-3 pt-3 border-t border-slate-700"
           >
             <div className="flex items-start space-x-2">
               <BarChart3 className="h-5 w-5 text-blue-400 mt-0.5" />
-              <p className="text-sm text-blue-300 italic">
-                {item.recommendation}
-              </p>
+              <p className="text-sm text-blue-300 italic">{recommendation}</p>
             </div>
           </motion.div>
         )}
