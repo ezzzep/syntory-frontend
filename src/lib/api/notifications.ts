@@ -1,4 +1,14 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`;
+import Cookies from "js-cookie";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = `${API_URL}/api/notifications`;
+
+async function ensureCsrf() {
+  await fetch(`${API_URL}/sanctum/csrf-cookie`, {
+    credentials: "include",
+  });
+}
+
 
 async function handleResponse<T>(res: Response): Promise<T> {
   const text = await res.text();
@@ -18,9 +28,6 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-/* ================================
-   FETCH NOTIFICATIONS
-================================ */
 export async function getNotifications() {
   const res = await fetch(BASE_URL, {
     cache: "no-store",
@@ -35,30 +42,34 @@ export async function getNotifications() {
   return result.data ?? [];
 }
 
-/* ================================
-   MARK AS READ
-================================ */
 export async function markNotificationAsRead(id: number) {
+  await ensureCsrf();
+
+  const token = Cookies.get("XSRF-TOKEN");
+
   const res = await fetch(`${BASE_URL}/${id}/read`, {
-    method: "PATCH",
+    method: "POST",
     credentials: "include",
     headers: {
       Accept: "application/json",
+      "X-XSRF-TOKEN": decodeURIComponent(token ?? ""),
     },
   });
 
   return handleResponse(res);
 }
 
-/* ================================
-   DELETE NOTIFICATION
-================================ */
 export async function deleteNotification(id: number) {
+  await ensureCsrf();
+
+  const token = Cookies.get("XSRF-TOKEN");
+
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
     credentials: "include",
     headers: {
       Accept: "application/json",
+      "X-XSRF-TOKEN": decodeURIComponent(token ?? ""),
     },
   });
 

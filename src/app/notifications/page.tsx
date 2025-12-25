@@ -11,9 +11,7 @@ import {
 
 import { Notification, NotificationType } from "@/types/notification";
 
-/* ============================
-   META PER TYPE
-============================ */
+
 const getNotificationMeta = (type: NotificationType) => {
   switch (type) {
     case "market_update":
@@ -54,9 +52,7 @@ const getNotificationMeta = (type: NotificationType) => {
   }
 };
 
-/* ============================
-   PAGE COMPONENT
-============================ */
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +77,7 @@ export default function NotificationsPage() {
       await markNotificationAsRead(id);
       setNotifications((prev) =>
         prev.map((n) =>
-          n.id === id ? { ...n, read_at: new Date().toISOString() } : n
+          n.id === id ? { ...n, is_read: new Date().toISOString() } : n
         )
       );
     } catch (err) {
@@ -126,7 +122,7 @@ export default function NotificationsPage() {
                 badge,
               } = getNotificationMeta(n.type);
 
-              const isRead = !!n.read_at;
+              const isRead = !!n.is_read;
 
               return (
                 <div

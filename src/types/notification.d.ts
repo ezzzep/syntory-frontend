@@ -9,5 +9,5 @@ export interface Notification {
   type: NotificationType;
   message: string;
   created_at: string;
-  read_at: string | null;
+  is_read: string | null;
 }
