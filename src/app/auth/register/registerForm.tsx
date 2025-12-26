@@ -69,7 +69,7 @@ export default function RegisterForm() {
       "
     >
       <div className="text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent p-1">
+        <h2 className="text-3xl sm:text-4xl font-bold text-white p-1">
           Register
         </h2>
       </div>
@@ -143,7 +143,7 @@ export default function RegisterForm() {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
+        className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
       >
         {loading ? "Registering..." : "Register"}
       </Button>
@@ -152,7 +152,7 @@ export default function RegisterForm() {
         Already have an account?{" "}
         <Link
           href="/auth/login"
-          className="font-medium bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent hover:from-blue-300 hover:via-purple-300 hover:to-pink-300 transition-all"
+          className="font-medium text-blue-300 transition-all"
         >
           Login
         </Link>

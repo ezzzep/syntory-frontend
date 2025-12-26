@@ -66,7 +66,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950 text-white font-sans p-3 sm:p-4 md:p-6">
       <div className="mb-6 sm:mb-8 md:mb-10 relative">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
           Dashboard
         </h1>
       </div>
